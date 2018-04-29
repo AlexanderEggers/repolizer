@@ -1,0 +1,5 @@
+include ':examples', ':annotation', ':processor'
+project(":examples").name = "repolizer-examples"
+project(":annotation").name = "repolizer-annotation"
+project(":processor").name = "repolizer-processor"
+rootProject.name = "repolizer-library"
