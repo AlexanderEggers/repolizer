@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService
 import org.repolizer.annotation.RepositoryProcessor
 import org.repolizer.annotation.repository.DB
 import org.repolizer.annotation.repository.Repository
+import org.repolizer.annotation.repository.method.Header
 import java.io.IOException
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
@@ -35,7 +36,7 @@ class MainProcessor : AbstractProcessor() {
     }
 
     override fun getSupportedAnnotationTypes(): MutableSet<String> {
-        return mutableSetOf(Repository::class.java.name, DB::class.java.name)
+        return mutableSetOf(Repository::class.java.name, DB::class.java.name, Header::class.java.name)
     }
 
     override fun getSupportedSourceVersion(): SourceVersion {
