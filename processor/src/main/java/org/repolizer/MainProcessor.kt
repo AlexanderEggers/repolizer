@@ -1,6 +1,8 @@
 package org.repolizer
 
 import com.google.auto.service.AutoService
+import org.repolizer.annotation.RepositoryProcessor
+import org.repolizer.annotation.repository.DB
 import org.repolizer.annotation.repository.Repository
 import java.io.IOException
 import javax.annotation.processing.*
@@ -25,7 +27,7 @@ class MainProcessor : AbstractProcessor() {
 
     override fun process(set: MutableSet<out TypeElement>, roundEnv: RoundEnvironment): Boolean {
         try {
-
+            RepositoryProcessor().process(this, roundEnv)
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -33,7 +35,7 @@ class MainProcessor : AbstractProcessor() {
     }
 
     override fun getSupportedAnnotationTypes(): MutableSet<String> {
-        return mutableSetOf(Repository::class.java.name)
+        return mutableSetOf(Repository::class.java.name, DB::class.java.name)
     }
 
     override fun getSupportedSourceVersion(): SourceVersion {
