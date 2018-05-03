@@ -3,9 +3,8 @@ package org.repolizer
 import android.content.Context
 import okhttp3.OkHttpClient
 
-class Repolizer internal constructor(builder: Builder){
+class Repolizer internal constructor(val context: Context, builder: Builder){
 
-    val context: Context = builder.context
     val httpClient: OkHttpClient? = builder.httpClient
     val baseUrl: String? = builder.baseUrl
 
@@ -19,12 +18,12 @@ class Repolizer internal constructor(builder: Builder){
 
     companion object {
 
-        fun newBuilder(context: Context): Builder {
-            return Builder(context)
+        fun newBuilder(): Builder {
+            return Builder()
         }
     }
 
-    class Builder(internal var context: Context) {
+    class Builder {
 
         internal var httpClient: OkHttpClient? = null
         internal var baseUrl: String? = null
@@ -54,8 +53,8 @@ class Repolizer internal constructor(builder: Builder){
             return this@Builder
         }
 
-        fun build(): Repolizer {
-            return Repolizer(this@Builder)
+        fun build(context: Context): Repolizer {
+            return Repolizer(context,this@Builder)
         }
     }
 }
