@@ -1,4 +1,4 @@
-package org.repolizer.annotation.repository.method
+package org.repolizer.annotation.repository.parameter
 
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)

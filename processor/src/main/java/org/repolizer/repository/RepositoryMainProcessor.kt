@@ -1,14 +1,11 @@
-package org.repolizer.annotation
+package org.repolizer.repository
 
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
 import org.repolizer.MainProcessor
-import org.repolizer.annotation.repository.DB
 import org.repolizer.annotation.repository.Repository
-import org.repolizer.annotation.repository.method.Header
-import org.repolizer.annotation.repository.method.SQLParameter
 import org.repolizer.util.AnnotationProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.ExecutableElement
@@ -16,7 +13,7 @@ import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
 
-class RepositoryProcessor : AnnotationProcessor {
+class RepositoryMainProcessor : AnnotationProcessor {
 
     override fun process(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
         roundEnv.getElementsAnnotatedWith(Repository::class.java).forEach {
@@ -37,6 +34,8 @@ class RepositoryProcessor : AnnotationProcessor {
 
                 //check which Annotation is used by using getAnnotation(...) to test if the value is non-null
                 //if the final value is still null, it means the parameter has no annotation is therefore an error
+
+                //OR prepare parameter annotations and save them inside map using RepoClassName.methodName as key and the element as value.
 
                 fileBuilder.addMethod(MethodSpec.methodBuilder(exElement.simpleName.toString())
                         .addModifiers(Modifier.PUBLIC)

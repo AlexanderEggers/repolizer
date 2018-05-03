@@ -4,5 +4,5 @@ package org.repolizer.annotation.repository
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class PUT(val url: String,
-                     val sql: String = "",
+                     val updateDB: Boolean = false,
                      val requiresLogin: Boolean = false)

@@ -4,7 +4,7 @@ import com.google.auto.service.AutoService
 import org.repolizer.annotation.RepositoryProcessor
 import org.repolizer.annotation.repository.DB
 import org.repolizer.annotation.repository.Repository
-import org.repolizer.annotation.repository.method.Header
+import org.repolizer.annotation.repository.parameter.Header
 import java.io.IOException
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
