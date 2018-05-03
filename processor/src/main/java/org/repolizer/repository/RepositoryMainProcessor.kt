@@ -5,7 +5,8 @@ import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
 import org.repolizer.MainProcessor
-import org.repolizer.annotation.repository.Repository
+import org.repolizer.annotation.repository.*
+import org.repolizer.annotation.repository.parameter.*
 import org.repolizer.util.AnnotationProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.ExecutableElement
@@ -16,6 +17,8 @@ import javax.lang.model.element.VariableElement
 class RepositoryMainProcessor : AnnotationProcessor {
 
     override fun process(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
+        initRepositoryAnnotations(mainProcessor, roundEnv)
+
         roundEnv.getElementsAnnotatedWith(Repository::class.java).forEach {
             val typeElement = it as TypeElement
             val repositoryName = typeElement.simpleName.toString()
@@ -48,5 +51,23 @@ class RepositoryMainProcessor : AnnotationProcessor {
                     .build()
                     .writeTo(mainProcessor.filer)
         }
+    }
+
+    private fun initRepositoryAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
+        //Method annotations
+        RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv, DB::class.java, RepositoryMapHolder.dbAnnotationMap)
+        RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv, DELETE::class.java, RepositoryMapHolder.deleteAnnotationMap)
+        RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv, GET::class.java, RepositoryMapHolder.getAnnotationMap)
+        RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv, POST::class.java, RepositoryMapHolder.postAnnotationMap)
+        RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv, PUT::class.java, RepositoryMapHolder.putAnnotationMap)
+        RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv, REFRESH::class.java, RepositoryMapHolder.refreshAnnotationMap)
+
+        //Param annotations
+        RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, DatabaseBody::class.java, RepositoryMapHolder.databaseBodyAnnotationMap)
+        RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, Header::class.java, RepositoryMapHolder.headerAnnotationMap)
+        RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, RequestBody::class.java, RepositoryMapHolder.requestBodyAnnotationMap)
+        RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, SqlParameter::class.java, RepositoryMapHolder.sqlParameterAnnotationMap)
+        RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, UrlParameter::class.java, RepositoryMapHolder.urlParameterAnnotationMap)
+        RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, UrlQuery::class.java, RepositoryMapHolder.urlQueryAnnotationMap)
     }
 }

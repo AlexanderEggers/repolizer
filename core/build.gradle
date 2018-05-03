@@ -51,6 +51,7 @@ dependencies {
     api project(":repolizer-annotation")
 
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
+    implementation "android.arch.persistence.room:runtime:$room_version"
 }
 
 apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'

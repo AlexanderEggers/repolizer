@@ -1,12 +1,13 @@
 package org.repolizer
 
+import android.content.Context
 import okhttp3.OkHttpClient
 
 class Repolizer internal constructor(builder: Builder){
 
-    init {
-        
-    }
+    val context: Context = builder.context
+    val httpClient: OkHttpClient? = builder.httpClient
+    val baseUrl: String? = builder.baseUrl
 
     fun create(repositoryClass: Class<*>) {
 
@@ -18,15 +19,15 @@ class Repolizer internal constructor(builder: Builder){
 
     companion object {
 
-        fun newBuilder(): Builder {
-            return Builder()
+        fun newBuilder(context: Context): Builder {
+            return Builder(context)
         }
     }
 
-    class Builder {
+    class Builder(internal var context: Context) {
 
-        private var httpClient: OkHttpClient? = null
-        private var baseUrl: String? = null
+        internal var httpClient: OkHttpClient? = null
+        internal var baseUrl: String? = null
 
         fun setClient(httpClient: OkHttpClient): Builder {
             this.httpClient = httpClient
