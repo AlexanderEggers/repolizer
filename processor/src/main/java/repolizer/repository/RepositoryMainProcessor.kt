@@ -70,6 +70,7 @@ class RepositoryMainProcessor : AnnotationProcessor {
                             .initializer("new RepositoryActionBuilderFactory()")
                             .build())
                     .addMethod(MethodSpec.constructorBuilder()
+                            .addModifiers(Modifier.PUBLIC)
                             .addParameter(classRepolizer, "repolizer")
                             .addStatement("super(repolizer)")
                             .build())
@@ -85,7 +86,7 @@ class RepositoryMainProcessor : AnnotationProcessor {
                 }
 
                 //TODO build method body >> must be unique for each method annotation
-                
+
                 fileBuilder.addMethod(dbMethodBuilder.build())
             }
 
