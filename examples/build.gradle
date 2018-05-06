@@ -24,5 +24,6 @@ dependencies {
     implementation "com.android.support:appcompat-v7:$support_lib_version"
 
     implementation project(":repolizer-annotation")
+    implementation project(":repolizer-core")
     kapt project(":repolizer-processor")
 }

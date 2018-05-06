@@ -5,4 +5,5 @@ package repolizer.annotation.repository
 @Target(AnnotationTarget.FUNCTION)
 annotation class GET(val url: String,
                      val sql: String = "",
-                     val requiresLogin: Boolean = false)
+                     val requiresLogin: Boolean = false,
+                     val showProgress: Boolean = false)
