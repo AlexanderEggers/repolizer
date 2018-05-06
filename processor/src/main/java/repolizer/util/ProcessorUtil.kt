@@ -1,24 +1,19 @@
 package repolizer.util
 
-import com.squareup.javapoet.ClassName
-import javax.lang.model.element.Element
-import javax.lang.model.type.MirroredTypeException
-import javax.lang.model.type.TypeMirror
-
 class ProcessorUtil {
 
     companion object {
 
-        fun classAndroidInjector(): ClassName {
-            return ClassName.get("dagger.android", "ContributesAndroidInjector")
+        fun getGeneratedRepositoryName(repositoryClass: Class<*>): String {
+            return "Generated_" + repositoryClass.simpleName + "_Repository"
         }
 
-        fun classModule(): ClassName {
-            return ClassName.get("dagger", "Module")
+        fun getGeneratedDatabaseName(databaseClass: Class<*>): String {
+            return "Generated_" + databaseClass.simpleName + "_Database"
         }
 
-        fun classViewModel(): ClassName {
-            return ClassName.get("android.arch.lifecycle", "ViewModel")
+        fun getGeneratedDatabaseProviderName(databaseClass: Class<*>): String {
+            return "Generated_" + databaseClass.simpleName + "_Database_Provider"
         }
     }
 }

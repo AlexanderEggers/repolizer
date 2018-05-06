@@ -13,6 +13,7 @@ import repolizer.repository.response.RequestProvider
 import repolizer.repository.response.ResponseService
 import repolizer.repository.retrofit.LiveDataCallAdapterFactory
 import repolizer.repository.util.LoginManager
+import repolizer.repository.util.Utils.Companion.getGeneratedRepositoryName
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
@@ -48,10 +49,11 @@ class Repolizer internal constructor(val context: Context, builder: Builder) {
 
     @Suppress("UNCHECKED_CAST")
     fun <T> create(repositoryClass: Class<T>): T {
-        return if(repositorySingletonMap.containsKey(repositoryClass.simpleName)) {
+        return if (repositorySingletonMap.containsKey(repositoryClass.simpleName)) {
             repositorySingletonMap[repositoryClass.simpleName] as T
         } else {
-            val realRepositoryClass = Class.forName("Generated_" + repositoryClass.simpleName + "Impl")
+            val realRepositoryClass = Class.forName(repositoryClass.`package`.name
+                    + getGeneratedRepositoryName(repositoryClass))
             val repository = realRepositoryClass.getConstructor(Repolizer::class.java).newInstance(this@Repolizer) as T
             repositorySingletonMap[repositoryClass.simpleName] = repository
             repository

@@ -1,8 +1,9 @@
 package repolizer
 
 import com.google.auto.service.AutoService
-import repolizer.annotation.repository.*
-import repolizer.annotation.repository.parameter.*
+import repolizer.annotation.repository.DB
+import repolizer.annotation.repository.Repository
+import repolizer.annotation.repository.parameter.Header
 import repolizer.repository.RepositoryMainProcessor
 import java.io.IOException
 import javax.annotation.processing.*

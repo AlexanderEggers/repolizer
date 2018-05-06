@@ -1,6 +1,6 @@
 package repolizer.repository.util
 
-class Utils {
+internal class Utils {
 
     companion object {
         private const val CACHE_URL_FORMAT_BASE = "CID"
@@ -10,6 +10,14 @@ class Utils {
                 "0"
             else
                 CACHE_URL_FORMAT_BASE + url.hashCode().toString()
+        }
+
+        fun getGeneratedRepositoryName(repositoryClass: Class<*>): String {
+            return "Generated_" + repositoryClass.simpleName + "_Repository"
+        }
+
+        fun getGeneratedDatabaseProviderName(databaseClass: Class<*>): String {
+            return "Generated_" + databaseClass.simpleName + "_Database_Provider"
         }
     }
 }
