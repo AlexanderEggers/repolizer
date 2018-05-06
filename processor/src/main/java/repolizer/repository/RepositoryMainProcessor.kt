@@ -4,13 +4,13 @@ import com.squareup.javapoet.*
 import repolizer.MainProcessor
 import repolizer.annotation.repository.*
 import repolizer.annotation.repository.parameter.*
+import repolizer.repository.method.RepositoryDBMethod
 import repolizer.util.AnnotationProcessor
 import repolizer.util.ProcessorUtil.Companion.getGeneratedDatabaseDao
 import repolizer.util.ProcessorUtil.Companion.getGeneratedDatabaseName
 import repolizer.util.ProcessorUtil.Companion.getGeneratedRepositoryName
 import repolizer.util.ProcessorUtil.Companion.getPackageName
 import javax.annotation.processing.RoundEnvironment
-import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.MirroredTypeException
@@ -75,19 +75,18 @@ class RepositoryMainProcessor : AnnotationProcessor {
                             .addStatement("super(repolizer)")
                             .build())
 
-            RepositoryMapHolder.dbAnnotationMap[it.simpleName.toString()]?.forEach {
-                val exElement = it as ExecutableElement
-                val dbMethodBuilder = MethodSpec.methodBuilder(exElement.simpleName.toString())
+            RepositoryMapHolder.dbAnnotationMap[it.simpleName.toString()]?.forEach { methodElement ->
+                val dbMethodBuilder = MethodSpec.methodBuilder(methodElement.simpleName.toString())
                         .addModifiers(Modifier.PUBLIC)
 
-                exElement.parameters.forEach {varElement ->
+                methodElement.parameters.forEach {varElement ->
                     val varType = ClassName.get(varElement.asType())
                     dbMethodBuilder.addParameter(varType, varElement.simpleName.toString())
                 }
 
                 //TODO build method body >> must be unique for each method annotation
 
-                fileBuilder.addMethod(dbMethodBuilder.build())
+                fileBuilder.addMethod(RepositoryDBMethod(dbMethodBuilder).build(it).build())
             }
 
             val file = fileBuilder.build()

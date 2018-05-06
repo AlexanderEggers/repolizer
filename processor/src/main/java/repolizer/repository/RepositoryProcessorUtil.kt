@@ -2,16 +2,14 @@ package repolizer.repository
 
 import repolizer.MainProcessor
 import javax.annotation.processing.RoundEnvironment
-import javax.lang.model.element.Element
-import javax.lang.model.element.ElementKind
-import javax.lang.model.element.TypeElement
+import javax.lang.model.element.*
 import javax.tools.Diagnostic
 
 class RepositoryProcessorUtil {
 
     companion object {
         fun initMethodAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment,
-                                  clazz: Class<out Annotation>, hashMap: HashMap<String, ArrayList<Element>>) {
+                                  clazz: Class<out Annotation>, hashMap: HashMap<String, ArrayList<ExecutableElement>>) {
             roundEnv.getElementsAnnotatedWith(clazz).forEach {
                 if (it.kind != ElementKind.METHOD) {
                     mainProcessor.messager!!.printMessage(Diagnostic.Kind.ERROR, "Can only " +
@@ -21,18 +19,18 @@ class RepositoryProcessorUtil {
 
                 val typeElement = it.enclosingElement as TypeElement
 
-                var currentList: ArrayList<Element>? = hashMap[typeElement.simpleName.toString()]
+                var currentList: ArrayList<ExecutableElement>? = hashMap[typeElement.simpleName.toString()]
                 if(currentList == null) {
                     currentList = ArrayList()
                 }
 
-                currentList.add(it)
+                currentList.add(it as ExecutableElement)
                 hashMap[typeElement.simpleName.toString()] = currentList
             }
         }
 
         fun initParamAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment,
-                                 clazz: Class<out Annotation>, hashMap: HashMap<String, ArrayList<Element>>) {
+                                 clazz: Class<out Annotation>, hashMap: HashMap<String, ArrayList<VariableElement>>) {
             roundEnv.getElementsAnnotatedWith(clazz).forEach {
                 if (it.kind != ElementKind.PARAMETER) {
                     mainProcessor.messager!!.printMessage(Diagnostic.Kind.ERROR, "Can only " +
@@ -42,12 +40,12 @@ class RepositoryProcessorUtil {
 
                 val typeElement = it.enclosingElement.enclosingElement as TypeElement
 
-                var currentList: ArrayList<Element>? = hashMap[typeElement.simpleName.toString()]
+                var currentList: ArrayList<VariableElement>? = hashMap[typeElement.simpleName.toString()]
                 if(currentList == null) {
                     currentList = ArrayList()
                 }
 
-                currentList.add(it)
+                currentList.add(it as VariableElement)
                 hashMap[typeElement.simpleName.toString()] = currentList
             }
         }
