@@ -11,7 +11,7 @@ class RepositoryProcessorUtil {
 
     companion object {
         fun initMethodAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment,
-                                  clazz: Class<out Annotation>, hashMap: HashMap<String, Element>) {
+                                  clazz: Class<out Annotation>, hashMap: HashMap<String, ArrayList<Element>>) {
             roundEnv.getElementsAnnotatedWith(clazz).forEach {
                 if (it.kind != ElementKind.METHOD) {
                     mainProcessor.messager!!.printMessage(Diagnostic.Kind.ERROR, "Can only " +
@@ -20,12 +20,19 @@ class RepositoryProcessorUtil {
                 }
 
                 val typeElement = it.enclosingElement as TypeElement
-                hashMap[typeElement.simpleName.toString()] = it
+
+                var currentList: ArrayList<Element>? = hashMap[typeElement.simpleName.toString()]
+                if(currentList == null) {
+                    currentList = ArrayList()
+                }
+
+                currentList.add(it)
+                hashMap[typeElement.simpleName.toString()] = currentList
             }
         }
 
         fun initParamAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment,
-                                 clazz: Class<out Annotation>, hashMap: HashMap<String, Element>) {
+                                 clazz: Class<out Annotation>, hashMap: HashMap<String, ArrayList<Element>>) {
             roundEnv.getElementsAnnotatedWith(clazz).forEach {
                 if (it.kind != ElementKind.PARAMETER) {
                     mainProcessor.messager!!.printMessage(Diagnostic.Kind.ERROR, "Can only " +
@@ -34,7 +41,14 @@ class RepositoryProcessorUtil {
                 }
 
                 val typeElement = it.enclosingElement.enclosingElement as TypeElement
-                hashMap[typeElement.simpleName.toString() + "." + it.enclosingElement.simpleName] = it
+
+                var currentList: ArrayList<Element>? = hashMap[typeElement.simpleName.toString()]
+                if(currentList == null) {
+                    currentList = ArrayList()
+                }
+
+                currentList.add(it)
+                hashMap[typeElement.simpleName.toString()] = currentList
             }
         }
     }

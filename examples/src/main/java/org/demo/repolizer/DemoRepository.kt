@@ -1,10 +1,10 @@
 package org.demo.repolizer
 
-import org.repolizer.annotation.repository.DB
-import org.repolizer.annotation.repository.Repository
+import repolizer.annotation.repository.DB
+import repolizer.annotation.repository.Repository
 import repolizer.annotation.repository.parameter.Header
 
-@Repository(entity = String::class, database = String::class)
+@Repository(entity = String::class, database = String::class, tableName = "TestTable")
 interface DemoRepository {
 
     @DB("")

@@ -5,49 +5,88 @@ import repolizer.MainProcessor
 import repolizer.annotation.repository.*
 import repolizer.annotation.repository.parameter.*
 import repolizer.util.AnnotationProcessor
+import repolizer.util.ProcessorUtil.Companion.getGeneratedDatabaseDao
+import repolizer.util.ProcessorUtil.Companion.getGeneratedDatabaseName
+import repolizer.util.ProcessorUtil.Companion.getGeneratedRepositoryName
+import repolizer.util.ProcessorUtil.Companion.getPackageName
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
-import javax.lang.model.element.VariableElement
+import javax.lang.model.type.MirroredTypeException
+import javax.lang.model.type.DeclaredType
 
 class RepositoryMainProcessor : AnnotationProcessor {
 
-    private val classClass = ClassName.get("repolizer.util", "BaseRepository")
+    private val classBaseRepository = ClassName.get("repolizer.repository", "BaseRepository")
+    private val classRepositoryActionBuilderFactory = ClassName.get("repolizer.repository.util", "RepositoryActionBuilderFactory")
+
+    private val classGlobalDatabaseProvider = ClassName.get("repolizer.database", "GlobalDatabaseProvider")
+
+    private val classRepolizer = ClassName.get("repolizer", "Repolizer")
 
     override fun process(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
         initRepositoryAnnotations(mainProcessor, roundEnv)
 
         roundEnv.getElementsAnnotatedWith(Repository::class.java).forEach {
-            val typeElement = it as TypeElement
-            val repositoryName = typeElement.simpleName.toString()
-            val repositoryPackageName = mainProcessor.elements!!.getPackageOf(typeElement).qualifiedName.toString()
+            //Repository annotation general data
+            val repositoryName = it.simpleName.toString()
+            val repositoryPackageName = getPackageName(mainProcessor, it)
             val repositoryClassName = ClassName.get(repositoryPackageName, repositoryName)
 
-            val classRepositoryEntity = ClassName.get(it.getAnnotation(Repository::class.java).entity.java)
-            val classRepositoryParent: TypeName = ParameterizedTypeName.get(classClass,
-                    classRepositoryEntity)
+            //Entity data for the generics param provided by the @Repository annotation
+            val objectEntity: TypeElement = getRepositoryEntityClass(it.getAnnotation(Repository::class.java))!!.asElement() as TypeElement
+            val classEntity = ClassName.get(getPackageName(mainProcessor, objectEntity), objectEntity.simpleName.toString())
 
-            val fileBuilder = TypeSpec.classBuilder("Generated_" + repositoryName + "Impl")
+            //Database data for the generics param provided by the @Repository annotation
+            val objectDatabase = getRepositoryDatabaseClass(it.getAnnotation(Repository::class.java))!!.asElement() as TypeElement
+            val classDatabase = ClassName.get(getPackageName(mainProcessor, objectDatabase), objectDatabase.simpleName.toString())
+            val classRealDatabase = ClassName.get(getPackageName(mainProcessor, objectDatabase),
+                    getGeneratedDatabaseName(objectDatabase.simpleName.toString()))
+            val classDatabaseDao = ClassName.get(getPackageName(mainProcessor, objectDatabase),
+                    getGeneratedDatabaseDao(objectDatabase.simpleName.toString(), objectEntity.simpleName.toString()))
+
+            //General field data
+            val classRepositoryParent: TypeName = ParameterizedTypeName.get(classBaseRepository,
+                    classEntity)
+            val classBuilderFactoryEntity: TypeName = ParameterizedTypeName.get(
+                    classRepositoryActionBuilderFactory,
+                    classEntity)
+
+            val fileBuilder = TypeSpec.classBuilder(getGeneratedRepositoryName(repositoryName))
                     .superclass(classRepositoryParent)
                     .addSuperinterface(repositoryClassName)
                     .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                    .addField(FieldSpec.builder(classRealDatabase, "db")
+                            .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                            .initializer("$classGlobalDatabaseProvider.INSTANCE.getDatabase($classDatabase.class)")
+                            .build())
+                    .addField(FieldSpec.builder(classDatabaseDao, "dao")
+                            .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                            .initializer("db.get" + objectEntity.simpleName + "Dao()")
+                            .build())
+                    .addField(FieldSpec.builder(classBuilderFactoryEntity, "factory")
+                            .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                            .initializer("new RepositoryActionBuilderFactory()")
+                            .build())
+                    .addMethod(MethodSpec.constructorBuilder()
+                            .addParameter(classRepolizer, "repolizer")
+                            .addStatement("super(repolizer)")
+                            .build())
 
-            roundEnv.getElementsAnnotatedWith(DB::class.java).forEach {
+            RepositoryMapHolder.dbAnnotationMap[it.simpleName.toString()]?.forEach {
                 val exElement = it as ExecutableElement
-
-                val varElement = exElement.parameters[0] as VariableElement
-                val varType = ClassName.get(varElement.asType())
-
-                //check which Annotation is used by using getAnnotation(...) to test if the value is non-null
-                //if the final value is still null, it means the parameter has no annotation is therefore an error
-
-                //OR prepare parameter annotations and save them inside map using RepoClassName.methodName as key and the element as value.
-
-                fileBuilder.addMethod(MethodSpec.methodBuilder(exElement.simpleName.toString())
+                val dbMethodBuilder = MethodSpec.methodBuilder(exElement.simpleName.toString())
                         .addModifiers(Modifier.PUBLIC)
-                        .addParameter(varType, varElement.simpleName.toString())
-                        .build())
+
+                exElement.parameters.forEach {varElement ->
+                    val varType = ClassName.get(varElement.asType())
+                    dbMethodBuilder.addParameter(varType, varElement.simpleName.toString())
+                }
+
+                //TODO build method body >> must be unique for each method annotation
+                
+                fileBuilder.addMethod(dbMethodBuilder.build())
             }
 
             val file = fileBuilder.build()
@@ -74,5 +113,23 @@ class RepositoryMainProcessor : AnnotationProcessor {
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, SqlParameter::class.java, RepositoryMapHolder.sqlParameterAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, UrlParameter::class.java, RepositoryMapHolder.urlParameterAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, UrlQuery::class.java, RepositoryMapHolder.urlQueryAnnotationMap)
+    }
+
+    private fun getRepositoryEntityClass(annotation: Repository): DeclaredType? {
+        try {
+            annotation.entity
+        } catch (ex: MirroredTypeException) {
+            return ex.typeMirror as DeclaredType
+        }
+        return null
+    }
+
+    private fun getRepositoryDatabaseClass(annotation: Repository): DeclaredType? {
+        try {
+            annotation.database
+        } catch (ex: MirroredTypeException) {
+            return ex.typeMirror as DeclaredType
+        }
+        return null
     }
 }

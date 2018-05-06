@@ -5,7 +5,7 @@ import repolizer.repository.util.RequestType
 abstract class ProgressController constructor(private val requestProvider: RequestProvider?) {
 
     fun show(url: String, requestType: RequestType) {
-        onShow(requestType)
+        onShow(url, requestType)
     }
 
     fun close() {
@@ -16,7 +16,7 @@ abstract class ProgressController constructor(private val requestProvider: Reque
         onCancel(requestProvider)
     }
 
-    protected abstract fun onShow(requestType: RequestType)
+    protected abstract fun onShow(url: String, requestType: RequestType)
     protected abstract fun onClose()
     protected abstract fun onCancel(requestProvider: RequestProvider?)
 }
