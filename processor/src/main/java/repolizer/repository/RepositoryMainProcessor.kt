@@ -59,7 +59,7 @@ class RepositoryMainProcessor : AnnotationProcessor {
                     .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                     .addField(FieldSpec.builder(classRealDatabase, "db")
                             .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                            .initializer("$classGlobalDatabaseProvider.INSTANCE.getDatabase($classDatabase.class)")
+                            .initializer("$classGlobalDatabaseProvider.INSTANCE.getDatabase(super.getContext(), $classDatabase.class)")
                             .build())
                     .addField(FieldSpec.builder(classDatabaseDao, "dao")
                             .addModifiers(Modifier.PRIVATE, Modifier.FINAL)

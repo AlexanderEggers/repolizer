@@ -17,7 +17,7 @@ import repolizer.repository.util.Utils.Companion.getGeneratedRepositoryName
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
-class Repolizer internal constructor(val context: Context, builder: Builder) {
+class Repolizer private constructor(val context: Context, builder: Builder) {
 
     private val httpClient: OkHttpClient? = builder.httpClient
     private val requestProvider: RequestProvider? = builder.requestProvider
