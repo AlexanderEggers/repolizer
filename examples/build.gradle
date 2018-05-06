@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "org.demo.repolizer"
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 27
     }
 
@@ -22,6 +22,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "com.android.support:appcompat-v7:$support_lib_version"
+    implementation "android.arch.lifecycle:livedata:$livedata_version"
 
     implementation project(":repolizer-annotation")
     implementation project(":repolizer-core")
