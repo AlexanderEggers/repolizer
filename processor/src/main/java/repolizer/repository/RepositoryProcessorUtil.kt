@@ -14,7 +14,8 @@ class RepositoryProcessorUtil {
                                   clazz: Class<out Annotation>, hashMap: HashMap<String, Element>) {
             roundEnv.getElementsAnnotatedWith(clazz).forEach {
                 if (it.kind != ElementKind.METHOD) {
-                    mainProcessor.messager!!.printMessage(Diagnostic.Kind.ERROR, "Can only be applied to a method.")
+                    mainProcessor.messager!!.printMessage(Diagnostic.Kind.ERROR, "Can only " +
+                            "be applied to a method.")
                     return
                 }
 
@@ -27,13 +28,13 @@ class RepositoryProcessorUtil {
                                  clazz: Class<out Annotation>, hashMap: HashMap<String, Element>) {
             roundEnv.getElementsAnnotatedWith(clazz).forEach {
                 if (it.kind != ElementKind.PARAMETER) {
-                    mainProcessor.messager!!.printMessage(Diagnostic.Kind.ERROR, "Can only be " +
-                            "applied to a parameter.")
+                    mainProcessor.messager!!.printMessage(Diagnostic.Kind.ERROR, "Can only " +
+                            "be applied to a parameter.")
                     return
                 }
 
                 val typeElement = it.enclosingElement.enclosingElement as TypeElement
-                hashMap[typeElement.simpleName.toString()] = it
+                hashMap[typeElement.simpleName.toString() + "." + it.enclosingElement.simpleName] = it
             }
         }
     }
