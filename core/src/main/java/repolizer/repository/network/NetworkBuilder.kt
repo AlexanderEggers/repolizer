@@ -4,7 +4,7 @@ import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
 import repolizer.repository.util.RequestType
 
-class NetworkBuilder<Entity> internal constructor(val typeToken: TypeToken<*>) {
+class NetworkBuilder<Entity> constructor(val typeToken: TypeToken<*>) {
 
     constructor(type: Class<*>) : this(TypeToken.get(type))
 

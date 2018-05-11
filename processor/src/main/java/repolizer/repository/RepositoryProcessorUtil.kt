@@ -39,14 +39,16 @@ class RepositoryProcessorUtil {
                 }
 
                 val typeElement = it.enclosingElement.enclosingElement as TypeElement
+                val methodElement = it.enclosingElement as ExecutableElement
+                val key = typeElement.simpleName.toString() + "." + methodElement.simpleName.toString()
 
-                var currentList: ArrayList<VariableElement>? = hashMap[typeElement.simpleName.toString()]
+                var currentList: ArrayList<VariableElement>? = hashMap[key]
                 if(currentList == null) {
                     currentList = ArrayList()
                 }
 
                 currentList.add(it as VariableElement)
-                hashMap[typeElement.simpleName.toString()] = currentList
+                hashMap[key] = currentList
             }
         }
     }
