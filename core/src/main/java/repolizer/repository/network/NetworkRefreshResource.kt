@@ -31,7 +31,12 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
     private val showProgress: Boolean = builder.showProgress
 
     private val url: String = builder.url
-    private val fullUrl: String = builder.fullUrl
+    private val fullUrl: String = if (repolizer.baseUrl!!.substring(repolizer.baseUrl.length) != "/") {
+        repolizer.baseUrl + "/" + builder.url
+    } else {
+        repolizer.baseUrl + builder.url
+    }
+    
     private val requestType: RequestType = builder.requestType!!
     private val bodyType: TypeToken<*> = builder.typeToken
 

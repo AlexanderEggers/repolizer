@@ -11,7 +11,6 @@ class NetworkBuilder<Entity> constructor(val typeToken: TypeToken<*>) {
     var requestType: RequestType? = null
 
     var url: String = ""
-    var fullUrl: String = ""
 
     var raw: Entity? = null
 

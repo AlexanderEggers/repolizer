@@ -12,19 +12,19 @@ class ProcessorUtil {
         }
 
         fun getGeneratedRepositoryName(repositoryName: String): String {
-            return "Generated_" + repositoryName + "_Repository"
+            return "Generated_$repositoryName"
         }
 
         fun getGeneratedDatabaseName(databaseName: String): String {
-            return "Generated_" + databaseName + "_Database"
+            return "Generated_$databaseName"
         }
 
         fun getGeneratedDatabaseDao(databaseName: String, entityName: String): String {
-            return "Generated_" + databaseName + "_" + entityName + "_Dao"
+            return "Generated_" + databaseName + "_" + entityName
         }
 
         fun getGeneratedDatabaseProviderName(databaseClass: Class<*>): String {
-            return "Generated_" + databaseClass.simpleName + "_Database_Provider"
+            return "Generated_" + databaseClass.simpleName + "_Provider"
         }
     }
 }

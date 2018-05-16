@@ -5,6 +5,7 @@ import repolizer.MainProcessor
 import repolizer.annotation.repository.*
 import repolizer.annotation.repository.parameter.*
 import repolizer.repository.method.RepositoryDBMethod
+import repolizer.repository.method.RepositoryGetMethod
 import repolizer.util.AnnotationProcessor
 import repolizer.util.ProcessorUtil.Companion.getGeneratedDatabaseDao
 import repolizer.util.ProcessorUtil.Companion.getGeneratedDatabaseName
@@ -71,6 +72,10 @@ class RepositoryMainProcessor : AnnotationProcessor {
                             .addParameter(classRepolizer, "repolizer")
                             .addStatement("super(repolizer)")
                             .build())
+
+            RepositoryGetMethod().build(it, classEntity, TypeSpec.classBuilder("DaoClassTest")).forEach {
+                fileBuilder.addMethod(it)
+            }
 
             RepositoryDBMethod().build(it, TypeSpec.classBuilder("DaoClassTest")).forEach {
                 fileBuilder.addMethod(it)
