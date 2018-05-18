@@ -6,7 +6,7 @@ import repolizer.repository.util.Utils.Companion.getGeneratedDatabaseProviderNam
 
 object GlobalDatabaseProvider {
 
-    private val databaseSingletonMap: HashMap<String, RoomDatabase> = HashMap()
+    private val databaseSingletonMap: HashMap<String, RepolizerDatabase> = HashMap()
 
     @Suppress("UNCHECKED_CAST")
     fun <T: RoomDatabase> getDatabase(context: Context, databaseClass: Class<*>): T {
@@ -17,9 +17,9 @@ object GlobalDatabaseProvider {
                     .forName(databaseClass.`package`.name
                             + getGeneratedDatabaseProviderName(databaseClass))
                     .newInstance() as DatabaseProvider
-            val roomDatabase = databaseProvider.getDatabase(context)
-            databaseSingletonMap[databaseClass.simpleName] = roomDatabase
-            roomDatabase as T
+            val repolizerDatabase = databaseProvider.getDatabase(context)
+            databaseSingletonMap[databaseClass.simpleName] = repolizerDatabase
+            repolizerDatabase as T
         }
     }
 }

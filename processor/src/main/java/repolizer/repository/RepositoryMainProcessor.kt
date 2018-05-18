@@ -23,6 +23,7 @@ class RepositoryMainProcessor : AnnotationProcessor {
     private val classAppExecutor = ClassName.get("repolizer.repository.util", "AppExecutor")
 
     private val classGlobalDatabaseProvider = ClassName.get("repolizer.database", "GlobalDatabaseProvider")
+    private val classCacheDao = ClassName.get("repolizer.database.cache", "CacheDao")
 
     private val classRepolizer = ClassName.get("repolizer", "Repolizer")
 
@@ -63,9 +64,13 @@ class RepositoryMainProcessor : AnnotationProcessor {
                             .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                             .initializer("AppExecutor.INSTANCE")
                             .build())
-                    .addField(FieldSpec.builder(classDatabaseDao, "dao")
+                    .addField(FieldSpec.builder(classDatabaseDao, "dataDao")
                             .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                             .initializer("db.get" + objectEntity.simpleName + "Dao()")
+                            .build())
+                    .addField(FieldSpec.builder(classCacheDao, "cacheDao")
+                            .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                            .initializer("db.getCacheDao()")
                             .build())
                     .addMethod(MethodSpec.constructorBuilder()
                             .addModifiers(Modifier.PUBLIC)

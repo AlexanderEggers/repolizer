@@ -1,9 +1,6 @@
 package repolizer.repository.method
 
-import com.squareup.javapoet.AnnotationSpec
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.TypeSpec
+import com.squareup.javapoet.*
 import repolizer.annotation.repository.DB
 import repolizer.repository.RepositoryMapHolder
 import javax.lang.model.element.Element
@@ -24,7 +21,7 @@ class RepositoryDBMethod {
                     .addModifiers(Modifier.PUBLIC)
                     .addAnnotation(Override::class.java)
 
-            val daoMethodBuilder = MethodSpec.methodBuilder(methodElement.simpleName.toString())
+            val daoMethodBuilder = MethodSpec.methodBuilder("queryFor_${methodElement.simpleName}")
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                     .addAnnotation(AnnotationSpec.builder(annotationRoomQuery)
                             .addMember("value", methodElement.getAnnotation(DB::class.java).sql)
@@ -36,27 +33,15 @@ class RepositoryDBMethod {
             }
 
             val daoParamList = ArrayList<String>()
-            RepositoryMapHolder.sqlParameterAnnotationMap[element.simpleName.toString() + "." +
-                    methodElement.simpleName.toString()]?.forEach {
-
+            RepositoryMapHolder.sqlParameterAnnotationMap["${element.simpleName}.${methodElement.simpleName}"]?.forEach {
                 val elementType = ClassName.get(it.asType())
                 daoMethodBuilder.addParameter(elementType, it.simpleName.toString())
                 daoParamList.add(it.simpleName.toString())
             }
 
-            var daoCall = "dao.${methodElement.simpleName}("
-            daoParamList.forEach {
-                daoCall += it
-            }
-
+            val networkGetLayerClass = createDatabaseLayerAnonymousClass(methodElement.simpleName.toString(), daoParamList)
             dbMethodBuilder.addStatement("$classDatabaseBuilder builder = new $classDatabaseBuilder()")
-            dbMethodBuilder.addCode("builder.setDatabaseLayer(new $classDatabaseLayer() {\n" +
-                    "   \n" +
-                    "   @Override\n" +
-                    "   public void updateDB() {\n" +
-                    "       $daoCall);\n" +
-                    "   }\n" +
-                    "});\n")
+            dbMethodBuilder.addStatement("builder.setDatabaseLayer($networkGetLayerClass)")
             dbMethodBuilder.addStatement("super.executeDB(builder)")
 
             daoClassBuilder.addMethod(daoMethodBuilder.build())
@@ -64,5 +49,22 @@ class RepositoryDBMethod {
         }
 
         return builderList
+    }
+
+    private fun createDatabaseLayerAnonymousClass(methodName: String, daoParamList: ArrayList<String>): TypeSpec {
+
+        var daoQueryCall = "dataDao.queryFor_$methodName("
+        daoParamList.forEach {
+            daoQueryCall += it
+        }
+
+        return TypeSpec.anonymousClassBuilder("")
+                .addSuperinterface(classDatabaseLayer)
+                .addMethod(MethodSpec.methodBuilder("updateDB")
+                        .addAnnotation(Override::class.java)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addStatement("$daoQueryCall)")
+                        .build())
+                .build()
     }
 }
