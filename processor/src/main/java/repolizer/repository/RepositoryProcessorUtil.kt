@@ -12,7 +12,7 @@ class RepositoryProcessorUtil {
                                   clazz: Class<out Annotation>, hashMap: HashMap<String, ArrayList<ExecutableElement>>) {
             roundEnv.getElementsAnnotatedWith(clazz).forEach {
                 if (it.kind != ElementKind.METHOD) {
-                    mainProcessor.messager!!.printMessage(Diagnostic.Kind.ERROR, "Can only " +
+                    mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
                             "be applied to a method.")
                     return
                 }
@@ -33,7 +33,7 @@ class RepositoryProcessorUtil {
                                  clazz: Class<out Annotation>, hashMap: HashMap<String, ArrayList<VariableElement>>) {
             roundEnv.getElementsAnnotatedWith(clazz).forEach {
                 if (it.kind != ElementKind.PARAMETER) {
-                    mainProcessor.messager!!.printMessage(Diagnostic.Kind.ERROR, "Can only " +
+                    mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
                             "be applied to a parameter.")
                     return
                 }

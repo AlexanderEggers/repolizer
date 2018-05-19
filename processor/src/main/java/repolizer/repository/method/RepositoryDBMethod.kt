@@ -52,18 +52,20 @@ class RepositoryDBMethod {
     }
 
     private fun createDatabaseLayerAnonymousClass(methodName: String, daoParamList: ArrayList<String>): TypeSpec {
-
         var daoQueryCall = "dataDao.queryFor_$methodName("
-        daoParamList.forEach {
-            daoQueryCall += it
+        val iterator = daoParamList.iterator()
+        while(iterator.hasNext()) {
+            daoQueryCall += iterator.next()
+            daoQueryCall += if (iterator.hasNext()) ", " else ""
         }
+        daoQueryCall += ")"
 
         return TypeSpec.anonymousClassBuilder("")
                 .addSuperinterface(classDatabaseLayer)
                 .addMethod(MethodSpec.methodBuilder("updateDB")
                         .addAnnotation(Override::class.java)
                         .addModifiers(Modifier.PUBLIC)
-                        .addStatement("$daoQueryCall)")
+                        .addStatement(daoQueryCall)
                         .build())
                 .build()
     }

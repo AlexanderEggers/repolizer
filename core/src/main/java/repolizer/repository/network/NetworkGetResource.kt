@@ -29,7 +29,7 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
     private val loginManager: LoginManager? = repolizer.loginManager
     private val responseService: ResponseService? = repolizer.responseService
     private val appExecutor: AppExecutor = AppExecutor
-    private val getLayer: NetworkGetLayer<Entity> = builder.networkLayer as NetworkGetLayer
+    private val getLayer: NetworkGetLayer<Entity> = builder.networkLayer as NetworkGetLayer<Entity>
 
     private val requiresLogin: Boolean = builder.requiresLogin
     private val showProgress: Boolean = builder.showProgress
@@ -42,7 +42,7 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
     }
 
     private val requestType: RequestType = builder.requestType!!
-    private val bodyType: TypeToken<*> = builder.typeToken
+    private val bodyType: TypeToken<*> = builder.typeToken!!
 
     private val headerMap: Map<String, String> = builder.headerMap
     private val queryMap: Map<String, String> = builder.queryMap

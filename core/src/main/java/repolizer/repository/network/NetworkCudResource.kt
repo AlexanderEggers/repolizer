@@ -23,10 +23,9 @@ class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, buil
     private val loginManager: LoginManager? = repolizer.loginManager
     private val responseService: ResponseService? = repolizer.responseService
     private val appExecutor: AppExecutor = AppExecutor
-    private val cudLayer: NetworkCudLayer<Entity> = builder.networkLayer as NetworkCudLayer
+    private val cudLayer: NetworkCudLayer<Entity> = builder.networkLayer as NetworkCudLayer<Entity>
 
     private val requiresLogin: Boolean = builder.requiresLogin
-    private val updateDB: Boolean = builder.updateDB
     private val showProgress: Boolean = builder.showProgress
 
     private val url: String = builder.url
@@ -80,9 +79,6 @@ class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, buil
                 }
 
                 if (response.isSuccessful()) {
-                    if (updateDB && raw != null) {
-                        cudLayer.updateDB(raw)
-                    }
                     responseService?.handleSuccess(response)
                 } else {
                     responseService?.handleError(response)

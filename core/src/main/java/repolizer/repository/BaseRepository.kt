@@ -1,7 +1,6 @@
 package repolizer.repository
 
 import android.arch.lifecycle.LiveData
-import android.content.Context
 import repolizer.Repolizer
 import repolizer.repository.database.DatabaseBuilder
 import repolizer.repository.network.NetworkBuilder
@@ -22,17 +21,7 @@ abstract class BaseRepository<Entity> constructor(private val repolizer: Repoliz
                 .execute(this, allowFetch)
     }
 
-    protected fun executePost(builder: NetworkBuilder<Entity>): LiveData<String> {
-        return builder.buildCud(repolizer)
-                .execute()
-    }
-
-    protected fun executePut(builder: NetworkBuilder<Entity>): LiveData<String> {
-        return builder.buildCud(repolizer)
-                .execute()
-    }
-
-    protected fun executeDelete(builder: NetworkBuilder<Entity>): LiveData<String> {
+    protected fun executeCud(builder: NetworkBuilder<Entity>): LiveData<String> {
         return builder.buildCud(repolizer)
                 .execute()
     }
@@ -48,9 +37,5 @@ abstract class BaseRepository<Entity> constructor(private val repolizer: Repoliz
 
     override fun onFetchFinished() {
         refreshing.set(false)
-    }
-
-    fun getContext(): Context {
-        return repolizer.context
     }
 }

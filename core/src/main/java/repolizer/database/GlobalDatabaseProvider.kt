@@ -9,7 +9,7 @@ object GlobalDatabaseProvider {
     private val databaseSingletonMap: HashMap<String, RepolizerDatabase> = HashMap()
 
     @Suppress("UNCHECKED_CAST")
-    fun <T: RoomDatabase> getDatabase(context: Context, databaseClass: Class<*>): T {
+    fun <T : RoomDatabase> getDatabase(context: Context, databaseClass: Class<*>): T {
         return if (databaseSingletonMap.containsKey(databaseClass.simpleName)) {
             (databaseSingletonMap[databaseClass.simpleName] as T?)!!
         } else {

@@ -14,9 +14,9 @@ import javax.lang.model.util.Elements
 @AutoService(Processor::class)
 class MainProcessor : AbstractProcessor() {
 
-    var filer: Filer? = null
-    var messager: Messager? = null
-    var elements: Elements? = null
+    lateinit var filer: Filer
+    lateinit var messager: Messager
+    lateinit var elements: Elements
 
     @Synchronized
     override fun init(processingEnvironment: ProcessingEnvironment) {

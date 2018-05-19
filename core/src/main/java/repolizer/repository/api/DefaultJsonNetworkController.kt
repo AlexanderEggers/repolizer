@@ -43,6 +43,6 @@ class DefaultJsonNetworkController(networkInterface: NetworkInterface, gson: Gso
     }
 
     override fun prepareUrl(url: String): String {
-        return url.split("\\?".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()[0]
+        return url.split("\\?")[0]
     }
 }

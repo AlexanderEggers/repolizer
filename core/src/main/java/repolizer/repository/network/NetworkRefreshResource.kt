@@ -25,7 +25,7 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
     private val loginManager: LoginManager? = repolizer.loginManager
     private val responseService: ResponseService? = repolizer.responseService
     private val appExecutor: AppExecutor = AppExecutor
-    private val updateLayer: NetworkRefreshLayer<Entity> = builder.networkLayer as NetworkRefreshLayer
+    private val updateLayer: NetworkRefreshLayer<Entity> = builder.networkLayer as NetworkRefreshLayer<Entity>
 
     private val requiresLogin: Boolean = builder.requiresLogin
     private val showProgress: Boolean = builder.showProgress
@@ -36,9 +36,9 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
     } else {
         repolizer.baseUrl + builder.url
     }
-    
+
     private val requestType: RequestType = builder.requestType!!
-    private val bodyType: TypeToken<*> = builder.typeToken
+    private val bodyType: TypeToken<*> = builder.typeToken!!
 
     private val headerMap: Map<String, String> = builder.headerMap
     private val queryMap: Map<String, String> = builder.queryMap

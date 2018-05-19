@@ -12,5 +12,5 @@ interface NetworkCudLayer<Entity> : NetworkLayer<Entity> {
                    headerMap: Map<String, String>,
                    url: String,
                    queryMap: Map<String, String>,
-                   raw: Any?): LiveData<NetworkResponse<String>>
+                   raw: Entity?): LiveData<NetworkResponse<String>>
 }

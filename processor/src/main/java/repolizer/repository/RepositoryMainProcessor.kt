@@ -4,8 +4,7 @@ import com.squareup.javapoet.*
 import repolizer.MainProcessor
 import repolizer.annotation.repository.*
 import repolizer.annotation.repository.parameter.*
-import repolizer.repository.method.RepositoryDBMethod
-import repolizer.repository.method.RepositoryGetMethod
+import repolizer.repository.method.*
 import repolizer.util.AnnotationProcessor
 import repolizer.util.ProcessorUtil.Companion.getGeneratedDatabaseDao
 import repolizer.util.ProcessorUtil.Companion.getGeneratedDatabaseName
@@ -56,13 +55,13 @@ class RepositoryMainProcessor : AnnotationProcessor {
                     .superclass(classRepositoryParent)
                     .addSuperinterface(repositoryClassName)
                     .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                    .addField(FieldSpec.builder(classRealDatabase, "db")
-                            .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                            .initializer("$classGlobalDatabaseProvider.INSTANCE.getDatabase(super.getContext(), $classDatabase.class)")
-                            .build())
                     .addField(FieldSpec.builder(classAppExecutor, "appExecutor")
                             .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                             .initializer("AppExecutor.INSTANCE")
+                            .build())
+                    .addField(FieldSpec.builder(classRealDatabase, "db")
+                            .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                            .initializer("$classGlobalDatabaseProvider.INSTANCE.getDatabase(super.getContext(), $classDatabase.class)")
                             .build())
                     .addField(FieldSpec.builder(classDatabaseDao, "dataDao")
                             .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
@@ -78,11 +77,23 @@ class RepositoryMainProcessor : AnnotationProcessor {
                             .addStatement("super(repolizer)")
                             .build())
 
+            RepositoryRefreshMethod().build(it, classEntity, TypeSpec.classBuilder("DaoClassTest")).forEach {
+                fileBuilder.addMethod(it)
+            }
+
             RepositoryGetMethod().build(it, classEntity, TypeSpec.classBuilder("DaoClassTest")).forEach {
                 fileBuilder.addMethod(it)
             }
 
+            RepositoryCudMethod().build(it, classEntity).forEach {
+                fileBuilder.addMethod(it)
+            }
+
             RepositoryDBMethod().build(it, TypeSpec.classBuilder("DaoClassTest")).forEach {
+                fileBuilder.addMethod(it)
+            }
+
+            RepositoryCacheMethod().build(it).forEach {
                 fileBuilder.addMethod(it)
             }
 
@@ -97,15 +108,15 @@ class RepositoryMainProcessor : AnnotationProcessor {
         //Method annotations
         RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv, REFRESH::class.java, RepositoryMapHolder.refreshAnnotationMap)
         RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv, GET::class.java, RepositoryMapHolder.getAnnotationMap)
-        RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv, POST::class.java, RepositoryMapHolder.postAnnotationMap)
-        RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv, PUT::class.java, RepositoryMapHolder.putAnnotationMap)
-        RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv, DELETE::class.java, RepositoryMapHolder.deleteAnnotationMap)
+        RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv, CUD::class.java, RepositoryMapHolder.cudAnnotationMap)
         RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv, DB::class.java, RepositoryMapHolder.dbAnnotationMap)
+        RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv, CACHE::class.java, RepositoryMapHolder.cacheAnnotationMap)
 
         //Param annotations
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, RepositoryParameter::class.java, RepositoryMapHolder.repositoryParameterAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, Header::class.java, RepositoryMapHolder.headerAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, RequestBody::class.java, RepositoryMapHolder.requestBodyAnnotationMap)
+        RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, DatabaseBody::class.java, RepositoryMapHolder.databaseBodyAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, SqlParameter::class.java, RepositoryMapHolder.sqlParameterAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, UrlParameter::class.java, RepositoryMapHolder.urlParameterAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, UrlQuery::class.java, RepositoryMapHolder.urlQueryAnnotationMap)

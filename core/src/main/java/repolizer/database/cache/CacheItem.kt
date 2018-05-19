@@ -11,7 +11,4 @@ class CacheItem(
         val url: String,
 
         @ColumnInfo(name = "cache_time")
-        val cacheTime: Long,
-
-        @ColumnInfo(name = "fresh_time")
-        val freshTime: Long)
+        var cacheTime: Long)

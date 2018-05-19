@@ -4,18 +4,23 @@ import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
 import repolizer.repository.util.RequestType
 
-class NetworkBuilder<Entity> constructor(val typeToken: TypeToken<*>) {
-
-    constructor(type: Class<*>) : this(TypeToken.get(type))
+class NetworkBuilder<Entity> {
 
     var requestType: RequestType? = null
 
     var url: String = ""
 
     var raw: Entity? = null
+        set(value) {
+            if (field != null) {
+                throw IllegalStateException("Only one raw body can be set. Make sure that you don't " +
+                        "use more than one @RequestBody annotation for this method")
+            } else field = value
+        }
+
+    var typeToken: TypeToken<*>? = null
 
     var requiresLogin: Boolean = false
-    var updateDB: Boolean = false
     var showProgress: Boolean = false
 
     var networkLayer: NetworkLayer<Entity>? = null

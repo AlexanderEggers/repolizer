@@ -7,4 +7,5 @@ interface NetworkGetLayer<Entity> : NetworkLayer<Entity> {
     fun updateFetchTime(fullUrlId: String)
 
     fun getData(): LiveData<Entity>
+    fun updateDB(entity: Entity)
 }
