@@ -8,9 +8,6 @@ interface CacheDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(vararg cacheItem: CacheItem)
 
-    @Query("INSERT INTO cache_table values (:url, :cacheTime)")
-    fun insert(url: String, cacheTime: Long)
-
     @Delete
     fun delete(vararg cacheItem: CacheItem)
 

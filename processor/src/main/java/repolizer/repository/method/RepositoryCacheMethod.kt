@@ -74,11 +74,7 @@ class RepositoryCacheMethod {
         if(!bodyCacheItemParamList.isEmpty()) {
             methodBuilder.addStatement(createDaoCall(doaCallStart, bodyCacheItemParamList))
         } else if(!bodyStringParamList.isEmpty()) {
-            if(isInsert) {
-                bodyStringParamList.forEach {
-                    methodBuilder.addStatement("$doaCallStart$it, $classSystem.currentTimeMillis())")
-                }
-            } else {
+            if(!isInsert) {
                 methodBuilder.addStatement(createDaoCall(doaCallStart, bodyStringParamList))
             }
         }

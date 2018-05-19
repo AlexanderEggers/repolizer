@@ -11,4 +11,4 @@ class CacheItem(
         val url: String,
 
         @ColumnInfo(name = "cache_time")
-        var cacheTime: Long)
+        var cacheTime: Long = System.currentTimeMillis())
