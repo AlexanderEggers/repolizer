@@ -75,12 +75,15 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
                         "of the Repolizer class to set your custom implementation.")
             }
 
-            val isLoginValid = loginManager.isCurrentLoginValid()
-            if (isLoginValid) {
-                loginManager.onLoginInvalid(context)
-            } else {
-                executeCall(networkResponse)
-            }
+            result.addSource(loginManager.isCurrentLoginValid(), { isLoginValid ->
+                if(isLoginValid != null) {
+                    if (isLoginValid) {
+                        loginManager.onLoginInvalid(context)
+                    } else {
+                        executeCall(networkResponse)
+                    }
+                }
+            })
         })
     }
 
