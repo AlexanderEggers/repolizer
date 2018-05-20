@@ -1,10 +1,10 @@
 package repolizer
 
+import android.arch.persistence.room.RoomDatabase
 import android.content.Context
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import repolizer.database.GlobalDatabaseProvider
-import repolizer.database.RepolizerDatabase
 import repolizer.repository.api.DefaultJsonNetworkController
 import repolizer.repository.api.NetworkController
 import repolizer.repository.api.NetworkInterface
@@ -61,7 +61,7 @@ class Repolizer private constructor(val context: Context, builder: Builder) {
         }
     }
 
-    fun getDatabase(databaseClass: Class<*>): RepolizerDatabase {
+    fun getDatabase(databaseClass: Class<*>): RoomDatabase {
         return GlobalDatabaseProvider.getDatabase(context, databaseClass)
     }
 

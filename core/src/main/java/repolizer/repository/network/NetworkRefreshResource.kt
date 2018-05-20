@@ -91,29 +91,31 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
         result.addSource(networkResponse) { response ->
             result.removeSource(networkResponse)
 
-            var body: Entity? = null
-            try {
-                body = gson.fromJson<Entity>(response!!.body, bodyType.type)
-            } catch (e: Exception) {
-                Log.e("Error parsing JSON:\n" + response!!.body + "\n", e.message)
+            appExecutor.workerThread.execute {
+                var body: Entity? = null
+                try {
+                    body = gson.fromJson<Entity>(response!!.body, bodyType.type)
+                } catch (e: Exception) {
+                    Log.e("Error parsing JSON:\n" + response!!.body + "\n", e.message)
+                }
+
+                val objectResponse: NetworkResponse<Entity> = response!!.withBody(body)
+
+                if (showProgress) {
+                    progressController?.close()
+                }
+
+                if (response.isSuccessful() && objectResponse.body != null) {
+                    responseService?.handleSuccess(response)
+                    updateLayer.updateDB(objectResponse.body)
+                    updateLayer.updateFetchTime(Utils.makeUrlId(fullUrl))
+                } else {
+                    responseService?.handleError(response)
+                }
+
+                callFinishedCallback!!.onFetchFinished()
+                result.postValue(response.body)
             }
-
-            val objectResponse: NetworkResponse<Entity> = response!!.withBody(body)
-
-            if (showProgress) {
-                progressController?.close()
-            }
-
-            if (response.isSuccessful() && objectResponse.body != null) {
-                responseService?.handleSuccess(response)
-                updateLayer.updateDB(objectResponse.body)
-                updateLayer.updateFetchTime(Utils.makeUrlId(fullUrl))
-            } else {
-                responseService?.handleError(response)
-            }
-
-            callFinishedCallback!!.onFetchFinished()
-            result.value = response.body
         }
     }
 }
