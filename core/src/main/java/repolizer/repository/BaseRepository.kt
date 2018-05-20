@@ -1,6 +1,7 @@
 package repolizer.repository
 
 import android.arch.lifecycle.LiveData
+import android.content.Context
 import repolizer.Repolizer
 import repolizer.repository.database.DatabaseBuilder
 import repolizer.repository.network.NetworkBuilder
@@ -37,5 +38,9 @@ abstract class BaseRepository<Entity> constructor(private val repolizer: Repoliz
 
     override fun onFetchFinished() {
         refreshing.set(false)
+    }
+
+    fun getContext(): Context {
+        return repolizer.context
     }
 }

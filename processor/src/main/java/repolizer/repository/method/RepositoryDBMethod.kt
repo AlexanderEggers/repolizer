@@ -24,7 +24,7 @@ class RepositoryDBMethod {
             val daoMethodBuilder = MethodSpec.methodBuilder("queryFor_${methodElement.simpleName}")
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                     .addAnnotation(AnnotationSpec.builder(annotationRoomQuery)
-                            .addMember("value", methodElement.getAnnotation(DB::class.java).sql)
+                            .addMember("value", "\"${methodElement.getAnnotation(DB::class.java).sql}\"")
                             .build())
 
             methodElement.parameters.forEach { varElement ->

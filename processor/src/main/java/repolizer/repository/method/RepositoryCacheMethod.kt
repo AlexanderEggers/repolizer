@@ -16,8 +16,6 @@ class RepositoryCacheMethod {
 
     private val classString = ClassName.get(String::class.java)
 
-    private val classSystem = ClassName.get(System::class.java)
-
     fun build(element: Element): List<MethodSpec> {
         val builderList = ArrayList<MethodSpec>()
 

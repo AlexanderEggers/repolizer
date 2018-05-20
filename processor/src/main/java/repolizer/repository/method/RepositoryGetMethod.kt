@@ -64,9 +64,9 @@ class RepositoryGetMethod {
             val daoQueryMethodBuilder = MethodSpec.methodBuilder("queryFor_${methodElement.simpleName}")
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                     .addAnnotation(AnnotationSpec.builder(classAnnotationRoomQuery)
-                            .addMember("value", querySql)
+                            .addMember("value", "\"$querySql\"")
                             .build())
-                    .returns(classGenericTypeForMethod)
+                    .returns(ParameterizedTypeName.get(classLiveData, classGenericTypeForMethod))
 
             methodElement.parameters.forEach { varElement ->
                 val varType = ClassName.get(varElement.asType())

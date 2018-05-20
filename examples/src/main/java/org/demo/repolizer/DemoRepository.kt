@@ -10,14 +10,14 @@ import repolizer.annotation.repository.util.CacheOperation
 import repolizer.annotation.repository.util.CudType
 import repolizer.annotation.repository.util.ParameterType
 
-@Repository(entity = String::class, database = String::class, tableName = "TestTable")
+@Repository(entity = DemoEntity::class, database = DemoDatabase::class, tableName = "demo_table")
 interface DemoRepository {
 
     @REFRESH("")
     fun testRefresh(): LiveData<String>
 
     @GET("")
-    fun testGet(@RepositoryParameter(ParameterType.ALLOW_FETCH) allowFetch: Boolean): LiveData<List<String>>
+    fun testGet(@RepositoryParameter(ParameterType.ALLOW_FETCH) allowFetch: Boolean): LiveData<List<DemoEntity>>
 
     @CUD("", CudType.POST)
     fun testPost(@RequestBody myBody: String): LiveData<String>
@@ -29,7 +29,7 @@ interface DemoRepository {
     fun testDelete(@RequestBody myBody: String): LiveData<String>
 
     @DB("")
-    fun test(@SqlParameter parameter: String)
+    fun testDB(@SqlParameter parameter: String)
 
     @CACHE(CacheOperation.INSERT)
     fun cacheTest(@DatabaseBody url: String)

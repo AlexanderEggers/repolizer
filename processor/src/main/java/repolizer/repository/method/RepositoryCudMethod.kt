@@ -16,9 +16,13 @@ class RepositoryCudMethod {
     private val classNetworkLayer = ClassName.get("repolizer.repository.network", "NetworkCudLayer")
     private val classNetworkController = ClassName.get("repolizer.repository.api", "NetworkController")
     private val classRequestType = ClassName.get("repolizer.repository.util", "RequestType")
+    private val classNetworkResponse = ClassName.get("repolizer.repository.response", "NetworkResponse")
 
     private val classList = ClassName.get(List::class.java)
     private val classMapWithString = ParameterizedTypeName.get(Map::class.java, String::class.java, String::class.java)
+    private val classNetworkResponseWithString = ParameterizedTypeName.get(classNetworkResponse, ClassName.get(String::class.java))
+
+    private val classLiveData = ClassName.get("android.arch.lifecycle", "LiveData")
 
     fun build(element: Element, entity: ClassName): List<MethodSpec> {
         val builderList = ArrayList<MethodSpec>()
@@ -87,7 +91,8 @@ class RepositoryCudMethod {
                         .addParameter(ClassName.get(String::class.java), "url")
                         .addParameter(classMapWithString, "queryMap")
                         .addParameter(classGenericTypeForMethod, "raw")
-                        .addStatement(getCreateCallStatement(cudType))
+                        .addStatement("return ${getCreateCallStatement(cudType)}")
+                        .returns(ParameterizedTypeName.get(classLiveData, classNetworkResponseWithString))
                         .build())
                 .build()
     }

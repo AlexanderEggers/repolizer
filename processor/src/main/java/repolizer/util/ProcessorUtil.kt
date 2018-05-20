@@ -19,7 +19,7 @@ class ProcessorUtil {
             return "Generated_$databaseName"
         }
 
-        fun getGeneratedDatabaseDao(databaseName: String, entityName: String): String {
+        fun getGeneratedDatabaseDaoName(databaseName: String, entityName: String): String {
             return "Generated_" + databaseName + "_" + entityName
         }
 
