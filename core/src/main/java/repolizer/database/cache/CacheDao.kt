@@ -17,7 +17,4 @@ interface CacheDao {
 
     @Query("DELETE FROM cache_table WHERE url IN :url")
     fun delete(vararg url: String)
-
-    @Query("DELETE FROM cache_table")
-    fun deleteAll()
 }

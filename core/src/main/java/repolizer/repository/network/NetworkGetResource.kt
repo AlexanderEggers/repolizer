@@ -62,7 +62,7 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
             val needsFetchByTime = getLayer.needsFetchByTime(makeUrlId(fullUrl))
             result.addSource(needsFetchByTime, { cacheState ->
                 result.removeSource(needsFetchByTime)
-                
+
                 this@NetworkGetResource.cacheState = cacheState!!
                 val needsFetch = cacheState == CacheState.NEEDS_SOFT_REFRESH ||
                         cacheState == CacheState.NEEDS_HARD_REFRESH || cacheState == CacheState.NO_CACHE

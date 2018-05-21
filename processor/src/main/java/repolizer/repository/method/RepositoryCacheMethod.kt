@@ -33,8 +33,6 @@ class RepositoryCacheMethod {
 
             val networkGetLayerClass = if(operation == CacheOperation.INSERT || operation == CacheOperation.DELETE_SINGLE) {
                 createCacheLayerForInsert(element, methodElement, operation == CacheOperation.INSERT)
-            } else if(operation == CacheOperation.DELETE_ALL) {
-                createCacheLayerForDeleteAll()
             } else throw IllegalStateException("Cache operation unknown. Cache the value you inserted into your @Cache annotation.")
 
             dbMethodBuilder.addStatement("$classDatabaseBuilder builder = new $classDatabaseBuilder()")
@@ -78,17 +76,6 @@ class RepositoryCacheMethod {
         }
 
         return builder.addMethod(methodBuilder.build()).build()
-    }
-
-    private fun createCacheLayerForDeleteAll(): TypeSpec {
-        return TypeSpec.anonymousClassBuilder("")
-                .addSuperinterface(classDatabaseLayer)
-                .addMethod(MethodSpec.methodBuilder("updateDB")
-                        .addAnnotation(Override::class.java)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addStatement("cacheDao.deleteAll()")
-                        .build())
-                .build()
     }
 
     private fun createDaoCall(doaCallStart: String, list: ArrayList<String>): String {

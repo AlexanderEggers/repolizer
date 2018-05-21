@@ -9,6 +9,7 @@ import repolizer.annotation.repository.parameter.SqlParameter
 import repolizer.annotation.repository.util.CacheOperation
 import repolizer.annotation.repository.util.CudType
 import repolizer.annotation.repository.util.ParameterType
+import repolizer.database.cache.CacheItem
 
 @Repository(entity = DemoEntity::class, database = DemoDatabase::class, tableName = "demo_table")
 interface DemoRepository {
@@ -32,5 +33,5 @@ interface DemoRepository {
     fun testDB(@SqlParameter parameter: String)
 
     @CACHE(CacheOperation.INSERT)
-    fun cacheTest(@DatabaseBody url: String)
+    fun cacheTest(@DatabaseBody cacheItem: CacheItem)
 }
