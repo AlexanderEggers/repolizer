@@ -65,5 +65,7 @@ dependencies {
     implementation project(":repolizer-core")
     kapt project(":repolizer-processor")
 
+    kapt "com.android.databinding:compiler:3.1.2"
+
     testImplementation 'junit:junit:4.12'
 }
