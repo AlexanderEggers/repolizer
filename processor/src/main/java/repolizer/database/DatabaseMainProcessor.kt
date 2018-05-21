@@ -39,9 +39,12 @@ class DatabaseMainProcessor : AnnotationProcessor {
                     .addSuperinterface(databaseClassName)
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
 
-            val entities = DatabaseMapHolder.daoMap[databaseName]
-            val entitiesFormat: String = if (entities != null) addDaoClassesToDatabase(entities, fileBuilder)
-            else addDaoClassesToDatabase(ArrayList(), fileBuilder)
+            val entities = DatabaseMapHolder.entityMap[databaseName]
+            val entitiesFormat: String = if (entities != null) addEntityClassesToDatabase(entities)
+            else addEntityClassesToDatabase(ArrayList())
+
+            val daoClasses: ArrayList<ClassName>? = DatabaseMapHolder.daoMap[databaseName]
+            addDaoClassesToDatabase(daoClasses, fileBuilder)
 
             fileBuilder.addAnnotation(AnnotationSpec.builder(classAnnotationDatabase)
                     .addMember("entities", entitiesFormat)
@@ -68,15 +71,20 @@ class DatabaseMainProcessor : AnnotationProcessor {
         }
     }
 
-    private fun addDaoClassesToDatabase(daoList: ArrayList<ClassName>, fileBuilder: TypeSpec.Builder): String {
+    private fun addEntityClassesToDatabase(daoList: ArrayList<ClassName>): String {
         var format = "{$classCacheDao.class"
 
         daoList.forEach { daoClassName ->
             format += ", $daoClassName.class"
-            fileBuilder.addMethod(createDatabaseDaoFunction(daoClassName))
         }
 
         return "$format}"
+    }
+
+    private fun addDaoClassesToDatabase(daoList: ArrayList<ClassName>?, fileBuilder: TypeSpec.Builder) {
+        daoList?.forEach { daoClassName ->
+            fileBuilder.addMethod(createDatabaseDaoFunction(daoClassName))
+        }
     }
 
     private fun createDatabaseDaoFunction(daoClassName: ClassName): MethodSpec {

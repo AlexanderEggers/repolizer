@@ -5,9 +5,8 @@ import com.squareup.javapoet.ClassName
 class DatabaseProcessorUtil {
 
     companion object {
-        fun addDaoToDatabaseMap(databaseName: String, daoName: ClassName) {
-            val hashMap = DatabaseMapHolder.daoMap
-
+        fun addClassNameToDatabaseMap(hashMap: HashMap<String, ArrayList<ClassName>>, databaseName: String,
+                                daoName: ClassName) {
             var currentList: ArrayList<ClassName>? = hashMap[databaseName]
             if (currentList == null) {
                 currentList = ArrayList()

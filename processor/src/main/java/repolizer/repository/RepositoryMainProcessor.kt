@@ -4,6 +4,7 @@ import com.squareup.javapoet.*
 import repolizer.MainProcessor
 import repolizer.annotation.repository.*
 import repolizer.annotation.repository.parameter.*
+import repolizer.database.DatabaseMapHolder
 import repolizer.database.DatabaseProcessorUtil
 import repolizer.repository.method.*
 import repolizer.util.AnnotationProcessor
@@ -82,8 +83,12 @@ class RepositoryMainProcessor : AnnotationProcessor {
                             .addStatement("super(repolizer)")
                             .build())
 
-            DatabaseProcessorUtil.addDaoToDatabaseMap(objectDatabase.simpleName.toString(),
+            DatabaseProcessorUtil.addClassNameToDatabaseMap(DatabaseMapHolder.daoMap,
+                    objectDatabase.simpleName.toString(),
                     ClassName.get(getPackageName(mainProcessor, objectDatabase), daoName))
+
+            DatabaseProcessorUtil.addClassNameToDatabaseMap(DatabaseMapHolder.entityMap,
+                    objectDatabase.simpleName.toString(), classEntity)
 
             val daoBuilder = TypeSpec.interfaceBuilder(daoName)
                     .addModifiers(Modifier.PUBLIC)

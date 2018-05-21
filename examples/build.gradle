@@ -22,12 +22,14 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "com.android.support:appcompat-v7:$support_lib_version"
-    implementation "android.arch.lifecycle:livedata:$livedata_version"
     implementation "com.google.code.gson:gson:$gson_version"
 
-    implementation "android.arch.persistence.room:runtime:$room_version"
+    implementation "android.arch.lifecycle:livedata:$livedata_version"
+    kapt "android.arch.lifecycle:compiler:$livedata_version"
 
-    implementation project(":repolizer-annotation")
+    implementation "android.arch.persistence.room:runtime:$room_version"
+    kapt "android.arch.persistence.room:compiler:$room_version"
+
     implementation project(":repolizer-core")
     kapt project(":repolizer-processor")
 }
