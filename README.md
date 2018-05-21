@@ -20,12 +20,6 @@ Compatibility
 -------------
 
  * The library requires at minimum Android 14.
- 
-TODO
--------------
-* Implementation
-* Unit testing
-* Full documentation (source code and wiki)
 
 Author
 ------

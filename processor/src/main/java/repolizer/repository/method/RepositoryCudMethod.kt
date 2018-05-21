@@ -1,14 +1,15 @@
 package repolizer.repository.method
 
-import com.squareup.javapoet.*
-import repolizer.repository.RepositoryMapHolder
-import javax.lang.model.element.Element
-import javax.lang.model.element.Modifier
+import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
+import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
 import repolizer.annotation.repository.CUD
 import repolizer.annotation.repository.util.CudType
+import repolizer.repository.RepositoryMapHolder
+import javax.lang.model.element.Element
+import javax.lang.model.element.Modifier
 
 class RepositoryCudMethod {
 
@@ -98,7 +99,7 @@ class RepositoryCudMethod {
     }
 
     private fun getRequestType(cudType: CudType): String {
-        return when(cudType) {
+        return when (cudType) {
             CudType.POST -> "POST"
             CudType.PUT -> "PUT"
             CudType.DELETE -> "DELETE"
@@ -106,7 +107,7 @@ class RepositoryCudMethod {
     }
 
     private fun getCreateCallStatement(cudType: CudType): String {
-        return when(cudType) {
+        return when (cudType) {
             CudType.POST -> "controller.post(headerMap, url, queryMap, raw)"
             CudType.PUT -> "controller.put(headerMap, url, queryMap, raw)"
             CudType.DELETE -> "controller.delete(headerMap, url, queryMap, raw)"

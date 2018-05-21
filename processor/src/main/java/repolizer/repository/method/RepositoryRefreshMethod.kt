@@ -1,13 +1,12 @@
 package repolizer.repository.method
 
 import com.squareup.javapoet.*
-import repolizer.repository.RepositoryMapHolder
-import javax.lang.model.element.Element
-import javax.lang.model.element.Modifier
-import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeSpec
 import repolizer.annotation.repository.REFRESH
+import repolizer.repository.RepositoryMapHolder
+import javax.lang.model.element.Element
+import javax.lang.model.element.Modifier
 
 class RepositoryRefreshMethod {
 
@@ -78,7 +77,7 @@ class RepositoryRefreshMethod {
             }
 
             val networkGetLayerClass = createNetworkGetLayerAnonymousClass(classGenericTypeForMethod,
-                   methodElement.simpleName.toString(), getAsList)
+                    methodElement.simpleName.toString(), getAsList)
             getMethodBuilder.addStatement("builder.setNetworkLayer($networkGetLayerClass)")
             getMethodBuilder.addStatement("return super.executeRefresh(builder)")
 
@@ -92,7 +91,7 @@ class RepositoryRefreshMethod {
     private fun createNetworkGetLayerAnonymousClass(classGenericTypeForMethod: TypeName, methodName: String,
                                                     getAsList: Boolean): TypeSpec {
 
-        val daoInsertStatement = if(getAsList) {
+        val daoInsertStatement = if (getAsList) {
             "$classArrayWithEntity insertValue = value.toArray(new $classEntity[value.size()])"
         } else {
             "$classGenericTypeForMethod insertValue = value"

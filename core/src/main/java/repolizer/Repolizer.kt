@@ -46,11 +46,11 @@ class Repolizer private constructor(val context: Context, builder: Builder) {
                 NetworkInterface::class.java, Gson::class.java).newInstance(networkInterface, gson)
     }
 
-    fun <T: BaseRepository<*>> create(repositoryClass: Class<T>): T {
+    fun <T : BaseRepository<*>> create(repositoryClass: Class<T>): T {
         return GlobalRepositoryProvider.getRepository(this, repositoryClass)
     }
 
-    fun <T: RoomDatabase> getDatabase(databaseClass: Class<T>): T {
+    fun <T : RoomDatabase> getDatabase(databaseClass: Class<T>): T {
         return GlobalDatabaseProvider.getDatabase(context, databaseClass)
     }
 

@@ -106,7 +106,7 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
             }
 
             result.addSource(loginManager.isCurrentLoginValid(), { isLoginValid ->
-                if(isLoginValid != null) {
+                if (isLoginValid != null) {
                     if (isLoginValid) {
                         loginManager.onLoginInvalid(context)
                     } else {
@@ -141,7 +141,7 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
                     getLayer.updateFetchTime(makeUrlId(fullUrl))
                 } else {
                     responseService?.handleError(response)
-                    if(cacheState == CacheState.NEEDS_HARD_REFRESH) {
+                    if (cacheState == CacheState.NEEDS_HARD_REFRESH) {
                         getLayer.removeAllData()
                     }
                 }

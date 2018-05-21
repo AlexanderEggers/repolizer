@@ -2,7 +2,10 @@ package repolizer.repository
 
 import repolizer.MainProcessor
 import javax.annotation.processing.RoundEnvironment
-import javax.lang.model.element.*
+import javax.lang.model.element.ElementKind
+import javax.lang.model.element.ExecutableElement
+import javax.lang.model.element.TypeElement
+import javax.lang.model.element.VariableElement
 import javax.tools.Diagnostic
 
 class RepositoryProcessorUtil {
@@ -20,7 +23,7 @@ class RepositoryProcessorUtil {
                 val typeElement = it.enclosingElement as TypeElement
 
                 var currentList: ArrayList<ExecutableElement>? = hashMap[typeElement.simpleName.toString()]
-                if(currentList == null) {
+                if (currentList == null) {
                     currentList = ArrayList()
                 }
 
@@ -43,7 +46,7 @@ class RepositoryProcessorUtil {
                 val key = typeElement.simpleName.toString() + "." + methodElement.simpleName.toString()
 
                 var currentList: ArrayList<VariableElement>? = hashMap[key]
-                if(currentList == null) {
+                if (currentList == null) {
                     currentList = ArrayList()
                 }
 

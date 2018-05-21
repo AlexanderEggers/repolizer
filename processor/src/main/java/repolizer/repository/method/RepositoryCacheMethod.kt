@@ -1,6 +1,8 @@
 package repolizer.repository.method
 
-import com.squareup.javapoet.*
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.TypeSpec
 import repolizer.annotation.repository.CACHE
 import repolizer.annotation.repository.util.CacheOperation
 import repolizer.repository.RepositoryMapHolder
@@ -31,7 +33,7 @@ class RepositoryCacheMethod {
                 dbMethodBuilder.addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
             }
 
-            val networkGetLayerClass = if(operation == CacheOperation.INSERT || operation == CacheOperation.DELETE_SINGLE) {
+            val networkGetLayerClass = if (operation == CacheOperation.INSERT || operation == CacheOperation.DELETE_SINGLE) {
                 createCacheLayerForInsert(element, methodElement, operation == CacheOperation.INSERT)
             } else throw IllegalStateException("Cache operation unknown. Cache the value you inserted into your @Cache annotation.")
 
@@ -48,14 +50,14 @@ class RepositoryCacheMethod {
     private fun createCacheLayerForInsert(element: Element, methodElement: ExecutableElement, isInsert: Boolean): TypeSpec {
         val bodyCacheItemParamList = ArrayList<String>()
         val bodyStringParamList = ArrayList<String>()
-        val doaCallStart = if(isInsert) "cacheDao.insert(" else "cacheDao.delete("
+        val doaCallStart = if (isInsert) "cacheDao.insert(" else "cacheDao.delete("
 
         RepositoryMapHolder.databaseBodyAnnotationMap["${element.simpleName}.${methodElement.simpleName}"]?.forEach { varElement ->
             val varType = ClassName.get(varElement.asType())
 
             if (varType == classCacheItem) {
                 bodyCacheItemParamList.add(varElement.simpleName.toString())
-            } else if(varType == classString) {
+            } else if (varType == classString) {
                 bodyStringParamList.add(varElement.simpleName.toString())
             }
         }
@@ -67,10 +69,10 @@ class RepositoryCacheMethod {
                 .addAnnotation(Override::class.java)
                 .addModifiers(Modifier.PUBLIC)
 
-        if(!bodyCacheItemParamList.isEmpty()) {
+        if (!bodyCacheItemParamList.isEmpty()) {
             methodBuilder.addStatement(createDaoCall(doaCallStart, bodyCacheItemParamList))
-        } else if(!bodyStringParamList.isEmpty()) {
-            if(!isInsert) {
+        } else if (!bodyStringParamList.isEmpty()) {
+            if (!isInsert) {
                 methodBuilder.addStatement(createDaoCall(doaCallStart, bodyStringParamList))
             }
         }
@@ -81,7 +83,7 @@ class RepositoryCacheMethod {
     private fun createDaoCall(doaCallStart: String, list: ArrayList<String>): String {
         var daoCall = doaCallStart
         val iterator = list.iterator()
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             daoCall += iterator.next()
             daoCall += if (iterator.hasNext()) ", " else ""
         }

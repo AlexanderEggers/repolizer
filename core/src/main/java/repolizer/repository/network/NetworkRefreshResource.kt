@@ -76,7 +76,7 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
             }
 
             result.addSource(loginManager.isCurrentLoginValid(), { isLoginValid ->
-                if(isLoginValid != null) {
+                if (isLoginValid != null) {
                     if (isLoginValid) {
                         loginManager.onLoginInvalid(context)
                     } else {

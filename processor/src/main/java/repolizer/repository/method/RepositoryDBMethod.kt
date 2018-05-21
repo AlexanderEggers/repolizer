@@ -1,6 +1,9 @@
 package repolizer.repository.method
 
-import com.squareup.javapoet.*
+import com.squareup.javapoet.AnnotationSpec
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.TypeSpec
 import repolizer.annotation.repository.DB
 import repolizer.repository.RepositoryMapHolder
 import javax.lang.model.element.Element
@@ -54,7 +57,7 @@ class RepositoryDBMethod {
     private fun createDatabaseLayerAnonymousClass(methodName: String, daoParamList: ArrayList<String>): TypeSpec {
         var daoQueryCall = "dataDao.queryFor_$methodName("
         val iterator = daoParamList.iterator()
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             daoQueryCall += iterator.next()
             daoQueryCall += if (iterator.hasNext()) ", " else ""
         }

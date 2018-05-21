@@ -9,4 +9,4 @@ import kotlin.reflect.KClass
 @Target(AnnotationTarget.CLASS)
 annotation class Migration(val type: MigrationType,
                            val migrations: Array<KClass<BaseMigration>>,
-                           val destructiveFrom: IntArray)
+                           val destructiveFrom: IntArray = [])

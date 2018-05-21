@@ -1,16 +1,15 @@
 package repolizer.repository.method
 
 import com.squareup.javapoet.*
+import com.squareup.javapoet.ParameterizedTypeName
+import com.squareup.javapoet.TypeSpec
 import repolizer.annotation.repository.GET
 import repolizer.annotation.repository.Repository
+import repolizer.annotation.repository.parameter.RepositoryParameter
+import repolizer.annotation.repository.util.ParameterType
 import repolizer.repository.RepositoryMapHolder
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.ParameterizedTypeName
-import com.squareup.javapoet.TypeSpec
-import repolizer.annotation.repository.parameter.RepositoryParameter
-import repolizer.annotation.repository.util.ParameterType
 
 class RepositoryGetMethod {
 
@@ -61,7 +60,7 @@ class RepositoryGetMethod {
                     .varargs()
 
             var querySql = methodElement.getAnnotation(GET::class.java).sql
-            if(querySql == "") {
+            if (querySql == "") {
                 querySql = "SELECT * FROM $tableName"
             }
 
@@ -119,7 +118,7 @@ class RepositoryGetMethod {
             RepositoryMapHolder.repositoryParameterAnnotationMap[element.simpleName.toString() + "." +
                     methodElement.simpleName.toString()]?.forEach { variable ->
                 val type = variable.getAnnotation(RepositoryParameter::class.java).type
-                when(type) {
+                when (type) {
                     ParameterType.ALLOW_FETCH -> allowFetchParamName = variable.simpleName.toString()
                 }
             }
@@ -128,7 +127,7 @@ class RepositoryGetMethod {
                     maxCacheTime, maxFreshTime, methodElement.simpleName.toString(), getAsList, daoParamList)
             getMethodBuilder.addStatement("builder.setNetworkLayer($networkGetLayerClass)")
 
-            if(allowFetchParamName != null) {
+            if (allowFetchParamName != null) {
                 getMethodBuilder.addStatement("return super.executeGet(builder, $allowFetchParamName)")
             } else {
                 val allowFetchByDefault = element.getAnnotation(Repository::class.java).allowFetchByDefault
@@ -148,7 +147,7 @@ class RepositoryGetMethod {
                                                     maxFreshTime: Long, methodName: String, getAsList: Boolean,
                                                     daoParamList: ArrayList<String>): TypeSpec {
 
-        val daoInsertStatement = if(getAsList) {
+        val daoInsertStatement = if (getAsList) {
             "$classArrayWithEntity insertValue = value.toArray(new $classEntity[value.size()])"
         } else {
             "$classGenericTypeForMethod insertValue = value"
@@ -156,7 +155,7 @@ class RepositoryGetMethod {
 
         var daoQueryCall = "dataDao.queryFor_$methodName("
         val iterator = daoParamList.iterator()
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             daoQueryCall += iterator.next()
             daoQueryCall += if (iterator.hasNext()) ", " else ""
         }

@@ -61,7 +61,7 @@ class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, buil
             }
 
             result.addSource(loginManager.isCurrentLoginValid(), { isLoginValid ->
-                if(isLoginValid != null) {
+                if (isLoginValid != null) {
                     if (isLoginValid) {
                         loginManager.onLoginInvalid(context)
                     } else {
