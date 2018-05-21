@@ -14,6 +14,7 @@ class RepositoryRefreshMethod {
     private val classNetworkBuilder = ClassName.get("repolizer.repository.network", "NetworkBuilder")
     private val classNetworkLayer = ClassName.get("repolizer.repository.network", "NetworkRefreshLayer")
     private val classRequestType = ClassName.get("repolizer.repository.util", "RequestType")
+    private val classCacheItem = ClassName.get("repolizer.database.cache", "CacheItem")
 
     private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
     private val classList = ClassName.get(List::class.java)
@@ -110,6 +111,7 @@ class RepositoryRefreshMethod {
                         .addAnnotation(Override::class.java)
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(String::class.java, "fullUrlId")
+                        .addStatement("cacheDao.insert(new $classCacheItem(fullUrlId, System.currentTimeMillis()))")
                         .build())
                 .build()
     }

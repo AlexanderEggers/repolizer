@@ -43,7 +43,7 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
     private val headerMap: Map<String, String> = builder.headerMap
     private val queryMap: Map<String, String> = builder.queryMap
 
-    private var callFinishedCallback: FetchSecurityLayer? = null
+    private lateinit var callFinishedCallback: FetchSecurityLayer
 
     @MainThread
     fun execute(fetchSecurityLayer: FetchSecurityLayer): LiveData<String> {
@@ -113,7 +113,7 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
                     responseService?.handleError(response)
                 }
 
-                callFinishedCallback!!.onFetchFinished()
+                callFinishedCallback.onFetchFinished()
                 result.postValue(response.body)
             }
         }

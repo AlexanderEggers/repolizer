@@ -8,6 +8,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
+import repolizer.database.cache.CacheState
 import repolizer.repository.api.NetworkController
 import repolizer.repository.response.NetworkResponse
 import repolizer.repository.response.ProgressController
@@ -47,7 +48,8 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
     private val headerMap: Map<String, String> = builder.headerMap
     private val queryMap: Map<String, String> = builder.queryMap
 
-    private var fetchSecurityLayer: FetchSecurityLayer? = null
+    private lateinit var fetchSecurityLayer: FetchSecurityLayer
+    private lateinit var cacheState: CacheState
 
     @MainThread
     fun execute(fetchSecurityLayer: FetchSecurityLayer, allowFetch: Boolean): LiveData<Entity> {
@@ -57,16 +59,25 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
         result.addSource(testSource) { data ->
             result.removeSource(testSource)
 
-            if (data != null || getLayer.needsFetchByTime(makeUrlId(fullUrl)) && allowFetch) {
-                if (fetchSecurityLayer.allowFetch()) {
-                    fetchFromNetwork()
+            val needsFetchByTime = getLayer.needsFetchByTime(makeUrlId(fullUrl))
+            result.addSource(needsFetchByTime, { cacheState ->
+                result.removeSource(needsFetchByTime)
+                
+                this@NetworkGetResource.cacheState = cacheState!!
+                val needsFetch = cacheState == CacheState.NEEDS_SOFT_REFRESH ||
+                        cacheState == CacheState.NEEDS_HARD_REFRESH || cacheState == CacheState.NO_CACHE
+
+                if ((data != null || needsFetch) && allowFetch) {
+                    if (fetchSecurityLayer.allowFetch()) {
+                        fetchFromNetwork()
+                    } else {
+                        establishConnection()
+                    }
                 } else {
+                    fetchSecurityLayer.onFetchFinished()
                     establishConnection()
                 }
-            } else {
-                fetchSecurityLayer.onFetchFinished()
-                establishConnection()
-            }
+            })
         }
 
         return result
@@ -130,9 +141,12 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
                     getLayer.updateFetchTime(makeUrlId(fullUrl))
                 } else {
                     responseService?.handleError(response)
+                    if(cacheState == CacheState.NEEDS_HARD_REFRESH) {
+                        getLayer.removeAllData()
+                    }
                 }
 
-                fetchSecurityLayer!!.onFetchFinished()
+                fetchSecurityLayer.onFetchFinished()
                 establishConnection()
             })
         }

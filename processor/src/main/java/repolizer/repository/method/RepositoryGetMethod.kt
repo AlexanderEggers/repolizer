@@ -17,11 +17,15 @@ class RepositoryGetMethod {
     private val classNetworkBuilder = ClassName.get("repolizer.repository.network", "NetworkBuilder")
     private val classNetworkLayer = ClassName.get("repolizer.repository.network", "NetworkGetLayer")
     private val classRequestType = ClassName.get("repolizer.repository.util", "RequestType")
+    private val classCacheItem = ClassName.get("repolizer.database.cache", "CacheItem")
+    private val classCacheState = ClassName.get("repolizer.database.cache", "CacheState")
 
     private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
     private val classList = ClassName.get(List::class.java)
 
     private val classLiveData = ClassName.get("android.arch.lifecycle", "LiveData")
+    private val classFunction = ClassName.get("android.arch.core.util", "Function")
+    private val classTransformations = ClassName.get("android.arch.lifecycle", "Transformations")
     private val classAnnotationRoomInsert = ClassName.get("android.arch.persistence.room", "Insert")
     private val classAnnotationRoomQuery = ClassName.get("android.arch.persistence.room", "Query")
     private val classOnConflictStrategy = ClassName.get("android.arch.persistence.room", "OnConflictStrategy")
@@ -67,6 +71,12 @@ class RepositoryGetMethod {
                             .addMember("value", "\"$querySql\"")
                             .build())
                     .returns(ParameterizedTypeName.get(classLiveData, classGenericTypeForMethod))
+
+            val daoDeleteAllMethodBuilder = MethodSpec.methodBuilder("deleteAllFor_${methodElement.simpleName}")
+                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                    .addAnnotation(AnnotationSpec.builder(classAnnotationRoomQuery)
+                            .addMember("value", "\"DELETE FROM $tableName\"")
+                            .build())
 
             methodElement.parameters.forEach { varElement ->
                 val varType = ClassName.get(varElement.asType())
@@ -127,6 +137,7 @@ class RepositoryGetMethod {
 
             daoClassBuilder.addMethod(daoInsertMethodBuilder.build())
             daoClassBuilder.addMethod(daoQueryMethodBuilder.build())
+            daoClassBuilder.addMethod(daoDeleteAllMethodBuilder.build())
             builderList.add(getMethodBuilder.build())
         }
 
@@ -164,19 +175,44 @@ class RepositoryGetMethod {
                         .addAnnotation(Override::class.java)
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(String::class.java, "fullUrlId")
-                        .addStatement("return true")
-                        .returns(Boolean::class.java)
+                        .addStatement("return $classTransformations.map(cacheDao.getCache(fullUrlId), " +
+                                "${createTransformationMapFunctionClass(maxCacheTime, maxFreshTime)})")
+                        .returns(ParameterizedTypeName.get(classLiveData, classCacheState))
                         .build())
                 .addMethod(MethodSpec.methodBuilder("updateFetchTime")
                         .addAnnotation(Override::class.java)
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(String::class.java, "fullUrlId")
+                        .addStatement("cacheDao.insert(new $classCacheItem(fullUrlId, System.currentTimeMillis()))")
                         .build())
                 .addMethod(MethodSpec.methodBuilder("getData")
                         .addAnnotation(Override::class.java)
                         .addModifiers(Modifier.PUBLIC)
                         .addStatement("return $daoQueryCall")
                         .returns(ParameterizedTypeName.get(classLiveData, classGenericTypeForMethod))
+                        .build())
+                .addMethod(MethodSpec.methodBuilder("removeAllData")
+                        .addAnnotation(Override::class.java)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addStatement("dataDao.deleteAllFor_$methodName()")
+                        .build())
+                .build()
+    }
+
+    private fun createTransformationMapFunctionClass(maxCacheTime: Long, maxFreshTime: Long): TypeSpec {
+        return TypeSpec.anonymousClassBuilder("")
+                .addSuperinterface(ParameterizedTypeName.get(classFunction, classCacheItem, classCacheState))
+                .addMethod(MethodSpec.methodBuilder("apply")
+                        .addAnnotation(Override::class.java)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(classCacheItem, "cacheItem")
+                        .addStatement("if(cacheItem == null) return $classCacheState.NO_CACHE")
+                        .addCode("\n")
+                        .addStatement("long lifeSpanOfCache = System.currentTimeMillis() - cacheItem.getCacheTime()")
+                        .addStatement("if(lifeSpanOfCache >= Long.parseLong(\"$maxFreshTime\")) return $classCacheState.NEEDS_SOFT_REFRESH")
+                        .addStatement("else if(lifeSpanOfCache >= Long.parseLong(\"$maxCacheTime\")) return $classCacheState.NEEDS_HARD_REFRESH")
+                        .addStatement("else return $classCacheState.NEEDS_NO_REFRESH")
+                        .returns(classCacheState)
                         .build())
                 .build()
     }
