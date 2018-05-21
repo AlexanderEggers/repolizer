@@ -4,16 +4,17 @@ import android.arch.persistence.room.RoomDatabase
 import android.content.Context
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
-import repolizer.database.GlobalDatabaseProvider
+import repolizer.database.provider.GlobalDatabaseProvider
+import repolizer.repository.BaseRepository
 import repolizer.repository.api.DefaultJsonNetworkController
 import repolizer.repository.api.NetworkController
 import repolizer.repository.api.NetworkInterface
+import repolizer.repository.provider.GlobalRepositoryProvider
 import repolizer.repository.response.ProgressController
 import repolizer.repository.response.RequestProvider
 import repolizer.repository.response.ResponseService
 import repolizer.repository.retrofit.LiveDataCallAdapterFactory
 import repolizer.repository.util.LoginManager
-import repolizer.repository.util.Utils.Companion.getGeneratedRepositoryName
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
@@ -30,8 +31,6 @@ class Repolizer private constructor(val context: Context, builder: Builder) {
     val loginManager: LoginManager? = builder.loginManager
     val responseService: ResponseService? = builder.responseService
 
-    private val repositorySingletonMap: HashMap<String, Any?> = HashMap()
-
     init {
         val retrofitBuilder = Retrofit.Builder()
                 .baseUrl(baseUrl!!)
@@ -47,21 +46,11 @@ class Repolizer private constructor(val context: Context, builder: Builder) {
                 NetworkInterface::class.java, Gson::class.java).newInstance(networkInterface, gson)
     }
 
-    //TODO put repository instances into provider class
-    @Suppress("UNCHECKED_CAST")
-    fun <T> create(repositoryClass: Class<T>): T {
-        return if (repositorySingletonMap.containsKey(repositoryClass.simpleName)) {
-            repositorySingletonMap[repositoryClass.simpleName] as T
-        } else {
-            val realRepositoryClass = Class.forName(repositoryClass.`package`.name
-                    + getGeneratedRepositoryName(repositoryClass))
-            val repository = realRepositoryClass.getConstructor(Repolizer::class.java).newInstance(this@Repolizer) as T
-            repositorySingletonMap[repositoryClass.simpleName] = repository
-            repository
-        }
+    fun <T: BaseRepository<*>> create(repositoryClass: Class<T>): T {
+        return GlobalRepositoryProvider.getRepository(this, repositoryClass)
     }
 
-    fun getDatabase(databaseClass: Class<*>): RoomDatabase {
+    fun <T: RoomDatabase> getDatabase(databaseClass: Class<T>): T {
         return GlobalDatabaseProvider.getDatabase(context, databaseClass)
     }
 

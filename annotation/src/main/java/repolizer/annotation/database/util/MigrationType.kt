@@ -1,4 +1,4 @@
-package repolizer.annotation.database
+package repolizer.annotation.database.util
 
 enum class MigrationType {
     DEFAULT,

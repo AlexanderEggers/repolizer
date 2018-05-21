@@ -22,7 +22,7 @@ class RepositoryMainProcessor : AnnotationProcessor {
     private val classBaseRepository = ClassName.get("repolizer.repository", "BaseRepository")
     private val classAppExecutor = ClassName.get("repolizer.repository.util", "AppExecutor")
 
-    private val classGlobalDatabaseProvider = ClassName.get("repolizer.database", "GlobalDatabaseProvider")
+    private val classGlobalDatabaseProvider = ClassName.get("repolizer.database.provider", "GlobalDatabaseProvider")
     private val classCacheDao = ClassName.get("repolizer.database.cache", "CacheDao")
 
     private val classRepolizer = ClassName.get("repolizer", "Repolizer")
@@ -30,7 +30,7 @@ class RepositoryMainProcessor : AnnotationProcessor {
     private val classAnnotationDao = ClassName.get("android.arch.persistence.room", "Dao")
 
     override fun process(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
-        initRepositoryAnnotations(mainProcessor, roundEnv)
+        initAnnotations(mainProcessor, roundEnv)
 
         roundEnv.getElementsAnnotatedWith(Repository::class.java).forEach {
             //Repository annotation general data
@@ -49,6 +49,8 @@ class RepositoryMainProcessor : AnnotationProcessor {
                     getGeneratedDatabaseName(objectDatabase.simpleName.toString()))
             val classDatabaseDao = ClassName.get(getPackageName(mainProcessor, objectDatabase),
                     getGeneratedDatabaseDaoName(objectDatabase.simpleName.toString(), objectEntity.simpleName.toString()))
+            val daoName = getGeneratedDatabaseDaoName(objectDatabase.simpleName.toString(),
+                    objectEntity.simpleName.toString())
 
             //General field data
             val classRepositoryParent: TypeName = ParameterizedTypeName.get(classBaseRepository,
@@ -68,7 +70,7 @@ class RepositoryMainProcessor : AnnotationProcessor {
                             .build())
                     .addField(FieldSpec.builder(classDatabaseDao, "dataDao")
                             .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                            .initializer("db.get" + objectEntity.simpleName + "Dao()")
+                            .initializer("db.get$daoName()")
                             .build())
                     .addField(FieldSpec.builder(classCacheDao, "cacheDao")
                             .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
@@ -80,9 +82,8 @@ class RepositoryMainProcessor : AnnotationProcessor {
                             .addStatement("super(repolizer)")
                             .build())
 
-            val daoName = getGeneratedDatabaseDaoName(objectDatabase.simpleName.toString(),
-                    objectEntity.simpleName.toString())
-            DatabaseProcessorUtil.addDaoToDatabaseMap(objectDatabase.simpleName.toString(), daoName)
+            DatabaseProcessorUtil.addDaoToDatabaseMap(objectDatabase.simpleName.toString(),
+                    ClassName.get(getPackageName(mainProcessor, objectDatabase), daoName))
 
             val daoBuilder = TypeSpec.interfaceBuilder(daoName)
                     .addModifiers(Modifier.PUBLIC)
@@ -120,7 +121,7 @@ class RepositoryMainProcessor : AnnotationProcessor {
         }
     }
 
-    private fun initRepositoryAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
+    private fun initAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
         //Method annotations
         RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv, REFRESH::class.java, RepositoryMapHolder.refreshAnnotationMap)
         RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv, GET::class.java, RepositoryMapHolder.getAnnotationMap)

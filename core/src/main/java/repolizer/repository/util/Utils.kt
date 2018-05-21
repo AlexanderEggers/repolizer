@@ -13,11 +13,11 @@ internal class Utils {
         }
 
         fun getGeneratedRepositoryName(repositoryClass: Class<*>): String {
-            return "Generated_" + repositoryClass.simpleName + "_Repository"
+            return "Generated_${repositoryClass.simpleName}"
         }
 
         fun getGeneratedDatabaseProviderName(databaseClass: Class<*>): String {
-            return "Generated_" + databaseClass.simpleName + "_Database_Provider"
+            return "Generated_${databaseClass.simpleName}_Provider"
         }
     }
 }

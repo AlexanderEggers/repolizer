@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService
 import repolizer.annotation.repository.DB
 import repolizer.annotation.repository.Repository
 import repolizer.annotation.repository.parameter.Header
+import repolizer.database.DatabaseMainProcessor
 import repolizer.repository.RepositoryMainProcessor
 import java.io.IOException
 import javax.annotation.processing.*
@@ -29,6 +30,7 @@ class MainProcessor : AbstractProcessor() {
     override fun process(set: MutableSet<out TypeElement>, roundEnv: RoundEnvironment): Boolean {
         try {
             RepositoryMainProcessor().process(this, roundEnv)
+            DatabaseMainProcessor().process(this, roundEnv)
         } catch (e: IOException) {
             e.printStackTrace()
         }

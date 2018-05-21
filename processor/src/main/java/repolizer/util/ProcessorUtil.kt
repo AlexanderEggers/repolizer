@@ -20,11 +20,11 @@ class ProcessorUtil {
         }
 
         fun getGeneratedDatabaseDaoName(databaseName: String, entityName: String): String {
-            return "Generated_" + databaseName + "_" + entityName
+            return "Generated_${databaseName}_${entityName}_Dao"
         }
 
-        fun getGeneratedDatabaseProviderName(databaseClass: Class<*>): String {
-            return "Generated_" + databaseClass.simpleName + "_Provider"
+        fun getGeneratedDatabaseProviderName(databaseName: String): String {
+            return "Generated_${databaseName}_Provider"
         }
     }
 }
