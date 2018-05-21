@@ -6,7 +6,7 @@ class DatabaseProcessorUtil {
 
     companion object {
         fun addClassNameToDatabaseMap(hashMap: HashMap<String, ArrayList<ClassName>>, databaseName: String,
-                                daoName: ClassName) {
+                                      daoName: ClassName) {
             var currentList: ArrayList<ClassName>? = hashMap[databaseName]
             if (currentList == null) {
                 currentList = ArrayList()

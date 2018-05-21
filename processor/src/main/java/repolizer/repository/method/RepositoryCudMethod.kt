@@ -1,10 +1,6 @@
 package repolizer.repository.method
 
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.ParameterizedTypeName
-import com.squareup.javapoet.TypeName
-import com.squareup.javapoet.TypeSpec
+import com.squareup.javapoet.*
 import repolizer.annotation.repository.CUD
 import repolizer.annotation.repository.util.CudType
 import repolizer.repository.RepositoryMapHolder
