@@ -1,0 +1,117 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="org.demo.weatherapp.view.BindingAdapter" />
+        <import type="android.view.View" />
+        <import type="android.text.Html" />
+
+        <variable
+            name="viewModel"
+            type="org.demo.weatherapp.MainActivityViewModel" />
+
+        <variable
+            name="isLoading"
+            type="Boolean" />
+
+    </data>
+
+    <android.support.design.widget.CoordinatorLayout
+        android:background="@color/colorPrimary"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ProgressBar
+            android:visibility="@{isLoading? View.VISIBLE : View.GONE}"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <RelativeLayout
+            android:visibility="@{isLoading? View.GONE : View.VISIBLE}"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="20dp">
+
+            <TextView
+                android:id="@+id/city_field"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:text="@{viewModel.cityName}"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/defaultTextColor" />
+
+            <TextView
+                android:id="@+id/updated_field"
+                android:text="@{viewModel.updateTime}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/city_field"
+                android:layout_centerHorizontal="true"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/defaultTextColor"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/weather_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/defaultTextColor"
+                android:textSize="90sp"
+                android:typeface="@{BindingAdapter.setWeatherFont(context)}"
+                app:setWeatherIcon="@{viewModel.weatherIcon}" />
+
+            <TextView
+                android:id="@+id/current_temperature_field"
+                android:text="@{viewModel.temp}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/defaultTextColor"
+                android:textSize="50sp" />
+
+            <TextView
+                android:id="@+id/details_field"
+                android:text="@{viewModel.description}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/weather_icon"
+                android:layout_centerHorizontal="true"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/defaultTextColor" />
+
+            <TextView
+                android:id="@+id/humidity_field"
+                android:text="@{viewModel.humidity}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/details_field"
+                android:layout_centerHorizontal="true"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/defaultTextColor" />
+
+            <TextView
+                android:id="@+id/pressure_field"
+                android:text="@{viewModel.pressure}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/humidity_field"
+                android:layout_centerHorizontal="true"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/defaultTextColor" />
+
+        </RelativeLayout>
+
+    </android.support.design.widget.CoordinatorLayout>
+
+
+
+</layout>

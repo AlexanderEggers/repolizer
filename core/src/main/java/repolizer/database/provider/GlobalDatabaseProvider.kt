@@ -9,13 +9,13 @@ object GlobalDatabaseProvider {
     private val databaseSingletonMap: HashMap<String, RoomDatabase> = HashMap()
 
     @Suppress("UNCHECKED_CAST")
-    fun <T : RoomDatabase> getDatabase(context: Context, databaseClass: Class<*>): T {
+    fun <T> getDatabase(context: Context, databaseClass: Class<*>): T {
         return if (databaseSingletonMap.containsKey(databaseClass.simpleName)) {
-            databaseSingletonMap[databaseClass.simpleName] as T
+            databaseSingletonMap[databaseClass.simpleName]!! as T
         } else {
             val databaseProvider: DatabaseProvider = Class
-                    .forName(databaseClass.`package`.name
-                            + getGeneratedDatabaseProviderName(databaseClass))
+                    .forName(databaseClass.`package`.name +
+                            ".${getGeneratedDatabaseProviderName(databaseClass)}")
                     .newInstance() as DatabaseProvider
             val roomDatabase = databaseProvider.getDatabase(context)
             databaseSingletonMap[databaseClass.simpleName] = roomDatabase

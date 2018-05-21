@@ -5,4 +5,4 @@ import kotlin.reflect.KClass
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
-annotation class Converter(val value: Array<KClass<*>>)
+annotation class TypeConverter(val value: Array<KClass<*>>)

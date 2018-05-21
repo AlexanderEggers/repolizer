@@ -5,12 +5,15 @@ import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeSpec
 import repolizer.annotation.repository.GET
 import repolizer.annotation.repository.Repository
+import repolizer.annotation.repository.parameter.Header
 import repolizer.annotation.repository.parameter.RepositoryParameter
+import repolizer.annotation.repository.parameter.UrlQuery
 import repolizer.annotation.repository.util.ParameterType
 import repolizer.repository.RepositoryMapHolder
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
 
+//TODO handle UrlParameter
 class RepositoryGetMethod {
 
     private val classNetworkBuilder = ClassName.get("repolizer.repository.network", "NetworkBuilder")
@@ -105,12 +108,14 @@ class RepositoryGetMethod {
 
             RepositoryMapHolder.headerAnnotationMap[element.simpleName.toString() + "." +
                     methodElement.simpleName.toString()]?.forEach {
-                getMethodBuilder.addStatement("builder.addHeader(${it.simpleName})")
+                getMethodBuilder.addStatement("builder.addHeader(" +
+                        "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName})")
             }
 
             RepositoryMapHolder.urlQueryAnnotationMap[element.simpleName.toString() + "." +
                     methodElement.simpleName.toString()]?.forEach {
-                getMethodBuilder.addStatement("builder.addQuery(${it.simpleName})")
+                getMethodBuilder.addStatement("builder.addQuery(" +
+                        "\"${it.getAnnotation(UrlQuery::class.java).key}\", ${it.simpleName})")
             }
 
             var allowFetchParamName: String? = null

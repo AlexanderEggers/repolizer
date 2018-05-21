@@ -14,7 +14,7 @@ import javax.lang.model.type.DeclaredType
 
 class DatabaseMainProcessor : AnnotationProcessor {
 
-    private val classCacheDao = ClassName.get("repolizer.database.cache", "CacheDao")
+    private val classCacheItem = ClassName.get("repolizer.database.cache", "CacheItem")
     private val classRepolizerDatabase = ClassName.get("repolizer.database", "RepolizerDatabase")
 
     private val classAnnotationDatabase = ClassName.get("android.arch.persistence.room", "Database")
@@ -71,11 +71,11 @@ class DatabaseMainProcessor : AnnotationProcessor {
         }
     }
 
-    private fun addEntityClassesToDatabase(daoList: ArrayList<ClassName>): String {
-        var format = "{$classCacheDao.class"
+    private fun addEntityClassesToDatabase(entities: ArrayList<ClassName>): String {
+        var format = "{$classCacheItem.class"
 
-        daoList.forEach { daoClassName ->
-            format += ", $daoClassName.class"
+        entities.forEach { entityName ->
+            format += ", $entityName.class"
         }
 
         return "$format}"
@@ -89,7 +89,7 @@ class DatabaseMainProcessor : AnnotationProcessor {
 
     private fun createDatabaseDaoFunction(daoClassName: ClassName): MethodSpec {
         return MethodSpec.methodBuilder("get${daoClassName.simpleName()}")
-                .addModifiers(Modifier.ABSTRACT)
+                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .returns(daoClassName)
                 .build()
     }

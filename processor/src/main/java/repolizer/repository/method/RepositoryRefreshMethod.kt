@@ -4,6 +4,8 @@ import com.squareup.javapoet.*
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeSpec
 import repolizer.annotation.repository.REFRESH
+import repolizer.annotation.repository.parameter.Header
+import repolizer.annotation.repository.parameter.UrlQuery
 import repolizer.repository.RepositoryMapHolder
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
@@ -68,12 +70,14 @@ class RepositoryRefreshMethod {
 
             RepositoryMapHolder.headerAnnotationMap[element.simpleName.toString() + "." +
                     methodElement.simpleName.toString()]?.forEach {
-                getMethodBuilder.addStatement("builder.addHeader(${it.simpleName})")
+                getMethodBuilder.addStatement("builder.addHeader(" +
+                        "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName})")
             }
 
             RepositoryMapHolder.urlQueryAnnotationMap[element.simpleName.toString() + "." +
                     methodElement.simpleName.toString()]?.forEach {
-                getMethodBuilder.addStatement("builder.addQuery(${it.simpleName})")
+                getMethodBuilder.addStatement("builder.addQuery(" +
+                        "\"${it.getAnnotation(UrlQuery::class.java).key}\", ${it.simpleName})")
             }
 
             val networkGetLayerClass = createNetworkGetLayerAnonymousClass(classGenericTypeForMethod,

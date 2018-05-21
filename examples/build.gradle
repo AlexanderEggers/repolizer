@@ -1,35 +1,69 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion "27.0.3"
-
     defaultConfig {
-        applicationId "org.demo.repolizer"
-        minSdkVersion 16
+        applicationId "org.demo.weatherapp"
+        minSdkVersion 21
         targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file("local.properties").newDataInputStream())
+        String apiKey = properties.getProperty("apiKey", "")
+        buildConfigField("String", "apiKey", apiKey)
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+    dataBinding {
+        enabled = true
     }
+}
+
+kapt {
+    generateStubs = true
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "com.android.support:appcompat-v7:$support_lib_version"
-    implementation "com.google.code.gson:gson:$gson_version"
+    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
+    implementation "android.arch.lifecycle:extensions:1.1.1"
 
-    implementation "android.arch.lifecycle:livedata:$livedata_version"
-    kapt "android.arch.lifecycle:compiler:$livedata_version"
+    implementation "android.arch.persistence.room:runtime:1.1.0"
+    kapt "android.arch.persistence.room:compiler:1.1.0"
 
-    implementation "android.arch.persistence.room:runtime:$room_version"
-    kapt "android.arch.persistence.room:compiler:$room_version"
+    implementation 'org.archknife:archknife-core:0.4.0'
+    kapt 'org.archknife:archknife-processor:0.4.0'
+
+    implementation 'com.google.code.gson:gson:2.8.4'
+    implementation "com.squareup.retrofit2:retrofit:2.4.0"
+    implementation "com.squareup.retrofit2:converter-gson:2.4.0"
+
+    implementation "com.squareup.okhttp3:okhttp:3.10.0"
+    implementation "com.squareup.okhttp3:logging-interceptor:3.10.0"
+
+    kapt "com.google.dagger:dagger-compiler:2.16"
+    kapt "com.google.dagger:dagger-android-processor:2.16"
 
     implementation project(":repolizer-core")
     kapt project(":repolizer-processor")
+
+    testImplementation 'junit:junit:4.12'
 }

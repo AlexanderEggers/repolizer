@@ -2,6 +2,8 @@ package repolizer.repository.method
 
 import com.squareup.javapoet.*
 import repolizer.annotation.repository.CUD
+import repolizer.annotation.repository.parameter.Header
+import repolizer.annotation.repository.parameter.UrlQuery
 import repolizer.annotation.repository.util.CudType
 import repolizer.repository.RepositoryMapHolder
 import javax.lang.model.element.Element
@@ -58,12 +60,14 @@ class RepositoryCudMethod {
 
             RepositoryMapHolder.headerAnnotationMap[element.simpleName.toString() + "." +
                     methodElement.simpleName.toString()]?.forEach {
-                getMethodBuilder.addStatement("builder.addHeader(${it.simpleName})")
+                getMethodBuilder.addStatement("builder.addHeader(" +
+                        "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName})")
             }
 
             RepositoryMapHolder.urlQueryAnnotationMap[element.simpleName.toString() + "." +
                     methodElement.simpleName.toString()]?.forEach {
-                getMethodBuilder.addStatement("builder.addQuery(${it.simpleName})")
+                getMethodBuilder.addStatement("builder.addQuery(" +
+                        "\"${it.getAnnotation(UrlQuery::class.java).key}\", ${it.simpleName})")
             }
 
             val networkGetLayerClass = createNetworkPostLayerAnonymousClass(

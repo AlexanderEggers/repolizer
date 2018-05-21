@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Repolizer Examples</string>
+    <string name="app_name">Weather App</string>
+    <string name="server_base_url">http://api.openweathermap.org/data/2.5/</string>
 </resources>

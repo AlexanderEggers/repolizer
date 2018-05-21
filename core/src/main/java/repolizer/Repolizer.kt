@@ -1,11 +1,9 @@
 package repolizer
 
-import android.arch.persistence.room.RoomDatabase
 import android.content.Context
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import repolizer.database.provider.GlobalDatabaseProvider
-import repolizer.repository.BaseRepository
 import repolizer.repository.api.DefaultJsonNetworkController
 import repolizer.repository.api.NetworkController
 import repolizer.repository.api.NetworkInterface
@@ -46,12 +44,14 @@ class Repolizer private constructor(val context: Context, builder: Builder) {
                 NetworkInterface::class.java, Gson::class.java).newInstance(networkInterface, gson)
     }
 
-    fun <T : BaseRepository<*>> create(repositoryClass: Class<T>): T {
-        return GlobalRepositoryProvider.getRepository(this, repositoryClass)
+    @Suppress("UNCHECKED_CAST")
+    fun <T> create(repositoryClass: Class<*>): T {
+        return GlobalRepositoryProvider.getRepository(this, repositoryClass) as T
     }
 
-    fun <T : RoomDatabase> getDatabase(databaseClass: Class<T>): T {
-        return GlobalDatabaseProvider.getDatabase(context, databaseClass)
+    @Suppress("UNCHECKED_CAST")
+    fun <T> getDatabase(databaseClass: Class<*>): T {
+        return GlobalDatabaseProvider.getDatabase(context, databaseClass) as T
     }
 
     companion object {
