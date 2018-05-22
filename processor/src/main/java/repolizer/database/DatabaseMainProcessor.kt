@@ -3,14 +3,17 @@ package repolizer.database
 import com.squareup.javapoet.*
 import repolizer.MainProcessor
 import repolizer.annotation.database.Database
+import repolizer.annotation.database.Migration
 import repolizer.util.AnnotationProcessor
 import repolizer.util.ProcessorUtil
 import repolizer.util.ProcessorUtil.Companion.getGeneratedDatabaseName
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.Element
+import javax.lang.model.element.ElementKind
 import javax.lang.model.element.Modifier
 import javax.lang.model.type.DeclaredType
+import javax.tools.Diagnostic
 
 class DatabaseMainProcessor : AnnotationProcessor {
 
@@ -21,7 +24,14 @@ class DatabaseMainProcessor : AnnotationProcessor {
     private val classAnnotationTypeConverters = ClassName.get("android.arch.persistence.room", "TypeConverters")
 
     override fun process(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
+        initMigrationAnnotations(mainProcessor, roundEnv)
+
         roundEnv.getElementsAnnotatedWith(Database::class.java).forEach {
+            if (it.kind != ElementKind.INTERFACE) {
+                mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
+                        "be applied to an interface.")
+                return
+            }
 
             //Database annotation general data
             val databaseName = it.simpleName.toString()
@@ -117,5 +127,25 @@ class DatabaseMainProcessor : AnnotationProcessor {
             }
         }
         return "{$converterFormat}"
+    }
+
+    private fun initMigrationAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
+        val hashMap: HashMap<String, ArrayList<Element>> = DatabaseMapHolder.migrationAnnotationMap
+
+        roundEnv.getElementsAnnotatedWith(Migration::class.java).forEach {
+            if (it.kind != ElementKind.INTERFACE) {
+                mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
+                        "be applied to an interface.")
+                return
+            }
+
+            var currentList: ArrayList<Element>? = hashMap[it.simpleName.toString()]
+            if (currentList == null) {
+                currentList = ArrayList()
+            }
+
+            currentList.add(it)
+            hashMap[it.simpleName.toString()] = currentList
+        }
     }
 }

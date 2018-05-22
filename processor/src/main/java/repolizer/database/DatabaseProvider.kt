@@ -4,7 +4,10 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
 import repolizer.annotation.database.Database
+import repolizer.annotation.database.Migration
 import repolizer.annotation.database.util.DatabaseType
+import repolizer.annotation.database.util.JournalMode
+import repolizer.annotation.database.util.MigrationType
 import repolizer.util.ProcessorUtil
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.Element
@@ -20,6 +23,7 @@ class DatabaseProvider {
     private val classRoom = ClassName.get("android.arch.persistence.room", "Room")
     private val classRoomDatabase = ClassName.get("android.arch.persistence.room", "RoomDatabase")
     private val classRoomDatabaseBuilder = ClassName.get("android.arch.persistence.room.RoomDatabase", "Builder")
+    private val classJournalMode = ClassName.get("android.arch.persistence.room.RoomDatabase", "JournalMode")
 
     @Suppress("UNCHECKED_CAST")
     fun build(element: Element, databaseName: String, realDatabaseClassName: ClassName): TypeSpec {
@@ -41,8 +45,40 @@ class DatabaseProvider {
             methodBuilder.addStatement("$classRoomDatabaseBuilder builder = $classRoom.inMemoryDatabaseBuilder(context, $realDatabaseClassName.class)")
         }
 
-        var migrationFormat = ""
+        val journalMode = element.getAnnotation(Database::class.java).journalMode
+        val realJournalMode = when(journalMode) {
+            JournalMode.AUTOMATIC -> "$classJournalMode.AUTOMATIC"
+            JournalMode.TRUNCATE -> "$classJournalMode.TRUNCATE"
+            JournalMode.WRITE_AHEAD_LOGGING -> "$classJournalMode.WRITE_AHEAD_LOGGING"
+        }
+        methodBuilder.addStatement("builder.setJournalMode($realJournalMode)")
+
+        var foundDestructiveMigration = false
         var destructiveVersionsFormat = ""
+        DatabaseMapHolder.migrationAnnotationMap[element.simpleName.toString()]?.forEach {
+            val migrationType = it.getAnnotation(Migration::class.java).migrationType
+            if(migrationType == MigrationType.DESTRUCTIVE) {
+                foundDestructiveMigration = true
+            }
+
+            val destructiveVersions = it.getAnnotation(Migration::class.java).destructiveFrom
+            destructiveVersions.forEach {
+                if (!destructiveVersionsFormat.isEmpty()) {
+                    destructiveVersionsFormat += ", "
+                }
+                destructiveVersionsFormat += it.toString()
+            }
+        }
+
+        if(foundDestructiveMigration) {
+            methodBuilder.addStatement("builder.fallbackToDestructiveMigration()")
+        }
+
+        if (!destructiveVersionsFormat.isEmpty()) {
+            methodBuilder.addStatement("builder.fallbackToDestructiveMigrationFrom($destructiveVersionsFormat)")
+        }
+
+        var migrationFormat = ""
         element.annotationMirrors.forEach {
             it.elementValues.forEach {
                 val key = it.key.simpleName.toString()
@@ -57,26 +93,19 @@ class DatabaseProvider {
                         if (!migrationFormat.isEmpty()) {
                             migrationFormat += ", "
                         }
-                        migrationFormat += "$objectClass.newInstance()"
-                    }
-                } else if (key == "destructiveFrom") {
-                    val destructiveVersions = value as IntArray
-                    destructiveVersions.forEach {
-                        if (!destructiveVersionsFormat.isEmpty()) {
-                            destructiveVersionsFormat += ", "
-                        }
-                        destructiveVersionsFormat += it.toString()
+                        migrationFormat += "$objectClass.class.newInstance()"
                     }
                 }
             }
         }
 
         if (!migrationFormat.isEmpty()) {
-            methodBuilder.addStatement("builder.addMigrations($migrationFormat)")
-        }
-
-        if (!destructiveVersionsFormat.isEmpty()) {
-            methodBuilder.addStatement("builder.fallbackToDestructiveMigrationFrom($destructiveVersionsFormat)")
+            methodBuilder.addCode("\n")
+            methodBuilder.addCode("try {\n")
+            methodBuilder.addCode("     builder.addMigrations($migrationFormat);\n")
+            methodBuilder.addCode("} catch(InstantiationException|IllegalAccessException e) {\n")
+            methodBuilder.addCode("     e.printStackTrace();\n")
+            methodBuilder.addCode("}\n\n")
         }
 
         methodBuilder.addStatement("return builder.build()")

@@ -36,7 +36,7 @@ class RepositoryRefreshMethod {
             val getAsList = methodElement.getAnnotation(REFRESH::class.java).getAsList
             val classGenericTypeForMethod = if (getAsList) ParameterizedTypeName.get(classList, entity) else entity
 
-            val getMethodBuilder = MethodSpec.methodBuilder(methodElement.simpleName.toString())
+            val refreshMethodBuilder = MethodSpec.methodBuilder(methodElement.simpleName.toString())
                     .addModifiers(Modifier.PUBLIC)
                     .addAnnotation(Override::class.java)
                     .returns(ClassName.get(methodElement.returnType))
@@ -44,14 +44,14 @@ class RepositoryRefreshMethod {
             val daoInsertMethodBuilder = MethodSpec.methodBuilder("insertFor_${methodElement.simpleName}")
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                     .addAnnotation(AnnotationSpec.builder(classAnnotationRoomInsert)
-                            .addMember("onConflict", "$classOnConflictStrategy.REPLACE") //TODO put inside annotation
+                            .addMember("onConflict", "$classOnConflictStrategy.REPLACE")
                             .build())
                     .addParameter(classArrayWithEntity, "elements")
                     .varargs()
 
             methodElement.parameters.forEach { varElement ->
                 val varType = ClassName.get(varElement.asType())
-                getMethodBuilder.addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
+                refreshMethodBuilder.addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
             }
 
             val url = methodElement.getAnnotation(REFRESH::class.java).url
@@ -61,32 +61,39 @@ class RepositoryRefreshMethod {
             val classWithTypeToken = ParameterizedTypeName.get(classTypeToken, classGenericTypeForMethod)
             val classWithNetworkBuilder = ParameterizedTypeName.get(classNetworkBuilder, classGenericTypeForMethod)
 
-            getMethodBuilder.addStatement("$classNetworkBuilder builder = new $classWithNetworkBuilder()")
-            getMethodBuilder.addStatement("builder.setTypeToken(new $classWithTypeToken() {})")
-            getMethodBuilder.addStatement("builder.setRequestType($classRequestType.REFRESH)")
-            getMethodBuilder.addStatement("builder.setUrl(\"$url\")")
-            getMethodBuilder.addStatement("builder.setRequiresLogin($requiresLogin)")
-            getMethodBuilder.addStatement("builder.setShowProgress($showProgress)")
+            refreshMethodBuilder.addStatement("String url = \"$url\"")
+            RepositoryMapHolder.urlParameterAnnotationMap[element.simpleName.toString() + "." +
+                    methodElement.simpleName.toString()]?.forEach {
+                refreshMethodBuilder.addStatement("url = url.replace(\":${it.simpleName}\", \"$it\")")
+            }
+            refreshMethodBuilder.addCode("\n")
+
+            refreshMethodBuilder.addStatement("$classNetworkBuilder builder = new $classWithNetworkBuilder()")
+            refreshMethodBuilder.addStatement("builder.setTypeToken(new $classWithTypeToken() {})")
+            refreshMethodBuilder.addStatement("builder.setRequestType($classRequestType.REFRESH)")
+            refreshMethodBuilder.addStatement("builder.setUrl(url)")
+            refreshMethodBuilder.addStatement("builder.setRequiresLogin($requiresLogin)")
+            refreshMethodBuilder.addStatement("builder.setShowProgress($showProgress)")
 
             RepositoryMapHolder.headerAnnotationMap[element.simpleName.toString() + "." +
                     methodElement.simpleName.toString()]?.forEach {
-                getMethodBuilder.addStatement("builder.addHeader(" +
+                refreshMethodBuilder.addStatement("builder.addHeader(" +
                         "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName})")
             }
 
             RepositoryMapHolder.urlQueryAnnotationMap[element.simpleName.toString() + "." +
                     methodElement.simpleName.toString()]?.forEach {
-                getMethodBuilder.addStatement("builder.addQuery(" +
+                refreshMethodBuilder.addStatement("builder.addQuery(" +
                         "\"${it.getAnnotation(UrlQuery::class.java).key}\", ${it.simpleName})")
             }
 
             val networkGetLayerClass = createNetworkGetLayerAnonymousClass(classGenericTypeForMethod,
                     methodElement.simpleName.toString(), getAsList)
-            getMethodBuilder.addStatement("builder.setNetworkLayer($networkGetLayerClass)")
-            getMethodBuilder.addStatement("return super.executeRefresh(builder)")
+            refreshMethodBuilder.addStatement("builder.setNetworkLayer($networkGetLayerClass)")
+            refreshMethodBuilder.addStatement("return super.executeRefresh(builder)")
 
             daoClassBuilder.addMethod(daoInsertMethodBuilder.build())
-            builderList.add(getMethodBuilder.build())
+            builderList.add(refreshMethodBuilder.build())
         }
 
         return builderList

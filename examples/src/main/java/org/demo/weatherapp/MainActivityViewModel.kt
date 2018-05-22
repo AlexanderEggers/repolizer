@@ -15,7 +15,7 @@ import javax.inject.Inject
 @ProvideViewModel
 class MainActivityViewModel @Inject constructor(weatherRepository: WeatherRepository) : ViewModel() {
 
-    private val weatherRawData: LiveData<WeatherModel> = weatherRepository.getWeatherData(BuildConfig.apiKey)
+    private val weatherRawData: LiveData<WeatherModel> = weatherRepository.getWeatherData("weather", BuildConfig.apiKey)
     private val observer: Observer<WeatherModel> = Observer {
         if (it != null) {
             cityName.set(it.cityName!!.toUpperCase(Locale.US) + ", " + it.systemData!!.country)

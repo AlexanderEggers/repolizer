@@ -31,14 +31,14 @@ class RepositoryCudMethod {
             val classGenericTypeForMethod = if (entityBodyAsList) ParameterizedTypeName.get(classList, entity) else entity
             val cudType = methodElement.getAnnotation(CUD::class.java).cudType
 
-            val getMethodBuilder = MethodSpec.methodBuilder(methodElement.simpleName.toString())
+            val cudMethodBuilder = MethodSpec.methodBuilder(methodElement.simpleName.toString())
                     .addModifiers(Modifier.PUBLIC)
                     .addAnnotation(Override::class.java)
                     .returns(ClassName.get(methodElement.returnType))
 
             methodElement.parameters.forEach { varElement ->
                 val varType = ClassName.get(varElement.asType())
-                getMethodBuilder.addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
+                cudMethodBuilder.addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
             }
 
             val url = methodElement.getAnnotation(CUD::class.java).url
@@ -47,35 +47,42 @@ class RepositoryCudMethod {
             val classWithNetworkBuilder = ParameterizedTypeName.get(classNetworkBuilder, classGenericTypeForMethod)
             val requestType = getRequestType(cudType)
 
-            getMethodBuilder.addStatement("$classNetworkBuilder builder = new $classWithNetworkBuilder()")
-            getMethodBuilder.addStatement("builder.setRequestType($classRequestType.$requestType)")
-            getMethodBuilder.addStatement("builder.setUrl(\"$url\")")
-            getMethodBuilder.addStatement("builder.setRequiresLogin($requiresLogin)")
-            getMethodBuilder.addStatement("builder.setShowProgress($showProgress)")
+            cudMethodBuilder.addStatement("String url = \"$url\"")
+            RepositoryMapHolder.urlParameterAnnotationMap[element.simpleName.toString() + "." +
+                    methodElement.simpleName.toString()]?.forEach {
+                cudMethodBuilder.addStatement("url = url.replace(\":${it.simpleName}\", \"$it\")")
+            }
+            cudMethodBuilder.addCode("\n")
+
+            cudMethodBuilder.addStatement("$classNetworkBuilder builder = new $classWithNetworkBuilder()")
+            cudMethodBuilder.addStatement("builder.setRequestType($classRequestType.$requestType)")
+            cudMethodBuilder.addStatement("builder.setUrl(url)")
+            cudMethodBuilder.addStatement("builder.setRequiresLogin($requiresLogin)")
+            cudMethodBuilder.addStatement("builder.setShowProgress($showProgress)")
 
             RepositoryMapHolder.requestBodyAnnotationMap[element.simpleName.toString() + "." +
                     methodElement.simpleName.toString()]?.forEach {
-                getMethodBuilder.addStatement("builder.setRaw(${it.simpleName})")
+                cudMethodBuilder.addStatement("builder.setRaw(${it.simpleName})")
             }
 
             RepositoryMapHolder.headerAnnotationMap[element.simpleName.toString() + "." +
                     methodElement.simpleName.toString()]?.forEach {
-                getMethodBuilder.addStatement("builder.addHeader(" +
+                cudMethodBuilder.addStatement("builder.addHeader(" +
                         "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName})")
             }
 
             RepositoryMapHolder.urlQueryAnnotationMap[element.simpleName.toString() + "." +
                     methodElement.simpleName.toString()]?.forEach {
-                getMethodBuilder.addStatement("builder.addQuery(" +
+                cudMethodBuilder.addStatement("builder.addQuery(" +
                         "\"${it.getAnnotation(UrlQuery::class.java).key}\", ${it.simpleName})")
             }
 
             val networkGetLayerClass = createNetworkPostLayerAnonymousClass(
                     classGenericTypeForMethod, cudType)
-            getMethodBuilder.addStatement("builder.setNetworkLayer($networkGetLayerClass)")
-            getMethodBuilder.addStatement("return super.executeCud(builder)")
+            cudMethodBuilder.addStatement("builder.setNetworkLayer($networkGetLayerClass)")
+            cudMethodBuilder.addStatement("return super.executeCud(builder)")
 
-            builderList.add(getMethodBuilder.build())
+            builderList.add(cudMethodBuilder.build())
         }
 
         return builderList

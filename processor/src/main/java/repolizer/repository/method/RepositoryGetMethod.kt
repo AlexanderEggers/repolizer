@@ -13,7 +13,6 @@ import repolizer.repository.RepositoryMapHolder
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
 
-//TODO handle UrlParameter
 class RepositoryGetMethod {
 
     private val classNetworkBuilder = ClassName.get("repolizer.repository.network", "NetworkBuilder")
@@ -57,7 +56,7 @@ class RepositoryGetMethod {
             val daoInsertMethodBuilder = MethodSpec.methodBuilder("insertFor_${methodElement.simpleName}")
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                     .addAnnotation(AnnotationSpec.builder(classAnnotationRoomInsert)
-                            .addMember("onConflict", "$classOnConflictStrategy.REPLACE") //TODO put inside annotation
+                            .addMember("onConflict", "$classOnConflictStrategy.REPLACE")
                             .build())
                     .addParameter(classArrayWithEntity, "elements")
                     .varargs()
@@ -99,10 +98,17 @@ class RepositoryGetMethod {
             val classWithTypeToken = ParameterizedTypeName.get(classTypeToken, classGenericTypeForMethod)
             val classWithNetworkBuilder = ParameterizedTypeName.get(classNetworkBuilder, classGenericTypeForMethod)
 
+            getMethodBuilder.addStatement("String url = \"$url\"")
+            RepositoryMapHolder.urlParameterAnnotationMap[element.simpleName.toString() + "." +
+                    methodElement.simpleName.toString()]?.forEach {
+                getMethodBuilder.addStatement("url = url.replace(\":${it.simpleName}\", \"$it\")")
+            }
+            getMethodBuilder.addCode("\n")
+
             getMethodBuilder.addStatement("$classNetworkBuilder builder = new $classWithNetworkBuilder()")
             getMethodBuilder.addStatement("builder.setTypeToken(new $classWithTypeToken() {})")
             getMethodBuilder.addStatement("builder.setRequestType($classRequestType.GET)")
-            getMethodBuilder.addStatement("builder.setUrl(\"$url\")")
+            getMethodBuilder.addStatement("builder.setUrl(url)")
             getMethodBuilder.addStatement("builder.setRequiresLogin($requiresLogin)")
             getMethodBuilder.addStatement("builder.setShowProgress($showProgress)")
 

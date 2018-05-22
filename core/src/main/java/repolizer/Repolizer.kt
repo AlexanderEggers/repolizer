@@ -1,5 +1,6 @@
 package repolizer
 
+import android.arch.persistence.room.RoomDatabase
 import android.content.Context
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
@@ -49,9 +50,8 @@ class Repolizer private constructor(val context: Context, builder: Builder) {
         return GlobalRepositoryProvider.getRepository(this, repositoryClass) as T
     }
 
-    @Suppress("UNCHECKED_CAST")
-    fun <T> getDatabase(databaseClass: Class<*>): T {
-        return GlobalDatabaseProvider.getDatabase(context, databaseClass) as T
+    fun getDatabase(databaseClass: Class<*>): RoomDatabase {
+        return GlobalDatabaseProvider.getDatabase(context, databaseClass)
     }
 
     companion object {

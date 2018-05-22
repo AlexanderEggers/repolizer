@@ -13,10 +13,12 @@ import repolizer.util.ProcessorUtil.Companion.getGeneratedDatabaseName
 import repolizer.util.ProcessorUtil.Companion.getGeneratedRepositoryName
 import repolizer.util.ProcessorUtil.Companion.getPackageName
 import javax.annotation.processing.RoundEnvironment
+import javax.lang.model.element.ElementKind
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.MirroredTypeException
+import javax.tools.Diagnostic
 
 class RepositoryMainProcessor : AnnotationProcessor {
 
@@ -34,6 +36,12 @@ class RepositoryMainProcessor : AnnotationProcessor {
         initAnnotations(mainProcessor, roundEnv)
 
         roundEnv.getElementsAnnotatedWith(Repository::class.java).forEach {
+            if (it.kind != ElementKind.INTERFACE) {
+                mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
+                        "be applied to an interface.")
+                return
+            }
+
             //Repository annotation general data
             val repositoryName = it.simpleName.toString()
             val repositoryPackageName = getPackageName(mainProcessor, it)

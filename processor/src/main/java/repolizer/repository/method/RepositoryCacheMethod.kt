@@ -24,24 +24,24 @@ class RepositoryCacheMethod {
         RepositoryMapHolder.cacheAnnotationMap[element.simpleName.toString()]?.forEach { methodElement ->
             val operation = methodElement.getAnnotation(CACHE::class.java).operation
 
-            val dbMethodBuilder = MethodSpec.methodBuilder(methodElement.simpleName.toString())
+            val cacheMethodBuilder = MethodSpec.methodBuilder(methodElement.simpleName.toString())
                     .addModifiers(Modifier.PUBLIC)
                     .addAnnotation(Override::class.java)
 
             methodElement.parameters.forEach { varElement ->
                 val varType = ClassName.get(varElement.asType())
-                dbMethodBuilder.addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
+                cacheMethodBuilder.addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
             }
 
             val networkGetLayerClass = if (operation == CacheOperation.INSERT || operation == CacheOperation.DELETE_SINGLE) {
                 createCacheLayerForInsert(element, methodElement, operation == CacheOperation.INSERT)
             } else throw IllegalStateException("Cache operation unknown. Cache the value you inserted into your @Cache annotation.")
 
-            dbMethodBuilder.addStatement("$classDatabaseBuilder builder = new $classDatabaseBuilder()")
-            dbMethodBuilder.addStatement("builder.setDatabaseLayer($networkGetLayerClass)")
-            dbMethodBuilder.addStatement("super.executeDB(builder)")
+            cacheMethodBuilder.addStatement("$classDatabaseBuilder builder = new $classDatabaseBuilder()")
+            cacheMethodBuilder.addStatement("builder.setDatabaseLayer($networkGetLayerClass)")
+            cacheMethodBuilder.addStatement("super.executeDB(builder)")
 
-            builderList.add(dbMethodBuilder.build())
+            builderList.add(cacheMethodBuilder.build())
         }
 
         return builderList
