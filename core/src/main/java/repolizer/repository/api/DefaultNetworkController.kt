@@ -43,6 +43,6 @@ class DefaultNetworkController(networkInterface: NetworkInterface, gson: Gson) :
     }
 
     override fun prepareUrl(url: String): String {
-        return url.split("\\?")[0]
+        return url.split("?")[0]
     }
 }
