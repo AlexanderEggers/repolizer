@@ -13,6 +13,7 @@ import repolizer.repository.response.NetworkResponse
 import repolizer.repository.response.ProgressController
 import repolizer.repository.response.ResponseService
 import repolizer.repository.util.*
+import repolizer.repository.util.Utils.Companion.prepareUrl
 
 class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, builder: NetworkBuilder<Entity>) {
 
@@ -50,7 +51,7 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
         this.callFinishedCallback = fetchSecurityLayer
 
         if (fetchSecurityLayer.allowFetch()) {
-            val apiResponse = controller.get(headerMap, url, queryMap)
+            val apiResponse = controller.get(headerMap, prepareUrl(url), queryMap)
 
             if (showProgress) {
                 progressController?.show(url, requestType)

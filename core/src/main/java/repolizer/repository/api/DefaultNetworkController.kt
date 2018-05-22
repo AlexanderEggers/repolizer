@@ -9,16 +9,16 @@ import repolizer.repository.response.NetworkResponse
 class DefaultNetworkController(networkInterface: NetworkInterface, gson: Gson) : NetworkController(networkInterface, gson) {
 
     override fun get(headerMap: Map<String, String>, url: String, queryMap: Map<String, String>): LiveData<NetworkResponse<String>> {
-        return networkInterface.get(headerMap, prepareUrl(url), queryMap)
+        return networkInterface.get(headerMap, url, queryMap)
     }
 
     override fun post(headerMap: Map<String, String>, url: String, queryMap: Map<String, String>, rawObject: Any?): LiveData<NetworkResponse<String>> {
         return if (rawObject != null) {
             val json = gson.toJson(rawObject)
             val requestBody = RequestBody.create(MediaType.parse("application/json"), json)
-            return networkInterface.post(headerMap, prepareUrl(url), queryMap, requestBody)
+            return networkInterface.post(headerMap, url, queryMap, requestBody)
         } else {
-            networkInterface.post(headerMap, prepareUrl(url), queryMap, null)
+            networkInterface.post(headerMap, url, queryMap, null)
         }
     }
 
@@ -26,9 +26,9 @@ class DefaultNetworkController(networkInterface: NetworkInterface, gson: Gson) :
         return if (rawObject != null) {
             val json = gson.toJson(rawObject)
             val requestBody = RequestBody.create(MediaType.parse("application/json"), json)
-            return networkInterface.put(headerMap, prepareUrl(url), queryMap, requestBody)
+            return networkInterface.put(headerMap, url, queryMap, requestBody)
         } else {
-            networkInterface.put(headerMap, prepareUrl(url), queryMap, null)
+            networkInterface.put(headerMap, url, queryMap, null)
         }
     }
 
@@ -36,13 +36,9 @@ class DefaultNetworkController(networkInterface: NetworkInterface, gson: Gson) :
         return if (rawObject != null) {
             val json = gson.toJson(rawObject)
             val requestBody = RequestBody.create(MediaType.parse("application/json"), json)
-            networkInterface.delete(headerMap, prepareUrl(url), queryMap, requestBody)
+            networkInterface.delete(headerMap, url, queryMap, requestBody)
         } else {
-            networkInterface.delete(headerMap, prepareUrl(url), queryMap)
+            networkInterface.delete(headerMap, url, queryMap)
         }
-    }
-
-    override fun prepareUrl(url: String): String {
-        return url.split("?")[0]
     }
 }

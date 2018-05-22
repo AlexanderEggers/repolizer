@@ -18,6 +18,7 @@ import repolizer.repository.util.FetchSecurityLayer
 import repolizer.repository.util.LoginManager
 import repolizer.repository.util.RequestType
 import repolizer.repository.util.Utils.Companion.makeUrlId
+import repolizer.repository.util.Utils.Companion.prepareUrl
 
 class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, builder: NetworkBuilder<Entity>) {
 
@@ -85,7 +86,7 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
 
     @MainThread
     private fun fetchFromNetwork() {
-        val networkResponse = controller.get(headerMap, url, queryMap)
+        val networkResponse = controller.get(headerMap, prepareUrl(url), queryMap)
 
         if (showProgress) {
             progressController?.show(url, requestType)

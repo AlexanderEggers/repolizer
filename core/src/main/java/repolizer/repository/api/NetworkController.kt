@@ -13,6 +13,4 @@ abstract class NetworkController(protected val networkInterface: NetworkInterfac
     abstract fun put(headerMap: Map<String, String>, url: String, queryMap: Map<String, String>, rawObject: Any?): LiveData<NetworkResponse<String>>
 
     abstract fun delete(headerMap: Map<String, String>, url: String, queryMap: Map<String, String>, rawObject: Any?): LiveData<NetworkResponse<String>>
-
-    abstract fun prepareUrl(url: String): String
 }

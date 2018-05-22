@@ -19,5 +19,9 @@ internal class Utils {
         fun getGeneratedDatabaseProviderName(databaseClass: Class<*>): String {
             return "Generated_${databaseClass.simpleName}_Provider"
         }
+
+        fun prepareUrl(url: String): String {
+            return url.split("?")[0]
+        }
     }
 }

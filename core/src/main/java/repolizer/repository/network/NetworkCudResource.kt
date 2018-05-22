@@ -12,6 +12,7 @@ import repolizer.repository.response.ResponseService
 import repolizer.repository.util.AppExecutor
 import repolizer.repository.util.LoginManager
 import repolizer.repository.util.RequestType
+import repolizer.repository.util.Utils.Companion.prepareUrl
 
 class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, builder: NetworkBuilder<Entity>) {
 
@@ -38,7 +39,7 @@ class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, buil
     @MainThread
     fun execute(): LiveData<String> {
         val networkResponse: LiveData<NetworkResponse<String>> = cudLayer.createCall(controller, headerMap,
-                url, queryMap, raw)
+                prepareUrl(url), queryMap, raw)
 
         if (showProgress) {
             progressController?.show(url, requestType)
