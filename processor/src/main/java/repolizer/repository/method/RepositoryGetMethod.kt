@@ -103,6 +103,24 @@ class RepositoryGetMethod {
                     methodElement.simpleName.toString()]?.forEach {
                 getMethodBuilder.addStatement("url = url.replace(\":${it.simpleName}\", \"$it\")")
             }
+
+            val urlQueryList = RepositoryMapHolder.urlQueryAnnotationMap[element.simpleName.toString() + "." +
+                    methodElement.simpleName.toString()]
+            if(urlQueryList?.isEmpty() == false) {
+                getMethodBuilder.addStatement("url += \"?\"")
+
+                val iterator = urlQueryList.iterator()
+                while(iterator.hasNext()) {
+                    val urlQuery = iterator.next()
+                    getMethodBuilder.addStatement("url += " +
+                            "\"${urlQuery.getAnnotation(UrlQuery::class.java).key}=\" + ${urlQuery.simpleName}")
+
+                    if(iterator.hasNext()) {
+                        getMethodBuilder.addStatement("url += \"&\"")
+                    }
+                }
+            }
+
             getMethodBuilder.addCode("\n")
 
             getMethodBuilder.addStatement("$classNetworkBuilder builder = new $classWithNetworkBuilder()")
@@ -118,8 +136,7 @@ class RepositoryGetMethod {
                         "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName})")
             }
 
-            RepositoryMapHolder.urlQueryAnnotationMap[element.simpleName.toString() + "." +
-                    methodElement.simpleName.toString()]?.forEach {
+            urlQueryList?.forEach {
                 getMethodBuilder.addStatement("builder.addQuery(" +
                         "\"${it.getAnnotation(UrlQuery::class.java).key}\", ${it.simpleName})")
             }
