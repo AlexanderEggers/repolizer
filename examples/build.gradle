@@ -42,30 +42,32 @@ kapt {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.android.support:design:27.1.1'
-    implementation "android.arch.lifecycle:extensions:1.1.1"
+    implementation "com.android.support:appcompat-v7:$support_lib_version"
+    implementation "com.android.support:design:$support_lib_version"
 
-    implementation "android.arch.persistence.room:runtime:1.1.0"
-    kapt "android.arch.persistence.room:compiler:1.1.0"
+    implementation "android.arch.lifecycle:extensions:$livedata_version"
+    kapt "android.arch.lifecycle:compiler:$livedata_version"
 
-    implementation 'org.archknife:archknife-core:0.4.0'
-    kapt 'org.archknife:archknife-processor:0.4.0'
+    implementation "android.arch.persistence.room:runtime:$room_version"
+    kapt "android.arch.persistence.room:compiler:$room_version"
 
-    implementation 'com.google.code.gson:gson:2.8.4'
-    implementation "com.squareup.retrofit2:retrofit:2.4.0"
-    implementation "com.squareup.retrofit2:converter-gson:2.4.0"
+    implementation "org.archknife:archknife-core:$archknife_version"
+    kapt "org.archknife:archknife-processor:$archknife_version"
 
-    implementation "com.squareup.okhttp3:okhttp:3.10.0"
-    implementation "com.squareup.okhttp3:logging-interceptor:3.10.0"
+    implementation "com.google.code.gson:gson:$gson_version"
+    implementation "com.squareup.retrofit2:retrofit:$retrofit2_version"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofit2_version"
 
-    kapt "com.google.dagger:dagger-compiler:2.16"
-    kapt "com.google.dagger:dagger-android-processor:2.16"
+    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
+
+    kapt "com.google.dagger:dagger-compiler:$dagger_version"
+    kapt "com.google.dagger:dagger-android-processor:$dagger_version"
 
     implementation project(":repolizer-core")
     kapt project(":repolizer-processor")
 
-    kapt "com.android.databinding:compiler:3.1.2"
+    kapt "com.android.databinding:compiler:$databinding_version"
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation "junit:junit:$junit_version"
 }
