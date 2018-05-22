@@ -46,7 +46,7 @@ class DatabaseProvider {
         }
 
         val journalMode = element.getAnnotation(Database::class.java).journalMode
-        val realJournalMode = when(journalMode) {
+        val realJournalMode = when (journalMode) {
             JournalMode.AUTOMATIC -> "$classJournalMode.AUTOMATIC"
             JournalMode.TRUNCATE -> "$classJournalMode.TRUNCATE"
             JournalMode.WRITE_AHEAD_LOGGING -> "$classJournalMode.WRITE_AHEAD_LOGGING"
@@ -57,7 +57,7 @@ class DatabaseProvider {
         var destructiveVersionsFormat = ""
         DatabaseMapHolder.migrationAnnotationMap[element.simpleName.toString()]?.forEach {
             val migrationType = it.getAnnotation(Migration::class.java).migrationType
-            if(migrationType == MigrationType.DESTRUCTIVE) {
+            if (migrationType == MigrationType.DESTRUCTIVE) {
                 foundDestructiveMigration = true
             }
 
@@ -70,7 +70,7 @@ class DatabaseProvider {
             }
         }
 
-        if(foundDestructiveMigration) {
+        if (foundDestructiveMigration) {
             methodBuilder.addStatement("builder.fallbackToDestructiveMigration()")
         }
 
