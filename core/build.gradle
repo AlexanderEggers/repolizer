@@ -44,11 +44,16 @@ android {
     }
 }
 
+tasks.withType(Javadoc).all {
+    enabled = false
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-    api project(":repolizer-annotation")
+    //api project(":repolizer-annotation")
+    api "org.repolizer:repolizer-annotation:$repolizer_library_version"
 
     implementation "android.arch.persistence.room:runtime:$room_version"
     implementation "android.arch.lifecycle:livedata:$livedata_version"
