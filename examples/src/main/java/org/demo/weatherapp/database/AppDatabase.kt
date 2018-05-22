@@ -8,5 +8,5 @@ import repolizer.annotation.database.util.MigrationType
 
 @Database(name = "WeatherDatabase", type = DatabaseType.PERSISTENT, version = 2)
 @TypeConverter(value = [Converter::class])
-@Migration(migrationType = MigrationType.DESTRUCTIVE, migrations = [MigrationTest::class])
+@Migration(migrationType = MigrationType.DESTRUCTIVE)
 interface AppDatabase

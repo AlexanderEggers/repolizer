@@ -6,7 +6,7 @@ import okhttp3.MediaType
 import okhttp3.RequestBody
 import repolizer.repository.response.NetworkResponse
 
-class DefaultJsonNetworkController(networkInterface: NetworkInterface, gson: Gson) : NetworkController(networkInterface, gson) {
+class DefaultNetworkController(networkInterface: NetworkInterface, gson: Gson) : NetworkController(networkInterface, gson) {
 
     override fun get(headerMap: Map<String, String>, url: String, queryMap: Map<String, String>): LiveData<NetworkResponse<String>> {
         return networkInterface.get(headerMap, prepareUrl(url), queryMap)

@@ -5,7 +5,7 @@ import android.content.Context
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import repolizer.database.provider.GlobalDatabaseProvider
-import repolizer.repository.api.DefaultJsonNetworkController
+import repolizer.repository.api.DefaultNetworkController
 import repolizer.repository.api.NetworkController
 import repolizer.repository.api.NetworkInterface
 import repolizer.repository.provider.GlobalRepositoryProvider
@@ -22,13 +22,13 @@ class Repolizer private constructor(val context: Context, builder: Builder) {
     private val httpClient: OkHttpClient? = builder.httpClient
     private val requestProvider: RequestProvider? = builder.requestProvider
 
-    val baseUrl: String? = builder.baseUrl
-    val networkController: NetworkController
-    var gson: Gson = builder.gson
+    internal val baseUrl: String? = builder.baseUrl
+    internal val networkController: NetworkController
+    internal var gson: Gson = builder.gson
 
-    val progressController: ProgressController? = builder.progressController
-    val loginManager: LoginManager? = builder.loginManager
-    val responseService: ResponseService? = builder.responseService
+    internal val progressController: ProgressController? = builder.progressController
+    internal val loginManager: LoginManager? = builder.loginManager
+    internal val responseService: ResponseService? = builder.responseService
 
     init {
         val retrofitBuilder = Retrofit.Builder()
@@ -66,7 +66,7 @@ class Repolizer private constructor(val context: Context, builder: Builder) {
         internal var httpClient: OkHttpClient? = null
         internal var baseUrl: String? = null
         internal var gson: Gson = Gson()
-        internal var networkControllerClass: Class<out NetworkController> = DefaultJsonNetworkController::class.java
+        internal var networkControllerClass: Class<out NetworkController> = DefaultNetworkController::class.java
 
         internal var progressController: ProgressController? = null
         internal var loginManager: LoginManager? = null
