@@ -17,7 +17,7 @@ repositories {
 
 dependencies {
   //includes all library artifacts
-  implementation 'org.repolizer:repolizer-processor:0.1.0'
+  implementation 'org.repolizer:repolizer-core:0.1.0'
   //just annotations
   implementation 'org.repolizer:repolizer-annotation:0.1.0'
   
