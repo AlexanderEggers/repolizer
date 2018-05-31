@@ -17,7 +17,7 @@ repositories {
 
 dependencies {
   //includes all library artifacts
-  implementation 'org.repolizer:repolizer-processor:0.1.0'
+  implementation 'org.repolizer:repolizer-core:0.1.0'
   //just annotations
   implementation 'org.repolizer:repolizer-annotation:0.1.0'
   
@@ -60,7 +60,7 @@ Here's an example for a database:
 @Migration(migrationType = MigrationType.DEFAULT)
 interface DemoDatabase
 ```
-If you need a fully working example, please use the [example project][3]. In order to make it work you need to register your own api-key for the application on the https://openweathermap.org/api page and define it's api key inside the local.properties file of the project.
+If you need a fully working example, please use the [example project][3]. In order to make it work you need to register your own api-key for the application at https://openweathermap.org/api and define it's key inside the local.properties file of the project.
 
 ```
 apiKey= MY_API_KEY
