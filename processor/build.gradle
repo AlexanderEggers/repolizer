@@ -32,8 +32,8 @@ ext {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    //implementation project(":repolizer-annotation")
-    implementation "org.repolizer:repolizer-annotation:$repolizer_library_version"
+    implementation project(":repolizer-annotation")
+    //implementation "org.repolizer:repolizer-annotation:$repolizer_library_version"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "com.squareup:javapoet:$javapoet_version"

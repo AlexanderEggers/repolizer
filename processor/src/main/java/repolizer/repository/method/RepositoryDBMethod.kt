@@ -9,6 +9,7 @@ import repolizer.repository.RepositoryMapHolder
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
 
+//TODO filter sql string for :(...) according to the param name that has been defined inside method
 class RepositoryDBMethod {
 
     private val annotationRoomQuery = ClassName.get("android.arch.persistence.room", "Query")
@@ -27,7 +28,7 @@ class RepositoryDBMethod {
             val daoMethodBuilder = MethodSpec.methodBuilder("queryFor_${methodElement.simpleName}")
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                     .addAnnotation(AnnotationSpec.builder(annotationRoomQuery)
-                            .addMember("value", "\"${methodElement.getAnnotation(DB::class.java).sql}\"")
+                            .addMember("value", "\"${methodElement.getAnnotation(DB::class.java).rawSql}\"")
                             .build())
 
             methodElement.parameters.forEach { varElement ->
