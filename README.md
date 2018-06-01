@@ -24,7 +24,7 @@ dependencies {
   
   kapt 'org.repolizer:repolizer-processor:0.2.1'
   
-  //Because of Room, you need one additional dependency to your project:
+  //Because of Room, you need one additional processor dependency inside your project:
   kapt "android.arch.persistence.room:compiler:1.1.1-rc1"
 }
 ```
