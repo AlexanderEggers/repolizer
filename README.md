@@ -17,22 +17,22 @@ repositories {
 
 dependencies {
   //includes all library artifacts
-  implementation 'org.repolizer:repolizer-core:0.1.0'
+  implementation 'org.repolizer:repolizer-core:0.2.0'
   //just annotations
-  implementation 'org.repolizer:repolizer-annotation:0.1.0'
+  implementation 'org.repolizer:repolizer-annotation:0.2.0'
   
-  kapt 'org.repolizer:repolizer-processor:0.1.0'
+  kapt 'org.repolizer:repolizer-processor:0.2.0'
   
   //Because of Room, you need one additional dependency to your project:
   kapt "android.arch.persistence.room:compiler:1.1.0"
 }
 ```
 
-How do I use Repolizer? (Step-by-step introduction for 0.1.0)
+How do I use Repolizer? (Step-by-step introduction for 0.2.0)
 -------------------
 Repolizer's design has been created similar to the Retrofit and Room usage. Therefore you need to create interfaces that will represent your repositories and databases.
 
-The repository includes the annotations GET, CUD, REFRESH, CACHE and DB. GET and CUD (create=PUT, update=PUSH, delete=DELETE) are related to their http codes. Every GET method will create a connection between the holder (like your viewmodel) and the database entries. The webservice will be used to update the database which will update this connection. Therefore REFRESH can be used to update the database entries after establishing the connection using the related GET method. The DB annotation can be used to create repository methods to change certain things inside the database. CACHE can be used to execute a small range of operations on the current saved cache.
+The repository includes the annotations GET, CUD, REFRESH, CACHE and DB. GET and CUD (create=PUT, update=PUSH, delete=DELETE) are related to their http codes. Every GET method will create a connection between the holder (like your viewmodel) and the database entries. The webservice will be used to update the database which will update this connection. Therefore REFRESH can be used to update the database entries after establishing the connection using the related GET method. The DB annotation can be used to create repository methods to change certain things inside the database. CACHE can be used to execute a small range of operations on the current saved cache. DB and CACHE require you to set an enum which defines the operation you can execute using the annotation. Optionally the DB annotation allows you to set a custom sql string. Keep in mind that certain operations require you to set a parameter using the DatabaseBody or SqlParameter annotation. For example the INSERT operation requires you to define an object which annotates the DatabaseBody which will be writtin inside the database (more you will find inside the documentation - coming soon!).
 
 The repository requires an entitiy, a database and a table name. Therefore every repository should be reponsible for only ONE entitiy. The database is used to define which source will save any data from this repository and the table is used for the related DAO object. 
 
@@ -78,7 +78,7 @@ Comments/bugs/questions/pull requests are always welcome!
 Compatibility
 -------------
 
- * The library requires at minimum Android 16.
+ * The library requires at minimum Android 14.
 
 Author
 ------
