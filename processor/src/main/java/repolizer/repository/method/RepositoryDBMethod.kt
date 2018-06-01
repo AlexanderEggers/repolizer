@@ -5,14 +5,18 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
 import repolizer.annotation.repository.DB
+import repolizer.annotation.repository.util.DatabaseOperation
 import repolizer.repository.RepositoryMapHolder
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
 
-//TODO filter sql string for :(...) according to the param name that has been defined inside method
 class RepositoryDBMethod {
 
+    private val annotationRoomInsert = ClassName.get("android.arch.persistence.room", "Insert")
+    private val annotationRoomUpdate = ClassName.get("android.arch.persistence.room", "Update")
     private val annotationRoomQuery = ClassName.get("android.arch.persistence.room", "Query")
+    private val annotationRoomDelete = ClassName.get("android.arch.persistence.room", "Delete")
+    private val classOnConflictStrategy = ClassName.get("android.arch.persistence.room", "OnConflictStrategy")
 
     private val classDatabaseBuilder = ClassName.get("repolizer.repository.database", "DatabaseBuilder")
     private val classDatabaseLayer = ClassName.get("repolizer.repository.database", "DatabaseLayer")
@@ -25,11 +29,30 @@ class RepositoryDBMethod {
                     .addModifiers(Modifier.PUBLIC)
                     .addAnnotation(Override::class.java)
 
-            val daoMethodBuilder = MethodSpec.methodBuilder("queryFor_${methodElement.simpleName}")
+            val daoMethodBuilder = MethodSpec.methodBuilder("dbFor_${methodElement.simpleName}")
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                    .addAnnotation(AnnotationSpec.builder(annotationRoomQuery)
-                            .addMember("value", "\"${methodElement.getAnnotation(DB::class.java).rawSql}\"")
-                            .build())
+
+            val databaseOperation = methodElement.getAnnotation(DB::class.java).databaseOperation
+            val sql = methodElement.getAnnotation(DB::class.java).sql
+
+            val annotation = if (sql.isEmpty()) {
+                when (databaseOperation) {
+                    DatabaseOperation.INSERT -> AnnotationSpec.builder(annotationRoomInsert)
+                            .addMember("onConflict", "$classOnConflictStrategy.REPLACE")
+                            .build()
+                    DatabaseOperation.UPDATE -> AnnotationSpec.builder(annotationRoomUpdate)
+                            .addMember("onConflict", "$classOnConflictStrategy.REPLACE")
+                            .build()
+                    DatabaseOperation.DELETE -> AnnotationSpec.builder(annotationRoomDelete).build()
+                    else -> throw IllegalStateException("If you want to use the " +
+                            "DatabaseOperation.QUERY, you need to define the sql value as well.")
+                }
+            } else {
+                AnnotationSpec.builder(annotationRoomQuery)
+                        .addMember("value", "\"$sql\"")
+                        .build()
+            }
+            daoMethodBuilder.addAnnotation(annotation)
 
             methodElement.parameters.forEach { varElement ->
                 val varType = ClassName.get(varElement.asType())
@@ -56,7 +79,7 @@ class RepositoryDBMethod {
     }
 
     private fun createDatabaseLayerAnonymousClass(methodName: String, daoParamList: ArrayList<String>): TypeSpec {
-        var daoQueryCall = "dataDao.queryFor_$methodName("
+        var daoQueryCall = "dataDao.dbFor_$methodName("
         val iterator = daoParamList.iterator()
         while (iterator.hasNext()) {
             daoQueryCall += iterator.next()
