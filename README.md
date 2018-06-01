@@ -13,6 +13,7 @@ Download
 ```gradle
 repositories {
   jcenter()
+  google()
 }
 
 dependencies {
