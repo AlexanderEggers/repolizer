@@ -22,6 +22,9 @@ dependencies {
   implementation 'org.repolizer:repolizer-annotation:0.1.0'
   
   kapt 'org.repolizer:repolizer-processor:0.1.0'
+  
+  //Because of Room, you need one additional dependency to your project:
+  kapt "android.arch.persistence.room:compiler:1.1.0"
 }
 ```
 
