@@ -7,8 +7,10 @@ import com.squareup.javapoet.TypeSpec
 import repolizer.annotation.repository.DB
 import repolizer.annotation.repository.util.DatabaseOperation
 import repolizer.repository.RepositoryMapHolder
+import javax.annotation.processing.Messager
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
+import javax.tools.Diagnostic
 
 class RepositoryDBMethod {
 
@@ -21,7 +23,7 @@ class RepositoryDBMethod {
     private val classDatabaseBuilder = ClassName.get("repolizer.repository.database", "DatabaseBuilder")
     private val classDatabaseLayer = ClassName.get("repolizer.repository.database", "DatabaseLayer")
 
-    fun build(element: Element, daoClassBuilder: TypeSpec.Builder): List<MethodSpec> {
+    fun build(messager: Messager, element: Element, daoClassBuilder: TypeSpec.Builder): List<MethodSpec> {
         val builderList = ArrayList<MethodSpec>()
 
         RepositoryMapHolder.dbAnnotationMap[element.simpleName.toString()]?.forEach { methodElement ->
@@ -34,24 +36,37 @@ class RepositoryDBMethod {
 
             val databaseOperation = methodElement.getAnnotation(DB::class.java).databaseOperation
             val sql = methodElement.getAnnotation(DB::class.java).sql
+            var objectExpected = false
 
-            val annotation = if (sql.isEmpty()) {
+            val annotation = (if (sql.isEmpty()) {
                 when (databaseOperation) {
-                    DatabaseOperation.INSERT -> AnnotationSpec.builder(annotationRoomInsert)
-                            .addMember("onConflict", "$classOnConflictStrategy.REPLACE")
-                            .build()
-                    DatabaseOperation.UPDATE -> AnnotationSpec.builder(annotationRoomUpdate)
-                            .addMember("onConflict", "$classOnConflictStrategy.REPLACE")
-                            .build()
-                    DatabaseOperation.DELETE -> AnnotationSpec.builder(annotationRoomDelete).build()
-                    else -> throw IllegalStateException("If you want to use the " +
-                            "DatabaseOperation.QUERY, you need to define the sql value as well.")
+                    DatabaseOperation.INSERT -> {
+                        objectExpected = true
+                        AnnotationSpec.builder(annotationRoomInsert)
+                                .addMember("onConflict", "$classOnConflictStrategy.REPLACE")
+                                .build()
+                    }
+                    DatabaseOperation.UPDATE -> {
+                        objectExpected = true
+                        AnnotationSpec.builder(annotationRoomUpdate)
+                                .addMember("onConflict", "$classOnConflictStrategy.REPLACE")
+                                .build()
+                    }
+                    DatabaseOperation.DELETE -> {
+                        objectExpected = true
+                        AnnotationSpec.builder(annotationRoomDelete).build()
+                    }
+                    else -> {
+                        messager.printMessage(Diagnostic.Kind.WARNING, "If you want to use the " +
+                                "DatabaseOperation.QUERY, you need to define the sql value as well.")
+                        null
+                    }
                 }
             } else {
                 AnnotationSpec.builder(annotationRoomQuery)
                         .addMember("value", "\"$sql\"")
                         .build()
-            }
+            }) ?: return emptyList()
             daoMethodBuilder.addAnnotation(annotation)
 
             methodElement.parameters.forEach { varElement ->
@@ -60,10 +75,32 @@ class RepositoryDBMethod {
             }
 
             val daoParamList = ArrayList<String>()
-            RepositoryMapHolder.sqlParameterAnnotationMap["${element.simpleName}.${methodElement.simpleName}"]?.forEach {
-                val elementType = ClassName.get(it.asType())
-                daoMethodBuilder.addParameter(elementType, it.simpleName.toString())
-                daoParamList.add(it.simpleName.toString())
+            if (objectExpected) {
+                RepositoryMapHolder.databaseBodyAnnotationMap["${element.simpleName}.${methodElement.simpleName}"]?.forEach {
+                    val elementType = ClassName.get(it.asType())
+                    daoMethodBuilder.addParameter(elementType, it.simpleName.toString())
+                    daoParamList.add(it.simpleName.toString())
+                }
+
+                if (daoParamList.isEmpty()) {
+                    messager.printMessage(Diagnostic.Kind.WARNING, "The method " +
+                            "${methodElement.simpleName} needs to have at least one parameter " +
+                            "which is using the @DatabaseBody annotation.")
+                    return emptyList()
+                }
+            } else {
+                RepositoryMapHolder.sqlParameterAnnotationMap["${element.simpleName}.${methodElement.simpleName}"]?.forEach {
+                    val elementType = ClassName.get(it.asType())
+                    daoMethodBuilder.addParameter(elementType, it.simpleName.toString())
+                    daoParamList.add(it.simpleName.toString())
+                }
+
+                if (daoParamList.isEmpty()) {
+                    messager.printMessage(Diagnostic.Kind.NOTE, "The method " +
+                            "${methodElement.simpleName} has no parameter and will always " +
+                            "execute the same sql string. If that is your intention, you can " +
+                            "ignore this note.")
+                }
             }
 
             val networkGetLayerClass = createDatabaseLayerAnonymousClass(methodElement.simpleName.toString(), daoParamList)

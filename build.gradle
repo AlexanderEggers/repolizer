@@ -14,10 +14,10 @@ buildscript {
         archknife_version = "0.5.0"
         dagger_version = "2.16"
 
-        room_version = '1.1.0'
+        room_version = '1.1.1-rc1'
         livedata_version = '1.1.1'
 
-        repolizer_library_version = "0.2.0"
+        repolizer_library_version = "0.2.1"
     }
 
     repositories {

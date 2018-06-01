@@ -114,7 +114,7 @@ class RepositoryMainProcessor : AnnotationProcessor {
                 fileBuilder.addMethod(it)
             }
 
-            RepositoryDBMethod().build(it, daoBuilder).forEach {
+            RepositoryDBMethod().build(mainProcessor.messager, it, daoBuilder).forEach {
                 fileBuilder.addMethod(it)
             }
 
