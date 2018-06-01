@@ -40,6 +40,7 @@ dependencies {
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "com.android.support:appcompat-v7:$support_lib_version"
     implementation "com.android.support:design:$support_lib_version"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
 
     implementation "android.arch.lifecycle:extensions:$livedata_version"
     kapt "android.arch.lifecycle:compiler:$livedata_version"
@@ -49,13 +50,6 @@ dependencies {
 
     implementation "org.archknife:archknife-core:$archknife_version"
     kapt "org.archknife:archknife-processor:$archknife_version"
-
-    implementation "com.google.code.gson:gson:$gson_version"
-    implementation "com.squareup.retrofit2:retrofit:$retrofit2_version"
-    implementation "com.squareup.retrofit2:converter-gson:$retrofit2_version"
-
-    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
-    implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
 
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
     kapt "com.google.dagger:dagger-android-processor:$dagger_version"
