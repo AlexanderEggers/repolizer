@@ -78,7 +78,7 @@ class RepositoryGetMethod {
 
             var deleteSql = methodElement.getAnnotation(GET::class.java).deleteSql
             if (deleteSql.isEmpty()) {
-                deleteSql = "DELETE * FROM $tableName"
+                deleteSql = "DELETE FROM $tableName"
             }
 
             val daoDeleteAllMethodBuilder = MethodSpec.methodBuilder("deleteAllFor_${methodElement.simpleName}")
@@ -171,10 +171,10 @@ class RepositoryGetMethod {
             getMethodBuilder.addStatement("builder.setNetworkLayer($networkGetLayerClass)")
 
             if(deleteIfCacheIsTooOldParamName != null) {
-                getMethodBuilder.addStatement("builder.setIsDeletingCacheIfTooOld($deleteIfCacheIsTooOldParamName")
+                getMethodBuilder.addStatement("builder.setDeletingCacheIfTooOld($deleteIfCacheIsTooOldParamName)")
             } else {
                 val deleteIfCacheIsTooOldByDefault = element.getAnnotation(Repository::class.java).deleteIfCacheIsTooOld
-                getMethodBuilder.addStatement("builder.setIsDeletingCacheIfTooOld($deleteIfCacheIsTooOldByDefault")
+                getMethodBuilder.addStatement("builder.setDeletingCacheIfTooOld($deleteIfCacheIsTooOldByDefault)")
             }
 
             if (allowFetchParamName != null) {

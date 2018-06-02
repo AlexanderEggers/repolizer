@@ -22,7 +22,7 @@ class RepositoryDBMethod {
     private val classDatabaseLayer = ClassName.get("repolizer.repository.database", "DatabaseLayer")
 
     private val classLiveData = ClassName.get("android.arch.lifecycle", "LiveData")
-    private val liveDataOfBoolean = ParameterizedTypeName.get(classLiveData, ClassName.get(Boolean::class.java))
+    private val liveDataOfBoolean = ParameterizedTypeName.get(classLiveData, ClassName.get(java.lang.Boolean::class.java))
 
     fun build(messager: Messager, element: Element, daoClassBuilder: TypeSpec.Builder): List<MethodSpec> {
         val builderList = ArrayList<MethodSpec>()

@@ -1,9 +1,6 @@
 package repolizer.repository.method
 
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.ParameterizedTypeName
-import com.squareup.javapoet.TypeSpec
+import com.squareup.javapoet.*
 import repolizer.annotation.repository.CACHE
 import repolizer.annotation.repository.util.CacheOperation
 import repolizer.repository.RepositoryMapHolder
@@ -23,7 +20,7 @@ class RepositoryCacheMethod {
     private val classString = ClassName.get(String::class.java)
 
     private val classLiveData = ClassName.get("android.arch.lifecycle", "LiveData")
-    private val liveDataOfBoolean = ParameterizedTypeName.get(classLiveData, ClassName.get(Boolean::class.java))
+    private val liveDataOfBoolean = ParameterizedTypeName.get(classLiveData, ClassName.get(java.lang.Boolean::class.java))
 
     fun build(messager: Messager, element: Element): List<MethodSpec> {
         val builderList = ArrayList<MethodSpec>()

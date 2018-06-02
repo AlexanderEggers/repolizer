@@ -24,6 +24,7 @@ class RepositoryCudMethod {
     private val classNetworkResponseWithString = ParameterizedTypeName.get(classNetworkResponse, ClassName.get(String::class.java))
 
     private val classLiveData = ClassName.get("android.arch.lifecycle", "LiveData")
+    private val liveDataOfString = ParameterizedTypeName.get(classLiveData, ClassName.get(String::class.java))
 
     fun build(messager: Messager, element: Element, entity: ClassName): List<MethodSpec> {
         val builderList = ArrayList<MethodSpec>()
@@ -84,7 +85,7 @@ class RepositoryCudMethod {
             cudMethodBuilder.addStatement("builder.setNetworkLayer($networkGetLayerClass)")
 
             val returnValue = ClassName.get(methodElement.returnType)
-            if(returnValue != ParameterizedTypeName.get(classLiveData, ClassName.get(String::class.java))) {
+            if(returnValue != liveDataOfString) {
                 messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
                         "@CUD annotation are only accepting LiveData<String> as a return type.")
                 return emptyList()
