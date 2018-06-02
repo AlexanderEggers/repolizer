@@ -1,15 +1,13 @@
 package repolizer.repository.method
 
-import com.squareup.javapoet.AnnotationSpec
-import com.squareup.javapoet.ClassName
-import com.squareup.javapoet.MethodSpec
-import com.squareup.javapoet.TypeSpec
+import com.squareup.javapoet.*
 import repolizer.annotation.repository.DB
 import repolizer.annotation.repository.util.DatabaseOperation
 import repolizer.repository.RepositoryMapHolder
 import javax.annotation.processing.Messager
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
+import javax.lang.model.type.TypeKind
 import javax.tools.Diagnostic
 
 class RepositoryDBMethod {
@@ -22,6 +20,9 @@ class RepositoryDBMethod {
 
     private val classDatabaseBuilder = ClassName.get("repolizer.repository.database", "DatabaseBuilder")
     private val classDatabaseLayer = ClassName.get("repolizer.repository.database", "DatabaseLayer")
+
+    private val classLiveData = ClassName.get("android.arch.lifecycle", "LiveData")
+    private val liveDataOfBoolean = ParameterizedTypeName.get(classLiveData, ClassName.get(Boolean::class.java))
 
     fun build(messager: Messager, element: Element, daoClassBuilder: TypeSpec.Builder): List<MethodSpec> {
         val builderList = ArrayList<MethodSpec>()
@@ -83,7 +84,7 @@ class RepositoryDBMethod {
                 }
 
                 if (daoParamList.isEmpty()) {
-                    messager.printMessage(Diagnostic.Kind.WARNING, "The method " +
+                    messager.printMessage(Diagnostic.Kind.ERROR, "The method " +
                             "${methodElement.simpleName} needs to have at least one parameter " +
                             "which is using the @DatabaseBody annotation.")
                     return emptyList()
@@ -106,7 +107,19 @@ class RepositoryDBMethod {
             val networkGetLayerClass = createDatabaseLayerAnonymousClass(methodElement.simpleName.toString(), daoParamList)
             dbMethodBuilder.addStatement("$classDatabaseBuilder builder = new $classDatabaseBuilder()")
             dbMethodBuilder.addStatement("builder.setDatabaseLayer($networkGetLayerClass)")
-            dbMethodBuilder.addStatement("super.executeDB(builder)")
+
+            val returnValue = ClassName.get(methodElement.returnType)
+            if(returnValue == liveDataOfBoolean) {
+                dbMethodBuilder.returns(ClassName.get(methodElement.returnType))
+                dbMethodBuilder.addStatement("return super.executeDB(builder)")
+            } else if(methodElement.returnType == TypeKind.VOID){
+                dbMethodBuilder.addStatement("super.executeDB(builder)")
+            } else {
+                messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
+                        "@DB annotation are only accepting LiveData<Boolean> or Void as a return " +
+                        "type.")
+                return emptyList()
+            }
 
             daoClassBuilder.addMethod(daoMethodBuilder.build())
             builderList.add(dbMethodBuilder.build())

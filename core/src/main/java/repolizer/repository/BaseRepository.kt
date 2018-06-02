@@ -27,8 +27,8 @@ abstract class BaseRepository<Entity> constructor(private val repolizer: Repoliz
                 .execute()
     }
 
-    protected fun executeDB(builder: DatabaseBuilder<Entity>) {
-        builder.build()
+    protected fun executeDB(builder: DatabaseBuilder<Entity>): LiveData<Boolean> {
+        return builder.build()
                 .execute()
     }
 
