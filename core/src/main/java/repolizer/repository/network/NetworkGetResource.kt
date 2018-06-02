@@ -38,10 +38,10 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
     private val deleteIfCacheIsTooOld: Boolean = builder.isDeletingCacheIfTooOld
 
     private val url: String = builder.url
-    private val fullUrl: String = if (repolizer.baseUrl!!.substring(repolizer.baseUrl.length) != "/") {
-        repolizer.baseUrl + "/" + builder.url
+    private val fullUrl: String = if (repolizer.baseUrl.substring(repolizer.baseUrl.length) != "/") {
+        "${repolizer.baseUrl}/${builder.url}"
     } else {
-        repolizer.baseUrl + builder.url
+        "${repolizer.baseUrl}${builder.url}"
     }
 
     private val requestType: RequestType = builder.requestType!!

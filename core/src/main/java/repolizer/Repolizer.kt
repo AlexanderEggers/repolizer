@@ -22,7 +22,7 @@ class Repolizer private constructor(val context: Context, builder: Builder) {
     private val httpClient: OkHttpClient? = builder.httpClient
     private val requestProvider: RequestProvider? = builder.requestProvider
 
-    internal val baseUrl: String? = builder.baseUrl
+    internal val baseUrl: String = builder.baseUrl!!
     internal val networkController: NetworkController
     internal var gson: Gson = builder.gson
 
@@ -32,7 +32,7 @@ class Repolizer private constructor(val context: Context, builder: Builder) {
 
     init {
         val retrofitBuilder = Retrofit.Builder()
-                .baseUrl(baseUrl!!)
+                .baseUrl(baseUrl)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addCallAdapterFactory(LiveDataCallAdapterFactory(requestProvider))
 
