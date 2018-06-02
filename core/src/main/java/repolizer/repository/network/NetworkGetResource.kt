@@ -35,6 +35,7 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
 
     private val requiresLogin: Boolean = builder.requiresLogin
     private val showProgress: Boolean = builder.showProgress
+    private val deleteIfCacheIsTooOld: Boolean = builder.isDeletingCacheIfTooOld
 
     private val url: String = builder.url
     private val fullUrl: String = if (repolizer.baseUrl!!.substring(repolizer.baseUrl.length) != "/") {
@@ -68,7 +69,7 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
                 val needsFetch = cacheState == CacheState.NEEDS_SOFT_REFRESH ||
                         cacheState == CacheState.NEEDS_HARD_REFRESH || cacheState == CacheState.NO_CACHE
 
-                if ((data != null || needsFetch) && allowFetch) {
+                if ((data == null || needsFetch) && allowFetch) {
                     if (fetchSecurityLayer.allowFetch()) {
                         fetchFromNetwork()
                     } else {
@@ -142,7 +143,7 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
                     getLayer.updateFetchTime(makeUrlId(fullUrl))
                 } else {
                     responseService?.handleError(response)
-                    if (cacheState == CacheState.NEEDS_HARD_REFRESH) {
+                    if (deleteIfCacheIsTooOld && cacheState == CacheState.NEEDS_HARD_REFRESH) {
                         getLayer.removeAllData()
                     }
                 }

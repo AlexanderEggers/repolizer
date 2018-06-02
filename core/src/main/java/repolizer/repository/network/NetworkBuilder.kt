@@ -22,6 +22,7 @@ class NetworkBuilder<Entity> {
 
     var requiresLogin: Boolean = false
     var showProgress: Boolean = false
+    var isDeletingCacheIfTooOld: Boolean = false
 
     var networkLayer: NetworkLayer<Entity>? = null
 

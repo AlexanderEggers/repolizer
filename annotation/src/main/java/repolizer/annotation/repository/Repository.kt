@@ -8,4 +8,5 @@ import kotlin.reflect.KClass
 annotation class Repository(val entity: KClass<*>,
                             val database: KClass<*>,
                             val tableName: String,
-                            val allowFetchByDefault: Boolean = true)
+                            val allowFetchByDefault: Boolean = true,
+                            val deleteIfCacheIsTooOld: Boolean = true)
