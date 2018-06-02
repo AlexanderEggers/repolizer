@@ -6,7 +6,7 @@ import repolizer.annotation.database.util.JournalMode
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.CLASS)
-annotation class Database(val name: String,
+annotation class Database(val name: String = "database",
                           val version: Int,
                           val type: DatabaseType,
                           val exportSchema: Boolean = true,
