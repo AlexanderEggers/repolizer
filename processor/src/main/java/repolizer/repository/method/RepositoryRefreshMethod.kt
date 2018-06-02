@@ -7,8 +7,10 @@ import repolizer.annotation.repository.REFRESH
 import repolizer.annotation.repository.parameter.Header
 import repolizer.annotation.repository.parameter.UrlQuery
 import repolizer.repository.RepositoryMapHolder
+import javax.annotation.processing.Messager
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
+import javax.tools.Diagnostic
 
 class RepositoryRefreshMethod {
 
@@ -20,13 +22,14 @@ class RepositoryRefreshMethod {
     private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
     private val classList = ClassName.get(List::class.java)
 
+    private val classLiveData = ClassName.get("android.arch.lifecycle", "LiveData")
     private val classAnnotationRoomInsert = ClassName.get("android.arch.persistence.room", "Insert")
     private val classOnConflictStrategy = ClassName.get("android.arch.persistence.room", "OnConflictStrategy")
 
     private lateinit var classEntity: TypeName
     private lateinit var classArrayWithEntity: TypeName
 
-    fun build(element: Element, entity: ClassName, daoClassBuilder: TypeSpec.Builder): List<MethodSpec> {
+    fun build(messager: Messager, element: Element, entity: ClassName, daoClassBuilder: TypeSpec.Builder): List<MethodSpec> {
         val builderList = ArrayList<MethodSpec>()
 
         classEntity = entity
@@ -90,7 +93,15 @@ class RepositoryRefreshMethod {
             val networkGetLayerClass = createNetworkGetLayerAnonymousClass(classGenericTypeForMethod,
                     methodElement.simpleName.toString(), getAsList)
             refreshMethodBuilder.addStatement("builder.setNetworkLayer($networkGetLayerClass)")
-            refreshMethodBuilder.addStatement("return super.executeRefresh(builder)")
+
+            val returnValue = ClassName.get(methodElement.returnType)
+            if(returnValue != ParameterizedTypeName.get(classLiveData, ClassName.get(String::class.java))) {
+                messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
+                        "@REFRESH annotation are only accepting LiveData<String> as a return type.")
+                return emptyList()
+            } else {
+                refreshMethodBuilder.addStatement("return super.executeRefresh(builder)")
+            }
 
             daoClassBuilder.addMethod(daoInsertMethodBuilder.build())
             builderList.add(refreshMethodBuilder.build())

@@ -57,8 +57,8 @@ class RepositoryDBMethod {
                         objectExpected = true
                         AnnotationSpec.builder(annotationRoomDelete).build()
                     }
-                    else -> {
-                        messager.printMessage(Diagnostic.Kind.WARNING, "If you want to use the " +
+                    DatabaseOperation.QUERY -> {
+                        messager.printMessage(Diagnostic.Kind.ERROR, "If you want to use the " +
                                 "DatabaseOperation.QUERY, you need to define the sql value as well.")
                         null
                     }
@@ -109,16 +109,18 @@ class RepositoryDBMethod {
             dbMethodBuilder.addStatement("builder.setDatabaseLayer($networkGetLayerClass)")
 
             val returnValue = ClassName.get(methodElement.returnType)
-            if(returnValue == liveDataOfBoolean) {
-                dbMethodBuilder.returns(ClassName.get(methodElement.returnType))
-                dbMethodBuilder.addStatement("return super.executeDB(builder)")
-            } else if(methodElement.returnType == TypeKind.VOID){
-                dbMethodBuilder.addStatement("super.executeDB(builder)")
-            } else {
-                messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
-                        "@DB annotation are only accepting LiveData<Boolean> or Void as a return " +
-                        "type.")
-                return emptyList()
+            when {
+                returnValue == liveDataOfBoolean -> {
+                    dbMethodBuilder.returns(ClassName.get(methodElement.returnType))
+                    dbMethodBuilder.addStatement("return super.executeDB(builder)")
+                }
+                methodElement.returnType == TypeKind.VOID -> dbMethodBuilder.addStatement("super.executeDB(builder)")
+                else -> {
+                    messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
+                            "@DB annotation are only accepting LiveData<Boolean> or Void as a return " +
+                            "type.")
+                    return emptyList()
+                }
             }
 
             daoClassBuilder.addMethod(daoMethodBuilder.build())

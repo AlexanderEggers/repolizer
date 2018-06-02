@@ -6,8 +6,10 @@ import repolizer.annotation.repository.parameter.Header
 import repolizer.annotation.repository.parameter.UrlQuery
 import repolizer.annotation.repository.util.CudType
 import repolizer.repository.RepositoryMapHolder
+import javax.annotation.processing.Messager
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
+import javax.tools.Diagnostic
 
 class RepositoryCudMethod {
 
@@ -23,7 +25,7 @@ class RepositoryCudMethod {
 
     private val classLiveData = ClassName.get("android.arch.lifecycle", "LiveData")
 
-    fun build(element: Element, entity: ClassName): List<MethodSpec> {
+    fun build(messager: Messager, element: Element, entity: ClassName): List<MethodSpec> {
         val builderList = ArrayList<MethodSpec>()
 
         RepositoryMapHolder.cudAnnotationMap[element.simpleName.toString()]?.forEach { methodElement ->
@@ -80,7 +82,15 @@ class RepositoryCudMethod {
             val networkGetLayerClass = createNetworkPostLayerAnonymousClass(
                     classGenericTypeForMethod, cudType)
             cudMethodBuilder.addStatement("builder.setNetworkLayer($networkGetLayerClass)")
-            cudMethodBuilder.addStatement("return super.executeCud(builder)")
+
+            val returnValue = ClassName.get(methodElement.returnType)
+            if(returnValue != ParameterizedTypeName.get(classLiveData, ClassName.get(String::class.java))) {
+                messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
+                        "@CUD annotation are only accepting LiveData<String> as a return type.")
+                return emptyList()
+            } else {
+                cudMethodBuilder.addStatement("return super.executeCud(builder)")
+            }
 
             builderList.add(cudMethodBuilder.build())
         }

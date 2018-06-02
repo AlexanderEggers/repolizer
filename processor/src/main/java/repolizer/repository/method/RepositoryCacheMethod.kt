@@ -2,13 +2,17 @@ package repolizer.repository.method
 
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeSpec
 import repolizer.annotation.repository.CACHE
 import repolizer.annotation.repository.util.CacheOperation
 import repolizer.repository.RepositoryMapHolder
+import javax.annotation.processing.Messager
 import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
+import javax.lang.model.type.TypeKind
+import javax.tools.Diagnostic
 
 class RepositoryCacheMethod {
 
@@ -18,7 +22,10 @@ class RepositoryCacheMethod {
 
     private val classString = ClassName.get(String::class.java)
 
-    fun build(element: Element): List<MethodSpec> {
+    private val classLiveData = ClassName.get("android.arch.lifecycle", "LiveData")
+    private val liveDataOfBoolean = ParameterizedTypeName.get(classLiveData, ClassName.get(Boolean::class.java))
+
+    fun build(messager: Messager, element: Element): List<MethodSpec> {
         val builderList = ArrayList<MethodSpec>()
 
         RepositoryMapHolder.cacheAnnotationMap[element.simpleName.toString()]?.forEach { methodElement ->
@@ -39,7 +46,21 @@ class RepositoryCacheMethod {
 
             cacheMethodBuilder.addStatement("$classDatabaseBuilder builder = new $classDatabaseBuilder()")
             cacheMethodBuilder.addStatement("builder.setDatabaseLayer($networkGetLayerClass)")
-            cacheMethodBuilder.addStatement("super.executeDB(builder)")
+
+            val returnValue = ClassName.get(methodElement.returnType)
+            when {
+                returnValue == liveDataOfBoolean -> {
+                    cacheMethodBuilder.returns(ClassName.get(methodElement.returnType))
+                    cacheMethodBuilder.addStatement("return super.executeDB(builder)")
+                }
+                methodElement.returnType == TypeKind.VOID -> cacheMethodBuilder.addStatement("super.executeDB(builder)")
+                else -> {
+                    messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
+                            "@CACHE annotation are only accepting LiveData<Boolean> or Void as a " +
+                            "return type.")
+                    return emptyList()
+                }
+            }
 
             builderList.add(cacheMethodBuilder.build())
         }
@@ -82,12 +103,13 @@ class RepositoryCacheMethod {
 
     private fun createDaoCall(doaCallStart: String, list: ArrayList<String>): String {
         var daoCall = doaCallStart
+
         val iterator = list.iterator()
         while (iterator.hasNext()) {
             daoCall += iterator.next()
             daoCall += if (iterator.hasNext()) ", " else ""
         }
-        daoCall += ")"
-        return daoCall
+
+        return "$daoCall)"
     }
 }

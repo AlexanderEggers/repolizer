@@ -10,8 +10,10 @@ import repolizer.annotation.repository.parameter.RepositoryParameter
 import repolizer.annotation.repository.parameter.UrlQuery
 import repolizer.annotation.repository.util.ParameterType
 import repolizer.repository.RepositoryMapHolder
+import javax.annotation.processing.Messager
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
+import javax.tools.Diagnostic
 
 class RepositoryGetMethod {
 
@@ -35,7 +37,7 @@ class RepositoryGetMethod {
     private lateinit var classEntity: TypeName
     private lateinit var classArrayWithEntity: TypeName
 
-    fun build(element: Element, entity: ClassName, daoClassBuilder: TypeSpec.Builder): List<MethodSpec> {
+    fun build(messager: Messager, element: Element, entity: ClassName, daoClassBuilder: TypeSpec.Builder): List<MethodSpec> {
         val builderList = ArrayList<MethodSpec>()
         val tableName = element.getAnnotation(Repository::class.java).tableName
 
@@ -180,6 +182,15 @@ class RepositoryGetMethod {
             } else {
                 val allowFetchByDefault = element.getAnnotation(Repository::class.java).allowFetchByDefault
                 getMethodBuilder.addStatement("return super.executeGet(builder, $allowFetchByDefault)")
+            }
+
+            val returnValue = ClassName.get(methodElement.returnType)
+            if(returnValue != ParameterizedTypeName.get(classLiveData, classGenericTypeForMethod)) {
+                messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
+                        "@GET annotation are only accepting LiveData<ENTITY> as a return type." +
+                        "The ENTITY stands for the class which you have defined inside your" +
+                        "@Repository annotation under the field entity.")
+                return emptyList()
             }
 
             daoClassBuilder.addMethod(daoInsertMethodBuilder.build())

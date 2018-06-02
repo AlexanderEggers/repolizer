@@ -102,15 +102,15 @@ class RepositoryMainProcessor : AnnotationProcessor {
                     .addModifiers(Modifier.PUBLIC)
                     .addAnnotation(classAnnotationDao)
 
-            RepositoryRefreshMethod().build(it, classEntity, daoBuilder).forEach {
+            RepositoryRefreshMethod().build(mainProcessor.messager, it, classEntity, daoBuilder).forEach {
                 fileBuilder.addMethod(it)
             }
 
-            RepositoryGetMethod().build(it, classEntity, daoBuilder).forEach {
+            RepositoryGetMethod().build(mainProcessor.messager, it, classEntity, daoBuilder).forEach {
                 fileBuilder.addMethod(it)
             }
 
-            RepositoryCudMethod().build(it, classEntity).forEach {
+            RepositoryCudMethod().build(mainProcessor.messager, it, classEntity).forEach {
                 fileBuilder.addMethod(it)
             }
 
@@ -118,7 +118,7 @@ class RepositoryMainProcessor : AnnotationProcessor {
                 fileBuilder.addMethod(it)
             }
 
-            RepositoryCacheMethod().build(it).forEach {
+            RepositoryCacheMethod().build(mainProcessor.messager, it).forEach {
                 fileBuilder.addMethod(it)
             }
 
