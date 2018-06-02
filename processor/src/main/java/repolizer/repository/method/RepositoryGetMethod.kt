@@ -171,8 +171,8 @@ class RepositoryGetMethod {
             if(deleteIfCacheIsTooOldParamName != null) {
                 getMethodBuilder.addStatement("builder.setIsDeletingCacheIfTooOld($deleteIfCacheIsTooOldParamName")
             } else {
-                val deleteIfCacheIsTooOldByDelete = element.getAnnotation(Repository::class.java).deleteIfCacheIsTooOld
-                getMethodBuilder.addStatement("builder.setIsDeletingCacheIfTooOld($deleteIfCacheIsTooOldByDelete")
+                val deleteIfCacheIsTooOldByDefault = element.getAnnotation(Repository::class.java).deleteIfCacheIsTooOld
+                getMethodBuilder.addStatement("builder.setIsDeletingCacheIfTooOld($deleteIfCacheIsTooOldByDefault")
             }
 
             if (allowFetchParamName != null) {
