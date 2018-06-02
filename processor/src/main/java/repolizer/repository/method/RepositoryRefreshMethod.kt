@@ -22,9 +22,11 @@ class RepositoryRefreshMethod {
     private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
     private val classList = ClassName.get(List::class.java)
 
-    private val classLiveData = ClassName.get("android.arch.lifecycle", "LiveData")
     private val classAnnotationRoomInsert = ClassName.get("android.arch.persistence.room", "Insert")
     private val classOnConflictStrategy = ClassName.get("android.arch.persistence.room", "OnConflictStrategy")
+
+    private val classLiveData = ClassName.get("android.arch.lifecycle", "LiveData")
+    private val liveDataOfString = ParameterizedTypeName.get(classLiveData, ClassName.get(String::class.java))
 
     private lateinit var classEntity: TypeName
     private lateinit var classArrayWithEntity: TypeName
@@ -95,7 +97,7 @@ class RepositoryRefreshMethod {
             refreshMethodBuilder.addStatement("builder.setNetworkLayer($networkGetLayerClass)")
 
             val returnValue = ClassName.get(methodElement.returnType)
-            if(returnValue != ParameterizedTypeName.get(classLiveData, ClassName.get(String::class.java))) {
+            if(returnValue != liveDataOfString) {
                 messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
                         "@REFRESH annotation are only accepting LiveData<String> as a return type.")
                 return emptyList()
