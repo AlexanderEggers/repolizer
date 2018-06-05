@@ -110,8 +110,7 @@ class DatabaseProvider {
 
         methodBuilder.addStatement("return builder.build()")
                 .returns(classRoomDatabase)
-
-
+        
         return providerBuilder
                 .addMethod(methodBuilder.build())
                 .build()

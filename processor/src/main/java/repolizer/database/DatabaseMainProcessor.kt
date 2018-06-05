@@ -8,10 +8,7 @@ import repolizer.util.AnnotationProcessor
 import repolizer.util.ProcessorUtil
 import repolizer.util.ProcessorUtil.Companion.getGeneratedDatabaseName
 import javax.annotation.processing.RoundEnvironment
-import javax.lang.model.element.AnnotationValue
-import javax.lang.model.element.Element
-import javax.lang.model.element.ElementKind
-import javax.lang.model.element.Modifier
+import javax.lang.model.element.*
 import javax.lang.model.type.DeclaredType
 import javax.tools.Diagnostic
 
@@ -27,9 +24,17 @@ class DatabaseMainProcessor : AnnotationProcessor {
         initMigrationAnnotations(mainProcessor, roundEnv)
 
         roundEnv.getElementsAnnotatedWith(Database::class.java).forEach {
-            if (it.kind != ElementKind.INTERFACE) {
+            val typeElement = it as TypeElement
+
+            if (!it.kind.isInterface) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                        "be applied to an interface.")
+                        "be applied to an interface. Error in class: ${typeElement.simpleName}")
+                return
+            }
+
+            if(!typeElement.interfaces.isEmpty()) {
+                mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Parent " +
+                        "interfaces are not allowed. Error in class: ${typeElement.simpleName}")
                 return
             }
 
@@ -133,9 +138,9 @@ class DatabaseMainProcessor : AnnotationProcessor {
         val hashMap: HashMap<String, ArrayList<Element>> = DatabaseMapHolder.migrationAnnotationMap
 
         roundEnv.getElementsAnnotatedWith(Migration::class.java).forEach {
-            if (it.kind != ElementKind.INTERFACE) {
+            if (!it.kind.isInterface) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                        "be applied to an interface.")
+                        "be applied to an interface. Error in class: ${it.simpleName}")
                 return
             }
 

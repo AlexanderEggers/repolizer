@@ -14,13 +14,14 @@ class RepositoryProcessorUtil {
         fun initMethodAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment,
                                   clazz: Class<out Annotation>, hashMap: HashMap<String, ArrayList<ExecutableElement>>) {
             roundEnv.getElementsAnnotatedWith(clazz).forEach {
+                val typeElement = it.enclosingElement as TypeElement
+
                 if (it.kind != ElementKind.METHOD) {
                     mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                            "be applied to a method.")
+                            "be applied to a method. Error in class: " +
+                            "${typeElement.simpleName}.${it.simpleName}")
                     return
                 }
-
-                val typeElement = it.enclosingElement as TypeElement
 
                 var currentList: ArrayList<ExecutableElement>? = hashMap[typeElement.simpleName.toString()]
                 if (currentList == null) {
@@ -35,16 +36,17 @@ class RepositoryProcessorUtil {
         fun initParamAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment,
                                  clazz: Class<out Annotation>, hashMap: HashMap<String, ArrayList<VariableElement>>) {
             roundEnv.getElementsAnnotatedWith(clazz).forEach {
+                val typeElement = it.enclosingElement.enclosingElement as TypeElement
+                val methodElement = it.enclosingElement as ExecutableElement
+
                 if (it.kind != ElementKind.PARAMETER) {
                     mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                            "be applied to a parameter.")
+                            "be applied to a parameter. Error in class: " +
+                            "${typeElement.simpleName}.${methodElement.simpleName}")
                     return
                 }
 
-                val typeElement = it.enclosingElement.enclosingElement as TypeElement
-                val methodElement = it.enclosingElement as ExecutableElement
                 val key = typeElement.simpleName.toString() + "." + methodElement.simpleName.toString()
-
                 var currentList: ArrayList<VariableElement>? = hashMap[key]
                 if (currentList == null) {
                     currentList = ArrayList()

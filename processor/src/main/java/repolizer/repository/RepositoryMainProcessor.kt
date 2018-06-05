@@ -13,7 +13,6 @@ import repolizer.util.ProcessorUtil.Companion.getGeneratedDatabaseName
 import repolizer.util.ProcessorUtil.Companion.getGeneratedRepositoryName
 import repolizer.util.ProcessorUtil.Companion.getPackageName
 import javax.annotation.processing.RoundEnvironment
-import javax.lang.model.element.ElementKind
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
@@ -36,9 +35,17 @@ class RepositoryMainProcessor : AnnotationProcessor {
         initAnnotations(mainProcessor, roundEnv)
 
         roundEnv.getElementsAnnotatedWith(Repository::class.java).forEach {
-            if (it.kind != ElementKind.INTERFACE) {
+            val typeElement = it as TypeElement
+
+            if (!it.kind.isInterface) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                        "be applied to an interface.")
+                        "be applied to an interface. Error in class: ${typeElement.simpleName}")
+                return
+            }
+
+            if(!typeElement.interfaces.isEmpty()) {
+                mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Parent " +
+                        "interfaces are not allowed. Error in class: ${typeElement.simpleName}")
                 return
             }
 
