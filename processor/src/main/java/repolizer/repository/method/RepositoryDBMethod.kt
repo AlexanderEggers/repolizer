@@ -61,7 +61,7 @@ class RepositoryDBMethod {
                     DatabaseOperation.QUERY -> {
                         messager.printMessage(Diagnostic.Kind.ERROR, "If you want to use the " +
                                 "DatabaseOperation.QUERY, you need to define the sql value as well." +
-                                "Error for class.method: ${element.simpleName}.${methodElement.simpleName}")
+                                "Error for ${element.simpleName}.${methodElement.simpleName}")
                         null
                     }
                 }
@@ -89,7 +89,7 @@ class RepositoryDBMethod {
                     messager.printMessage(Diagnostic.Kind.ERROR, "The method " +
                             "${methodElement.simpleName} needs to have at least one parameter " +
                             "which is using the @DatabaseBody annotation. Error for " +
-                            "class.method: ${element.simpleName}.${methodElement.simpleName}")
+                            "${element.simpleName}.${methodElement.simpleName}")
                     continue
                 }
             } else {
@@ -103,7 +103,7 @@ class RepositoryDBMethod {
                     messager.printMessage(Diagnostic.Kind.NOTE, "The method " +
                             "${methodElement.simpleName} has no parameter and will always " +
                             "execute the same sql string. If that is your intention, you can " +
-                            "ignore this note. Info for class.method: " +
+                            "ignore this note. Info for " +
                             "${element.simpleName}.${methodElement.simpleName}")
                 }
             }
@@ -121,7 +121,7 @@ class RepositoryDBMethod {
             } else {
                 messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
                         "@DB annotation are only accepting LiveData<Boolean> or Void as a return " +
-                        "type. Error for class.method: ${element.simpleName}.${methodElement.simpleName}")
+                        "type. Error for ${element.simpleName}.${methodElement.simpleName}")
                 continue
             }
 

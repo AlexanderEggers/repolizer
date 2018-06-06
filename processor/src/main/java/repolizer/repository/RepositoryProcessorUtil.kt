@@ -18,7 +18,7 @@ class RepositoryProcessorUtil {
 
                 if (it.kind != ElementKind.METHOD) {
                     mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                            "be applied to a method. Error for class.method: " +
+                            "be applied to a method. Error for " +
                             "${typeElement.simpleName}.${it.simpleName}")
                     continue
                 }
@@ -38,7 +38,7 @@ class RepositoryProcessorUtil {
 
                 if (it.kind != ElementKind.PARAMETER) {
                     mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                            "be applied to a parameter. Error for class.method.parameter: " +
+                            "be applied to a parameter. Error for " +
                             "${typeElement.simpleName}.${methodElement.simpleName}.${it.simpleName}")
                     continue
                 }

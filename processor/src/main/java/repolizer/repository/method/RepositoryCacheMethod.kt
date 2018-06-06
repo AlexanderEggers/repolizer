@@ -57,7 +57,7 @@ class RepositoryCacheMethod {
             } else {
                 messager.printMessage(Diagnostic.Kind.ERROR, "Methods that are using the " +
                         "@CACHE annotation are only accepting LiveData<Boolean> or Void as a " +
-                        "return type. Error for class.method: ${element.simpleName}.${methodElement.simpleName}")
+                        "return type. Error for ${element.simpleName}.${methodElement.simpleName}")
                 continue
             }
 

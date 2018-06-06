@@ -30,13 +30,13 @@ class DatabaseMainProcessor {
 
             if (!it.kind.isInterface) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                        "be applied to an interface. Error for class: ${typeElement.simpleName}")
+                        "be applied to an interface. Error for ${typeElement.simpleName}")
                 continue
             }
 
             if (!typeElement.interfaces.isEmpty()) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Parent " +
-                        "interfaces are not allowed. Error for class: ${typeElement.simpleName}")
+                        "interfaces are not allowed. Error for ${typeElement.simpleName}")
                 continue
             }
 
@@ -142,7 +142,7 @@ class DatabaseMainProcessor {
         for (it in roundEnv.getElementsAnnotatedWith(Migration::class.java)) {
             if (!it.kind.isInterface) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                        "be applied to an interface. Error for class: ${it.simpleName}")
+                        "be applied to an interface. Error for ${it.simpleName}")
                 continue
             }
 

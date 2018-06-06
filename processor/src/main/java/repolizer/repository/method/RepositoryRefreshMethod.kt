@@ -103,7 +103,7 @@ class RepositoryRefreshMethod {
             } else {
                 messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
                         "@REFRESH annotation are only accepting LiveData<String> as a return type." +
-                        "Error for class.method: ${element.simpleName}.${methodElement.simpleName}")
+                        "Error for ${element.simpleName}.${methodElement.simpleName}")
                 continue
             }
 

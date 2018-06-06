@@ -91,7 +91,7 @@ class RepositoryCudMethod {
             } else {
                 messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
                         "@CUD annotation are only accepting LiveData<String> as a return type." +
-                        "Error for class.method: ${element.simpleName}.${methodElement.simpleName}")
+                        "Error for ${element.simpleName}.${methodElement.simpleName}")
                 continue
             }
 

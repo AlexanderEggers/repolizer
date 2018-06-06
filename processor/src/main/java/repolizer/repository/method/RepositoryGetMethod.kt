@@ -190,7 +190,7 @@ class RepositoryGetMethod {
                 messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
                         "@GET annotation are only accepting LiveData<ENTITY> as a return type." +
                         "The ENTITY stands for the class which you have defined inside your" +
-                        "@Repository annotation under the field entity. Error for class.method: " +
+                        "@Repository annotation under the field entity. Error for " +
                         "${element.simpleName}.${methodElement.simpleName}")
                 continue
             }
