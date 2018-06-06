@@ -14,7 +14,7 @@ class NetworkBuilder<Entity> {
         set(value) {
             if (field != null) {
                 throw IllegalStateException("Only one raw body can be set. Make sure that you don't " +
-                        "use more than one @RequestBody annotation for this method")
+                        "use more than one @RequestBody annotation for this method.")
             } else field = value
         }
 

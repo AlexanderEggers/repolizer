@@ -37,7 +37,8 @@ class RepositoryRefreshMethod {
         classEntity = entity
         classArrayWithEntity = ArrayTypeName.of(entity)
 
-        RepositoryMapHolder.refreshAnnotationMap[element.simpleName.toString()]?.forEach { methodElement ->
+        val list = RepositoryMapHolder.refreshAnnotationMap[element.simpleName.toString()] ?: ArrayList()
+        for (methodElement in list) {
             val getAsList = methodElement.getAnnotation(REFRESH::class.java).getAsList
             val classGenericTypeForMethod = if (getAsList) ParameterizedTypeName.get(classList, entity) else entity
 
@@ -97,12 +98,13 @@ class RepositoryRefreshMethod {
             refreshMethodBuilder.addStatement("builder.setNetworkLayer($networkGetLayerClass)")
 
             val returnValue = ClassName.get(methodElement.returnType)
-            if(returnValue != liveDataOfString) {
-                messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
-                        "@REFRESH annotation are only accepting LiveData<String> as a return type.")
-                return emptyList()
-            } else {
+            if (returnValue == liveDataOfString) {
                 refreshMethodBuilder.addStatement("return super.executeRefresh(builder)")
+            } else {
+                messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
+                        "@REFRESH annotation are only accepting LiveData<String> as a return type." +
+                        "Error for class.method: ${element.simpleName}.${methodElement.simpleName}")
+                continue
             }
 
             daoClassBuilder.addMethod(daoInsertMethodBuilder.build())

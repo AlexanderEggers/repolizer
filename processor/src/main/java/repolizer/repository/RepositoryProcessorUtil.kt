@@ -13,21 +13,18 @@ class RepositoryProcessorUtil {
     companion object {
         fun initMethodAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment,
                                   clazz: Class<out Annotation>, hashMap: HashMap<String, ArrayList<ExecutableElement>>) {
-            roundEnv.getElementsAnnotatedWith(clazz).forEach {
+            for (it in roundEnv.getElementsAnnotatedWith(clazz)) {
                 val typeElement = it.enclosingElement as TypeElement
 
                 if (it.kind != ElementKind.METHOD) {
                     mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                            "be applied to a method. Error in class: " +
+                            "be applied to a method. Error for class.method: " +
                             "${typeElement.simpleName}.${it.simpleName}")
-                    return
+                    continue
                 }
 
-                var currentList: ArrayList<ExecutableElement>? = hashMap[typeElement.simpleName.toString()]
-                if (currentList == null) {
-                    currentList = ArrayList()
-                }
-
+                val key = typeElement.simpleName.toString()
+                val currentList: ArrayList<ExecutableElement> = hashMap[key] ?: ArrayList()
                 currentList.add(it as ExecutableElement)
                 hashMap[typeElement.simpleName.toString()] = currentList
             }
@@ -35,23 +32,19 @@ class RepositoryProcessorUtil {
 
         fun initParamAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment,
                                  clazz: Class<out Annotation>, hashMap: HashMap<String, ArrayList<VariableElement>>) {
-            roundEnv.getElementsAnnotatedWith(clazz).forEach {
+            for (it in roundEnv.getElementsAnnotatedWith(clazz)) {
                 val typeElement = it.enclosingElement.enclosingElement as TypeElement
                 val methodElement = it.enclosingElement as ExecutableElement
 
                 if (it.kind != ElementKind.PARAMETER) {
                     mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                            "be applied to a parameter. Error in class: " +
-                            "${typeElement.simpleName}.${methodElement.simpleName}")
-                    return
+                            "be applied to a parameter. Error for class.method.parameter: " +
+                            "${typeElement.simpleName}.${methodElement.simpleName}.${it.simpleName}")
+                    continue
                 }
 
                 val key = typeElement.simpleName.toString() + "." + methodElement.simpleName.toString()
-                var currentList: ArrayList<VariableElement>? = hashMap[key]
-                if (currentList == null) {
-                    currentList = ArrayList()
-                }
-
+                val currentList: ArrayList<VariableElement> = hashMap[key] ?: ArrayList()
                 currentList.add(it as VariableElement)
                 hashMap[key] = currentList
             }

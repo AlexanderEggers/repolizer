@@ -19,10 +19,6 @@ class LiveDataCallAdapter internal constructor(
         private val requestProvider: RequestProvider?,
         private val appExecutor: AppExecutor) : CallAdapter<String, LiveData<NetworkResponse<String>>> {
 
-    override fun responseType(): Type {
-        return responseType
-    }
-
     override fun adapt(call: Call<String>): LiveData<NetworkResponse<String>> {
         return object : LiveData<NetworkResponse<String>>() {
             internal var started = AtomicBoolean(false)
@@ -56,16 +52,16 @@ class LiveDataCallAdapter internal constructor(
         }
     }
 
+    override fun responseType(): Type {
+        return responseType
+    }
+
     private fun getErrorBody(response: Response<String>?): String {
         try {
-            val errorBody = response?.errorBody()
-            if (errorBody != null) {
-                return errorBody.string()
-            }
+            return response?.errorBody()?.toString() ?: ""
         } catch (e: IOException) {
             Log.e(LiveDataCallAdapter::class.java.name, e.message)
         }
-
         return ""
     }
 }

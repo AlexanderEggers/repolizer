@@ -1,6 +1,5 @@
-package repolizer.util
+package repolizer
 
-import repolizer.MainProcessor
 import javax.lang.model.element.Element
 
 class ProcessorUtil {

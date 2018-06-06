@@ -44,10 +44,8 @@ class RepositoryGetMethod {
         classEntity = entity
         classArrayWithEntity = ArrayTypeName.of(entity)
 
-        RepositoryMapHolder.getAnnotationMap[element.simpleName.toString()]?.forEach { methodElement ->
-            val maxCacheTime = methodElement.getAnnotation(GET::class.java).maxCacheTime
-            val maxFreshTime = methodElement.getAnnotation(GET::class.java).maxFreshTime
-
+        val list = RepositoryMapHolder.getAnnotationMap[element.simpleName.toString()] ?: ArrayList()
+        for (methodElement in list) {
             val getAsList = methodElement.getAnnotation(GET::class.java).getAsList
             val classGenericTypeForMethod = if (getAsList) ParameterizedTypeName.get(classList, entity) else entity
 
@@ -165,12 +163,15 @@ class RepositoryGetMethod {
                 createNetworkGetLayerAnonymousClassForDBOnly(classGenericTypeForMethod,
                         methodElement.simpleName.toString(), daoParamList)
             } else {
+                val maxCacheTime = methodElement.getAnnotation(GET::class.java).maxCacheTime
+                val maxFreshTime = methodElement.getAnnotation(GET::class.java).maxFreshTime
+
                 createNetworkGetLayerAnonymousClass(classGenericTypeForMethod,
                         maxCacheTime, maxFreshTime, methodElement.simpleName.toString(), getAsList, daoParamList)
             }
             getMethodBuilder.addStatement("builder.setNetworkLayer($networkGetLayerClass)")
 
-            if(deleteIfCacheIsTooOldParamName != null) {
+            if (deleteIfCacheIsTooOldParamName != null) {
                 getMethodBuilder.addStatement("builder.setDeletingCacheIfTooOld($deleteIfCacheIsTooOldParamName)")
             } else {
                 val deleteIfCacheIsTooOldByDefault = element.getAnnotation(Repository::class.java).deleteIfCacheIsTooOld
@@ -185,12 +186,13 @@ class RepositoryGetMethod {
             }
 
             val returnValue = ClassName.get(methodElement.returnType)
-            if(returnValue != ParameterizedTypeName.get(classLiveData, classGenericTypeForMethod)) {
+            if (returnValue != ParameterizedTypeName.get(classLiveData, classGenericTypeForMethod)) {
                 messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
                         "@GET annotation are only accepting LiveData<ENTITY> as a return type." +
                         "The ENTITY stands for the class which you have defined inside your" +
-                        "@Repository annotation under the field entity.")
-                return emptyList()
+                        "@Repository annotation under the field entity. Error for class.method: " +
+                        "${element.simpleName}.${methodElement.simpleName}")
+                continue
             }
 
             daoClassBuilder.addMethod(daoInsertMethodBuilder.build())

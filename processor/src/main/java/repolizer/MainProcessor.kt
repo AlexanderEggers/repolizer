@@ -13,6 +13,7 @@ import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 import javax.lang.model.util.Elements
+import javax.tools.Diagnostic
 
 @AutoService(Processor::class)
 class MainProcessor : AbstractProcessor() {
@@ -34,8 +35,9 @@ class MainProcessor : AbstractProcessor() {
             RepositoryMainProcessor().process(this, roundEnv)
             DatabaseMainProcessor().process(this, roundEnv)
         } catch (e: IOException) {
-            e.printStackTrace()
+            messager.printMessage(Diagnostic.Kind.ERROR, "Something went wrong: ${e.message}")
         }
+
         return true
     }
 
@@ -44,11 +46,13 @@ class MainProcessor : AbstractProcessor() {
                 //Database annotations
                 Database::class.java.name, Migration::class.java.name, TypeConverter::class.java.name,
 
-                //Repository annotations
+                //General repository annotations
                 Repository::class.java.name,
+
                 //Repository method annotations
                 REFRESH::class.java.name, GET::class.java.name, DB::class.java.name,
                 CUD::class.java.name, CACHE::class.java.name,
+
                 //Repository parameter annotations
                 DatabaseBody::class.java.name, Header::class.java.name,
                 RepositoryParameter::class.java.name, RequestBody::class.java.name,

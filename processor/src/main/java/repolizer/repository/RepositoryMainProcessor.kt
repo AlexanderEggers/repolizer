@@ -2,16 +2,15 @@ package repolizer.repository
 
 import com.squareup.javapoet.*
 import repolizer.MainProcessor
+import repolizer.ProcessorUtil.Companion.getGeneratedDatabaseDaoName
+import repolizer.ProcessorUtil.Companion.getGeneratedDatabaseName
+import repolizer.ProcessorUtil.Companion.getGeneratedRepositoryName
+import repolizer.ProcessorUtil.Companion.getPackageName
 import repolizer.annotation.repository.*
 import repolizer.annotation.repository.parameter.*
 import repolizer.database.DatabaseMapHolder
 import repolizer.database.DatabaseProcessorUtil
 import repolizer.repository.method.*
-import repolizer.util.AnnotationProcessor
-import repolizer.util.ProcessorUtil.Companion.getGeneratedDatabaseDaoName
-import repolizer.util.ProcessorUtil.Companion.getGeneratedDatabaseName
-import repolizer.util.ProcessorUtil.Companion.getGeneratedRepositoryName
-import repolizer.util.ProcessorUtil.Companion.getPackageName
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
@@ -19,7 +18,7 @@ import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.MirroredTypeException
 import javax.tools.Diagnostic
 
-class RepositoryMainProcessor : AnnotationProcessor {
+class RepositoryMainProcessor {
 
     private val classBaseRepository = ClassName.get("repolizer.repository", "BaseRepository")
     private val classAppExecutor = ClassName.get("repolizer.repository.util", "AppExecutor")
@@ -31,22 +30,22 @@ class RepositoryMainProcessor : AnnotationProcessor {
 
     private val classAnnotationDao = ClassName.get("android.arch.persistence.room", "Dao")
 
-    override fun process(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
+    fun process(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
         initAnnotations(mainProcessor, roundEnv)
 
-        roundEnv.getElementsAnnotatedWith(Repository::class.java).forEach {
+        for (it in roundEnv.getElementsAnnotatedWith(Repository::class.java)) {
             val typeElement = it as TypeElement
 
             if (!it.kind.isInterface) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                        "be applied to an interface. Error in class: ${typeElement.simpleName}")
-                return
+                        "be applied to an interface. Error for class: ${typeElement.simpleName}")
+                continue
             }
 
-            if(!typeElement.interfaces.isEmpty()) {
+            if (!typeElement.interfaces.isEmpty()) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Parent " +
-                        "interfaces are not allowed. Error in class: ${typeElement.simpleName}")
-                return
+                        "interfaces are not allowed. Error for class: ${typeElement.simpleName}")
+                continue
             }
 
             //Repository annotation general data

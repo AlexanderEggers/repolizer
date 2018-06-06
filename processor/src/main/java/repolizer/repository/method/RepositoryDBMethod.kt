@@ -27,7 +27,8 @@ class RepositoryDBMethod {
     fun build(messager: Messager, element: Element, daoClassBuilder: TypeSpec.Builder): List<MethodSpec> {
         val builderList = ArrayList<MethodSpec>()
 
-        RepositoryMapHolder.dbAnnotationMap[element.simpleName.toString()]?.forEach { methodElement ->
+        val list = RepositoryMapHolder.dbAnnotationMap[element.simpleName.toString()] ?: ArrayList()
+        for (methodElement in list) {
             val dbMethodBuilder = MethodSpec.methodBuilder(methodElement.simpleName.toString())
                     .addModifiers(Modifier.PUBLIC)
                     .addAnnotation(Override::class.java)
@@ -59,7 +60,8 @@ class RepositoryDBMethod {
                     }
                     DatabaseOperation.QUERY -> {
                         messager.printMessage(Diagnostic.Kind.ERROR, "If you want to use the " +
-                                "DatabaseOperation.QUERY, you need to define the sql value as well.")
+                                "DatabaseOperation.QUERY, you need to define the sql value as well." +
+                                "Error for class.method: ${element.simpleName}.${methodElement.simpleName}")
                         null
                     }
                 }
@@ -67,7 +69,7 @@ class RepositoryDBMethod {
                 AnnotationSpec.builder(annotationRoomQuery)
                         .addMember("value", "\"$sql\"")
                         .build()
-            }) ?: return emptyList()
+            }) ?: continue
             daoMethodBuilder.addAnnotation(annotation)
 
             methodElement.parameters.forEach { varElement ->
@@ -86,8 +88,9 @@ class RepositoryDBMethod {
                 if (daoParamList.isEmpty()) {
                     messager.printMessage(Diagnostic.Kind.ERROR, "The method " +
                             "${methodElement.simpleName} needs to have at least one parameter " +
-                            "which is using the @DatabaseBody annotation.")
-                    return emptyList()
+                            "which is using the @DatabaseBody annotation. Error for " +
+                            "class.method: ${element.simpleName}.${methodElement.simpleName}")
+                    continue
                 }
             } else {
                 RepositoryMapHolder.sqlParameterAnnotationMap["${element.simpleName}.${methodElement.simpleName}"]?.forEach {
@@ -100,7 +103,8 @@ class RepositoryDBMethod {
                     messager.printMessage(Diagnostic.Kind.NOTE, "The method " +
                             "${methodElement.simpleName} has no parameter and will always " +
                             "execute the same sql string. If that is your intention, you can " +
-                            "ignore this note.")
+                            "ignore this note. Info for class.method: " +
+                            "${element.simpleName}.${methodElement.simpleName}")
                 }
             }
 
@@ -109,18 +113,16 @@ class RepositoryDBMethod {
             dbMethodBuilder.addStatement("builder.setDatabaseLayer($networkGetLayerClass)")
 
             val returnValue = ClassName.get(methodElement.returnType)
-            when {
-                returnValue == liveDataOfBoolean -> {
-                    dbMethodBuilder.returns(ClassName.get(methodElement.returnType))
-                    dbMethodBuilder.addStatement("return super.executeDB(builder)")
-                }
-                methodElement.returnType == TypeKind.VOID -> dbMethodBuilder.addStatement("super.executeDB(builder)")
-                else -> {
-                    messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
-                            "@DB annotation are only accepting LiveData<Boolean> or Void as a return " +
-                            "type.")
-                    return emptyList()
-                }
+            if (returnValue == liveDataOfBoolean) {
+                dbMethodBuilder.returns(ClassName.get(methodElement.returnType))
+                dbMethodBuilder.addStatement("return super.executeDB(builder)")
+            } else if (methodElement.returnType == TypeKind.VOID) {
+                dbMethodBuilder.addStatement("super.executeDB(builder)")
+            } else {
+                messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
+                        "@DB annotation are only accepting LiveData<Boolean> or Void as a return " +
+                        "type. Error for class.method: ${element.simpleName}.${methodElement.simpleName}")
+                continue
             }
 
             daoClassBuilder.addMethod(daoMethodBuilder.build())

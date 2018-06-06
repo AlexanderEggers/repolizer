@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class BaseRepository<Entity> constructor(private val repolizer: Repolizer) : FetchSecurityLayer {
 
-    private val refreshing = AtomicBoolean(false)
+    private val fetchingData = AtomicBoolean(false)
 
     protected fun executeRefresh(builder: NetworkBuilder<Entity>): LiveData<String> {
         return builder.buildRefresh(repolizer)
@@ -33,11 +33,11 @@ abstract class BaseRepository<Entity> constructor(private val repolizer: Repoliz
     }
 
     override fun allowFetch(): Boolean {
-        return refreshing.compareAndSet(false, true)
+        return fetchingData.compareAndSet(false, true)
     }
 
     override fun onFetchFinished() {
-        refreshing.set(false)
+        fetchingData.set(false)
     }
 
     fun getContext(): Context {

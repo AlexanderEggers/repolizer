@@ -29,7 +29,8 @@ class RepositoryCudMethod {
     fun build(messager: Messager, element: Element, entity: ClassName): List<MethodSpec> {
         val builderList = ArrayList<MethodSpec>()
 
-        RepositoryMapHolder.cudAnnotationMap[element.simpleName.toString()]?.forEach { methodElement ->
+        val list = RepositoryMapHolder.cudAnnotationMap[element.simpleName.toString()] ?: ArrayList()
+        for (methodElement in list) {
             val entityBodyAsList = methodElement.getAnnotation(CUD::class.java).entityBodyAsList
             val classGenericTypeForMethod = if (entityBodyAsList) ParameterizedTypeName.get(classList, entity) else entity
             val cudType = methodElement.getAnnotation(CUD::class.java).cudType
@@ -85,12 +86,13 @@ class RepositoryCudMethod {
             cudMethodBuilder.addStatement("builder.setNetworkLayer($networkGetLayerClass)")
 
             val returnValue = ClassName.get(methodElement.returnType)
-            if(returnValue != liveDataOfString) {
-                messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
-                        "@CUD annotation are only accepting LiveData<String> as a return type.")
-                return emptyList()
-            } else {
+            if (returnValue == liveDataOfString) {
                 cudMethodBuilder.addStatement("return super.executeCud(builder)")
+            } else {
+                messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
+                        "@CUD annotation are only accepting LiveData<String> as a return type." +
+                        "Error for class.method: ${element.simpleName}.${methodElement.simpleName}")
+                continue
             }
 
             builderList.add(cudMethodBuilder.build())

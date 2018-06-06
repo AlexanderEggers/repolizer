@@ -15,16 +15,20 @@ class LiveDataCallAdapterFactory(private val requestProvider: RequestProvider?) 
 
     override fun get(returnType: Type, annotations: Array<Annotation>, retrofit: Retrofit): CallAdapter<*, *>? {
         if (CallAdapter.Factory.getRawType(returnType) != LiveData::class.java) {
-            return null
+            throw IllegalArgumentException("Type must have the raw type of LiveData.")
         }
+
         val observableType = CallAdapter.Factory.getParameterUpperBound(0, returnType as ParameterizedType)
         val rawObservableType = CallAdapter.Factory.getRawType(observableType)
+
         if (rawObservableType != NetworkResponse::class.java) {
-            throw IllegalArgumentException("type must be a resource")
+            throw IllegalArgumentException("Type must be a resource.")
         }
+
         if (observableType !is ParameterizedType) {
-            throw IllegalArgumentException("resource must be parameterized")
+            throw IllegalArgumentException("Resource must be parameterized.")
         }
+
         val bodyType = CallAdapter.Factory.getParameterUpperBound(0, observableType)
         return LiveDataCallAdapter(bodyType, requestProvider, appExecutor)
     }

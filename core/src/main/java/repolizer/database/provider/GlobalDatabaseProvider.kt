@@ -13,9 +13,9 @@ object GlobalDatabaseProvider {
         return if (databaseSingletonMap.containsKey(databaseClass.simpleName)) {
             databaseSingletonMap[databaseClass.simpleName]!! as T
         } else {
-            val databaseProvider: DatabaseProvider = Class
-                    .forName(databaseClass.`package`.name +
-                            ".${getGeneratedDatabaseProviderName(databaseClass)}")
+            val databaseProvider: DatabaseProvider = Class.forName(
+                    "${databaseClass.`package`.name}." +
+                            getGeneratedDatabaseProviderName(databaseClass))
                     .newInstance() as DatabaseProvider
             val roomDatabase = databaseProvider.getDatabase(context)
             databaseSingletonMap[databaseClass.simpleName] = roomDatabase

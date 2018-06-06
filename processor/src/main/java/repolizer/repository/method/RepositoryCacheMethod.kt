@@ -1,6 +1,9 @@
 package repolizer.repository.method
 
-import com.squareup.javapoet.*
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterizedTypeName
+import com.squareup.javapoet.TypeSpec
 import repolizer.annotation.repository.CACHE
 import repolizer.annotation.repository.util.CacheOperation
 import repolizer.repository.RepositoryMapHolder
@@ -25,7 +28,9 @@ class RepositoryCacheMethod {
     fun build(messager: Messager, element: Element): List<MethodSpec> {
         val builderList = ArrayList<MethodSpec>()
 
-        RepositoryMapHolder.cacheAnnotationMap[element.simpleName.toString()]?.forEach { methodElement ->
+        val list = RepositoryMapHolder.cacheAnnotationMap[element.simpleName.toString()]
+                ?: ArrayList()
+        for (methodElement in list) {
             val operation = methodElement.getAnnotation(CACHE::class.java).operation
 
             val cacheMethodBuilder = MethodSpec.methodBuilder(methodElement.simpleName.toString())
@@ -37,26 +42,23 @@ class RepositoryCacheMethod {
                 cacheMethodBuilder.addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
             }
 
-            val networkGetLayerClass = if (operation == CacheOperation.INSERT || operation == CacheOperation.DELETE_SINGLE) {
-                createCacheLayerForInsert(element, methodElement, operation == CacheOperation.INSERT)
-            } else throw IllegalStateException("Cache operation unknown. Cache the value you inserted into your @Cache annotation.")
+            val networkCacheLayerClass = createCacheLayerForInsert(element, methodElement,
+                    operation == CacheOperation.INSERT)
 
             cacheMethodBuilder.addStatement("$classDatabaseBuilder builder = new $classDatabaseBuilder()")
-            cacheMethodBuilder.addStatement("builder.setDatabaseLayer($networkGetLayerClass)")
+            cacheMethodBuilder.addStatement("builder.setDatabaseLayer($networkCacheLayerClass)")
 
             val returnValue = ClassName.get(methodElement.returnType)
-            when {
-                returnValue == liveDataOfBoolean -> {
-                    cacheMethodBuilder.returns(ClassName.get(methodElement.returnType))
-                    cacheMethodBuilder.addStatement("return super.executeDB(builder)")
-                }
-                methodElement.returnType == TypeKind.VOID -> cacheMethodBuilder.addStatement("super.executeDB(builder)")
-                else -> {
-                    messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
-                            "@CACHE annotation are only accepting LiveData<Boolean> or Void as a " +
-                            "return type.")
-                    return emptyList()
-                }
+            if (returnValue == liveDataOfBoolean) {
+                cacheMethodBuilder.returns(ClassName.get(methodElement.returnType))
+                cacheMethodBuilder.addStatement("return super.executeDB(builder)")
+            } else if (methodElement.returnType == TypeKind.VOID) {
+                cacheMethodBuilder.addStatement("super.executeDB(builder)")
+            } else {
+                messager.printMessage(Diagnostic.Kind.ERROR, "Methods that are using the " +
+                        "@CACHE annotation are only accepting LiveData<Boolean> or Void as a " +
+                        "return type. Error for class.method: ${element.simpleName}.${methodElement.simpleName}")
+                continue
             }
 
             builderList.add(cacheMethodBuilder.build())

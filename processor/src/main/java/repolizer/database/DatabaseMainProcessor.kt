@@ -2,17 +2,19 @@ package repolizer.database
 
 import com.squareup.javapoet.*
 import repolizer.MainProcessor
+import repolizer.ProcessorUtil
+import repolizer.ProcessorUtil.Companion.getGeneratedDatabaseName
 import repolizer.annotation.database.Database
 import repolizer.annotation.database.Migration
-import repolizer.util.AnnotationProcessor
-import repolizer.util.ProcessorUtil
-import repolizer.util.ProcessorUtil.Companion.getGeneratedDatabaseName
 import javax.annotation.processing.RoundEnvironment
-import javax.lang.model.element.*
+import javax.lang.model.element.AnnotationValue
+import javax.lang.model.element.Element
+import javax.lang.model.element.Modifier
+import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.tools.Diagnostic
 
-class DatabaseMainProcessor : AnnotationProcessor {
+class DatabaseMainProcessor {
 
     private val classCacheItem = ClassName.get("repolizer.database.cache", "CacheItem")
     private val classRepolizerDatabase = ClassName.get("repolizer.database", "RepolizerDatabase")
@@ -20,22 +22,22 @@ class DatabaseMainProcessor : AnnotationProcessor {
     private val classAnnotationDatabase = ClassName.get("android.arch.persistence.room", "Database")
     private val classAnnotationTypeConverters = ClassName.get("android.arch.persistence.room", "TypeConverters")
 
-    override fun process(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
+    fun process(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
         initMigrationAnnotations(mainProcessor, roundEnv)
 
-        roundEnv.getElementsAnnotatedWith(Database::class.java).forEach {
+        for (it in roundEnv.getElementsAnnotatedWith(Database::class.java)) {
             val typeElement = it as TypeElement
 
             if (!it.kind.isInterface) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                        "be applied to an interface. Error in class: ${typeElement.simpleName}")
-                return
+                        "be applied to an interface. Error for class: ${typeElement.simpleName}")
+                continue
             }
 
-            if(!typeElement.interfaces.isEmpty()) {
+            if (!typeElement.interfaces.isEmpty()) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Parent " +
-                        "interfaces are not allowed. Error in class: ${typeElement.simpleName}")
-                return
+                        "interfaces are not allowed. Error for class: ${typeElement.simpleName}")
+                continue
             }
 
             //Database annotation general data
@@ -137,18 +139,15 @@ class DatabaseMainProcessor : AnnotationProcessor {
     private fun initMigrationAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
         val hashMap: HashMap<String, ArrayList<Element>> = DatabaseMapHolder.migrationAnnotationMap
 
-        roundEnv.getElementsAnnotatedWith(Migration::class.java).forEach {
+        for (it in roundEnv.getElementsAnnotatedWith(Migration::class.java)) {
             if (!it.kind.isInterface) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                        "be applied to an interface. Error in class: ${it.simpleName}")
-                return
+                        "be applied to an interface. Error for class: ${it.simpleName}")
+                continue
             }
 
-            var currentList: ArrayList<Element>? = hashMap[it.simpleName.toString()]
-            if (currentList == null) {
-                currentList = ArrayList()
-            }
-
+            val key = it.simpleName.toString()
+            val currentList: ArrayList<Element> = hashMap[key] ?: ArrayList()
             currentList.add(it)
             hashMap[it.simpleName.toString()] = currentList
         }

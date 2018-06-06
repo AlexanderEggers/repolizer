@@ -57,8 +57,8 @@ class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, buil
     private fun checkLogin(networkResponse: LiveData<NetworkResponse<String>>) {
         appExecutor.workerThread.execute({
             if (loginManager == null) {
-                throw IllegalStateException("Checking the login requires a LoginManager. Use the setter" +
-                        "of the Repolizer class to set your custom implementation.")
+                throw IllegalStateException("Checking the login requires a LoginManager. Use the " +
+                        "setter of the Repolizer class to set your custom implementation.")
             }
 
             result.addSource(loginManager.isCurrentLoginValid(), { isLoginValid ->

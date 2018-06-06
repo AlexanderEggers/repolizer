@@ -15,7 +15,8 @@ object GlobalRepositoryProvider {
         } else {
             val realRepositoryClass = Class.forName(repositoryClass.`package`.name +
                     ".${Utils.getGeneratedRepositoryName(repositoryClass)}")
-            val repository = realRepositoryClass.getConstructor(Repolizer::class.java).newInstance(repolizer) as BaseRepository<*>
+            val repository = realRepositoryClass.getConstructor(Repolizer::class.java)
+                    .newInstance(repolizer) as BaseRepository<*>
             repositorySingletonMap[repositoryClass.simpleName] = repository
             repository
         }

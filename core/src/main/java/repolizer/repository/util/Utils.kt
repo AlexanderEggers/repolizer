@@ -5,11 +5,8 @@ internal class Utils {
     companion object {
         private const val CACHE_URL_FORMAT_BASE = "CID"
 
-        fun makeUrlId(url: String?): String {
-            return if (url == null || url.isEmpty())
-                "0"
-            else
-                CACHE_URL_FORMAT_BASE + url.hashCode().toString()
+        fun makeUrlId(url: String): String {
+            return CACHE_URL_FORMAT_BASE + url.hashCode().toString()
         }
 
         fun getGeneratedRepositoryName(repositoryClass: Class<*>): String {
