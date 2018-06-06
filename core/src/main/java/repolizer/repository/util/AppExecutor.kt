@@ -6,7 +6,6 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 object AppExecutor {
-
     val workerThread: Executor = Executors.newCachedThreadPool()
     val mainThread: Executor = MainThreadExecutor()
 
