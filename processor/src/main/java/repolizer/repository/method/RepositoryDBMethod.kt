@@ -77,38 +77,11 @@ class RepositoryDBMethod {
                 dbMethodBuilder.addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
             }
 
-            val daoParamList = ArrayList<String>()
-            if (objectExpected) {
-                RepositoryMapHolder.databaseBodyAnnotationMap["${element.simpleName}.${methodElement.simpleName}"]?.forEach {
-                    val elementType = ClassName.get(it.asType())
-                    daoMethodBuilder.addParameter(elementType, it.simpleName.toString())
-                    daoParamList.add(it.simpleName.toString())
-                }
+            val daoParamList = getDaoParamList(objectExpected, element, methodElement, messager,
+                    daoMethodBuilder)
+            val networkGetLayerClass = createDatabaseLayerAnonymousClass(methodElement.simpleName.toString(),
+                    daoParamList)
 
-                if (daoParamList.isEmpty()) {
-                    messager.printMessage(Diagnostic.Kind.ERROR, "The method " +
-                            "${methodElement.simpleName} needs to have at least one parameter " +
-                            "which is using the @DatabaseBody annotation. Error for " +
-                            "${element.simpleName}.${methodElement.simpleName}")
-                    continue
-                }
-            } else {
-                RepositoryMapHolder.sqlParameterAnnotationMap["${element.simpleName}.${methodElement.simpleName}"]?.forEach {
-                    val elementType = ClassName.get(it.asType())
-                    daoMethodBuilder.addParameter(elementType, it.simpleName.toString())
-                    daoParamList.add(it.simpleName.toString())
-                }
-
-                if (daoParamList.isEmpty()) {
-                    messager.printMessage(Diagnostic.Kind.NOTE, "The method " +
-                            "${methodElement.simpleName} has no parameter and will always " +
-                            "execute the same sql string. If that is your intention, you can " +
-                            "ignore this note. Info for " +
-                            "${element.simpleName}.${methodElement.simpleName}")
-                }
-            }
-
-            val networkGetLayerClass = createDatabaseLayerAnonymousClass(methodElement.simpleName.toString(), daoParamList)
             dbMethodBuilder.addStatement("$classDatabaseBuilder builder = new $classDatabaseBuilder()")
             dbMethodBuilder.addStatement("builder.setDatabaseLayer($networkGetLayerClass)")
 
@@ -149,5 +122,41 @@ class RepositoryDBMethod {
                         .addStatement(daoQueryCall)
                         .build())
                 .build()
+    }
+
+    private fun getDaoParamList(objectExpected: Boolean, element: Element, methodElement: Element,
+                                messager: Messager, daoMethodBuilder: MethodSpec.Builder): ArrayList<String> {
+        val daoParamList = ArrayList<String>()
+        if (objectExpected) {
+            RepositoryMapHolder.databaseBodyAnnotationMap["${element.simpleName}.${methodElement.simpleName}"]?.forEach {
+                val elementType = ClassName.get(it.asType())
+                daoMethodBuilder.addParameter(elementType, it.simpleName.toString())
+                daoParamList.add(it.simpleName.toString())
+            }
+
+            if (daoParamList.isEmpty()) {
+                messager.printMessage(Diagnostic.Kind.ERROR, "The method " +
+                        "${methodElement.simpleName} needs to have at least one parameter " +
+                        "which is using the @DatabaseBody annotation. Error for " +
+                        "${element.simpleName}.${methodElement.simpleName}")
+                return ArrayList()
+            }
+        } else {
+            RepositoryMapHolder.sqlParameterAnnotationMap["${element.simpleName}.${methodElement.simpleName}"]?.forEach {
+                val elementType = ClassName.get(it.asType())
+                daoMethodBuilder.addParameter(elementType, it.simpleName.toString())
+                daoParamList.add(it.simpleName.toString())
+            }
+
+            if (daoParamList.isEmpty()) {
+                messager.printMessage(Diagnostic.Kind.NOTE, "The method " +
+                        "${methodElement.simpleName} has no parameter and will always " +
+                        "execute the same sql string. If that is your intention, you can " +
+                        "ignore this note. Info for " +
+                        "${element.simpleName}.${methodElement.simpleName}")
+            }
+        }
+
+        return daoParamList
     }
 }
