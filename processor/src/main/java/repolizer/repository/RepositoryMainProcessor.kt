@@ -71,6 +71,7 @@ class RepositoryMainProcessor {
             val classRepositoryParent: TypeName = ParameterizedTypeName.get(classBaseRepository,
                     classEntity)
 
+            //Initialising repository class including needed fields and constructor
             val fileBuilder = TypeSpec.classBuilder(getGeneratedRepositoryName(repositoryName))
                     .superclass(classRepositoryParent)
                     .addSuperinterface(repositoryClassName)
@@ -97,17 +98,19 @@ class RepositoryMainProcessor {
                             .addStatement("super(repolizer)")
                             .build())
 
-            DatabaseProcessorUtil.addClassNameToDatabaseMap(DatabaseMapHolder.daoMap,
+            //Saving database and dao object for the database processor
+            DatabaseProcessorUtil.addClassNameToDatabaseHolderMap(DatabaseMapHolder.daoMap,
                     objectDatabase.simpleName.toString(),
                     ClassName.get(getPackageName(mainProcessor, objectDatabase), daoName))
 
-            DatabaseProcessorUtil.addClassNameToDatabaseMap(DatabaseMapHolder.entityMap,
+            DatabaseProcessorUtil.addClassNameToDatabaseHolderMap(DatabaseMapHolder.entityMap,
                     objectDatabase.simpleName.toString(), classEntity)
 
             val daoBuilder = TypeSpec.interfaceBuilder(daoName)
                     .addModifiers(Modifier.PUBLIC)
                     .addAnnotation(classAnnotationDao)
 
+            //Creation of the different repository methods
             RepositoryRefreshMethod().build(mainProcessor.messager, it, classEntity, daoBuilder).forEach {
                 fileBuilder.addMethod(it)
             }

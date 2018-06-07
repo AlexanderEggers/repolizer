@@ -18,8 +18,11 @@ import javax.lang.model.util.Elements
 class MainProcessor : AbstractProcessor() {
 
     lateinit var filer: Filer
+        private set
     lateinit var messager: Messager
+        private set
     lateinit var elements: Elements
+        private set
 
     @Synchronized
     override fun init(processingEnvironment: ProcessingEnvironment) {

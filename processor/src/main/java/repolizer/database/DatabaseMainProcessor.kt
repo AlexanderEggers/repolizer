@@ -25,10 +25,10 @@ class DatabaseMainProcessor {
     fun process(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
         initMigrationAnnotations(mainProcessor, roundEnv)
 
-        for (it in roundEnv.getElementsAnnotatedWith(Database::class.java)) {
-            val typeElement = it as TypeElement
+        for (databaseElement in roundEnv.getElementsAnnotatedWith(Database::class.java)) {
+            val typeElement = databaseElement as TypeElement
 
-            if (!it.kind.isInterface) {
+            if (!databaseElement.kind.isInterface) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
                         "be applied to an interface. Error for ${typeElement.simpleName}")
                 continue
@@ -41,15 +41,15 @@ class DatabaseMainProcessor {
             }
 
             //Database annotation general data
-            val databaseName = it.simpleName.toString()
-            val databasePackageName = ProcessorUtil.getPackageName(mainProcessor, it)
+            val databaseName = databaseElement.simpleName.toString()
+            val databasePackageName = ProcessorUtil.getPackageName(mainProcessor, databaseElement)
             val databaseClassName = ClassName.get(databasePackageName, databaseName)
 
             val realDatabaseName = getGeneratedDatabaseName(databaseName)
             val realDatabaseClassName = ClassName.get(databasePackageName, realDatabaseName)
 
-            val version = it.getAnnotation(Database::class.java).version
-            val exportSchema = it.getAnnotation(Database::class.java).exportSchema
+            val version = databaseElement.getAnnotation(Database::class.java).version
+            val exportSchema = databaseElement.getAnnotation(Database::class.java).exportSchema
 
             val fileBuilder = TypeSpec.classBuilder(getGeneratedDatabaseName(databaseName))
                     .superclass(classRepolizerDatabase)
@@ -69,14 +69,14 @@ class DatabaseMainProcessor {
                     .addMember("exportSchema", "$exportSchema")
                     .build())
 
-            val converterFormat = addConvertersToDatabase(it)
+            val converterFormat = addConvertersToDatabase(databaseElement)
             if (!converterFormat.isEmpty()) {
                 fileBuilder.addAnnotation(AnnotationSpec.builder(classAnnotationTypeConverters)
                         .addMember("value", converterFormat)
                         .build())
             }
 
-            val providerFile = DatabaseProvider().build(it, databaseName, realDatabaseClassName)
+            val providerFile = DatabaseProvider().build(databaseElement, databaseName, realDatabaseClassName)
             JavaFile.builder(databasePackageName, providerFile)
                     .build()
                     .writeTo(mainProcessor.filer)
