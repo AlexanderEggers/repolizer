@@ -13,7 +13,6 @@ import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
 import javax.lang.model.util.Elements
-import javax.tools.Diagnostic
 
 @AutoService(Processor::class)
 class MainProcessor : AbstractProcessor() {
@@ -35,7 +34,7 @@ class MainProcessor : AbstractProcessor() {
             RepositoryMainProcessor().process(this, roundEnv)
             DatabaseMainProcessor().process(this, roundEnv)
         } catch (e: IOException) {
-            messager.printMessage(Diagnostic.Kind.ERROR, "Something went wrong: ${e.message}")
+            e.printStackTrace()
         }
 
         return true
