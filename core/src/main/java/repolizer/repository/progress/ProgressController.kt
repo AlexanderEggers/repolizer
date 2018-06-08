@@ -1,5 +1,6 @@
 package repolizer.repository.progress
 
+import android.util.Log
 import repolizer.repository.response.RequestProvider
 import java.util.*
 import kotlin.collections.HashMap
@@ -50,9 +51,12 @@ abstract class ProgressController constructor(private val requestProvider: Reque
     internal abstract fun onShow(url: String, progressData: ProgressData?)
     internal abstract fun onClose()
 
-    fun cancel() {
+    open fun cancel() {
         sourceMap.clear()
-        requestProvider?.cancelAllRequests()
+        requestProvider?.cancelAllRequests() ?: Log.w(ProgressController::class.java.name,
+                "RequestProvider is null. This progress layer will be closed but nothing " +
+                        "else will happen. Not taking care of the running calls, could " +
+                        "confuse your users and damage the reputation of your app.")
         onClose()
     }
 }
