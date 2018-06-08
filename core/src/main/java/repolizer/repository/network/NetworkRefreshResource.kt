@@ -80,11 +80,11 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
         loginManager?.let {
             result.addSource(it.isCurrentLoginValid(), { isLoginValid ->
                 isLoginValid?.run {
-                    if (this) {
+                    if (this@run) {
                         executeCall(networkResponse)
                     } else {
                         appExecutor.mainThread.execute {
-                            loginManager.onLoginInvalid(context)
+                            it.onLoginInvalid(context)
                         }
                     }
                 }
@@ -116,13 +116,13 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
                         }
 
                         objectResponse?.body?.let {
-                            responseService?.handleSuccess(this)
+                            responseService?.handleSuccess(this@run)
                             updateLayer.updateDB(it)
                             updateLayer.updateFetchTime(makeUrlId(fullUrl))
                             result.postValue(body)
-                        } ?: responseService?.handleGesonError(response)
+                        } ?: responseService?.handleGesonError(this@run)
                     } else {
-                        responseService?.handleRequestError(response)
+                        responseService?.handleRequestError(this@run)
                     }
 
                     fetchSecurityLayer.onFetchFinished()

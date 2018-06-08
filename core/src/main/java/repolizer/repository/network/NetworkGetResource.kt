@@ -46,7 +46,7 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
         "${repolizer.baseUrl}${builder.url}"
     }
 
-    private val progressData: ProgressData = builder.progressData ?: object: ProgressData() {}
+    private val progressData: ProgressData = builder.progressData ?: object : ProgressData() {}
     private val bodyType: TypeToken<*> = builder.typeToken
             ?: throw IllegalStateException("Internal error: Body type is null.")
 
@@ -110,11 +110,11 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
         loginManager?.let {
             result.addSource(it.isCurrentLoginValid(), { isLoginValid ->
                 isLoginValid?.run {
-                    if (this) {
+                    if (this@run) {
                         executeCall(networkResponse)
                     } else {
                         appExecutor.mainThread.execute {
-                            loginManager.onLoginInvalid(context)
+                            it.onLoginInvalid(context)
                         }
                     }
                 }
@@ -146,16 +146,16 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
                         }
 
                         objectResponse?.body?.let {
-                            responseService?.handleSuccess(this)
+                            responseService?.handleSuccess(this@run)
                             getLayer.updateDB(it)
                             getLayer.updateFetchTime(makeUrlId(fullUrl))
                             establishConnection()
                         } ?: run {
-                            responseService?.handleGesonError(response)
+                            responseService?.handleGesonError(this)
                             handleCacheIfTooOld()
                         }
                     } else {
-                        responseService?.handleRequestError(response)
+                        responseService?.handleRequestError(this@run)
                         handleCacheIfTooOld()
                     }
 

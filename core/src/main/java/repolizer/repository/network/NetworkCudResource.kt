@@ -63,11 +63,11 @@ class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, buil
         loginManager?.let {
             result.addSource(it.isCurrentLoginValid(), { isLoginValid ->
                 isLoginValid?.run {
-                    if (this) {
+                    if (this@run) {
                         executeCall(networkResponse)
                     } else {
                         appExecutor.mainThread.execute {
-                            loginManager.onLoginInvalid(context)
+                            it.onLoginInvalid(context)
                         }
                     }
                 }
@@ -86,10 +86,10 @@ class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, buil
                 if (showProgress) progressController?.internalClose(url)
 
                 if (isSuccessful()) {
-                    responseService?.handleSuccess(this)
+                    responseService?.handleSuccess(this@run)
                     result.value = body
                 } else {
-                    responseService?.handleRequestError(this)
+                    responseService?.handleRequestError(this@run)
                 }
             }
         }
