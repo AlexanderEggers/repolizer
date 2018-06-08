@@ -8,7 +8,7 @@ abstract class ProgressController constructor(private val requestProvider: Reque
 
     private val sourceMap: HashMap<String, Int> = HashMap()
 
-    private val queryProgressParams: LinkedList<ProgressParams> = LinkedList()
+    private val queryProgressParams: LinkedList<ProgressData> = LinkedList()
     private val queryUrl: LinkedList<String> = LinkedList()
 
     var isShowingProgress = false
@@ -25,14 +25,14 @@ abstract class ProgressController constructor(private val requestProvider: Reque
         else sourceMap[url] = count
     }
 
-    internal fun internalShow(url: String, progressParams: ProgressParams?) {
+    internal fun internalShow(url: String, progressData: ProgressData?) {
         increaseSourceCount(url)
 
         if (isShowingProgress) {
             isShowingProgress = true
-            onShow(url, progressParams)
+            onShow(url, progressData)
         } else {
-            queryProgressParams.addFirst(progressParams)
+            queryProgressParams.addFirst(progressData)
             queryUrl.addFirst(url)
         }
     }
@@ -47,7 +47,7 @@ abstract class ProgressController constructor(private val requestProvider: Reque
         }
     }
 
-    internal abstract fun onShow(url: String, progressParams: ProgressParams?)
+    internal abstract fun onShow(url: String, progressData: ProgressData?)
     internal abstract fun onClose()
 
     fun cancel() {

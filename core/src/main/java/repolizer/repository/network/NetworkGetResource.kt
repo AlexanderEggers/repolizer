@@ -12,7 +12,7 @@ import repolizer.Repolizer
 import repolizer.database.cache.CacheState
 import repolizer.repository.api.NetworkController
 import repolizer.repository.progress.ProgressController
-import repolizer.repository.progress.ProgressParams
+import repolizer.repository.progress.ProgressData
 import repolizer.repository.response.NetworkResponse
 import repolizer.repository.response.ResponseService
 import repolizer.repository.util.AppExecutor
@@ -46,7 +46,7 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
         "${repolizer.baseUrl}${builder.url}"
     }
 
-    private val progressParams: ProgressParams = builder.progressParams ?: ProgressParams()
+    private val progressData: ProgressData = builder.progressData ?: object: ProgressData() {}
     private val bodyType: TypeToken<*> = builder.typeToken
             ?: throw IllegalStateException("Internal error: Body type is null.")
 
@@ -57,7 +57,7 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
     private lateinit var cacheState: CacheState
 
     init {
-        progressParams.requestType = RequestType.GET
+        progressData.requestType = RequestType.GET
     }
 
     @MainThread
@@ -97,7 +97,7 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
     @MainThread
     private fun fetchFromNetwork() {
         val networkResponse = controller.get(headerMap, prepareUrl(url), queryMap)
-        if (showProgress) progressController?.internalShow(url, progressParams)
+        if (showProgress) progressController?.internalShow(url, progressData)
 
         if (requiresLogin) {
             checkLogin(networkResponse)

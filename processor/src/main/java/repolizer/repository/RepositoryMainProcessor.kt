@@ -159,7 +159,7 @@ class RepositoryMainProcessor {
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, SqlParameter::class.java, RepositoryMapHolder.sqlParameterAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, UrlParameter::class.java, RepositoryMapHolder.urlParameterAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, UrlQuery::class.java, RepositoryMapHolder.urlQueryAnnotationMap)
-        RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, ProgressParams::class.java, RepositoryMapHolder.progressParamsAnnotationMap)
+        RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv, Progress::class.java, RepositoryMapHolder.progressParamsAnnotationMap)
     }
 
     private fun getRepositoryEntityClass(annotation: Repository): DeclaredType? {

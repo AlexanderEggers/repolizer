@@ -2,7 +2,7 @@ package repolizer.repository.network
 
 import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
-import repolizer.repository.progress.ProgressParams
+import repolizer.repository.progress.ProgressData
 import repolizer.repository.util.RequestType
 
 class NetworkBuilder<Entity> {
@@ -19,11 +19,11 @@ class NetworkBuilder<Entity> {
             } else field = value
         }
 
-    var progressParams: ProgressParams? = null
+    var progressData: ProgressData? = null
         set(value) {
             if (field != null) {
-                throw IllegalStateException("Only ONE ProgressParams object can be set. Make sure " +
-                        "that you don't use more than one @ProgressParams parameter for this method.")
+                throw IllegalStateException("Only ONE Progress object can be set. Make sure " +
+                        "that you don't use more than one @Progress parameter for this method.")
             } else field = value
         }
 

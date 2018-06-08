@@ -10,7 +10,7 @@ import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
 import repolizer.repository.api.NetworkController
 import repolizer.repository.progress.ProgressController
-import repolizer.repository.progress.ProgressParams
+import repolizer.repository.progress.ProgressData
 import repolizer.repository.response.NetworkResponse
 import repolizer.repository.response.ResponseService
 import repolizer.repository.util.*
@@ -40,7 +40,7 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
         repolizer.baseUrl + builder.url
     }
 
-    private val progressParams: ProgressParams = builder.progressParams ?: ProgressParams()
+    private val progressData: ProgressData = builder.progressData ?: object: ProgressData() {}
     private val bodyType: TypeToken<*> = builder.typeToken
             ?: throw IllegalStateException("Internal error: Body type is null.")
 
@@ -50,7 +50,7 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
     private lateinit var fetchSecurityLayer: FetchSecurityLayer
 
     init {
-        progressParams.requestType = RequestType.REFRESH
+        progressData.requestType = RequestType.REFRESH
     }
 
     @MainThread
@@ -61,7 +61,7 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
             val apiResponse = controller.get(headerMap, prepareUrl(url), queryMap)
 
             if (showProgress) {
-                progressController?.internalShow(url, progressParams)
+                progressController?.internalShow(url, progressData)
             }
 
             if (requiresLogin) {

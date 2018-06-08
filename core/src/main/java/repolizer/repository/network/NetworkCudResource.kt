@@ -8,7 +8,7 @@ import repolizer.Repolizer
 import repolizer.repository.api.NetworkController
 import repolizer.repository.response.NetworkResponse
 import repolizer.repository.progress.ProgressController
-import repolizer.repository.progress.ProgressParams
+import repolizer.repository.progress.ProgressData
 import repolizer.repository.response.ResponseService
 import repolizer.repository.util.AppExecutor
 import repolizer.repository.util.LoginManager
@@ -32,14 +32,14 @@ class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, buil
     private val url: String = builder.url
     private val raw: Entity? = builder.raw
 
-    private val progressParams: ProgressParams = builder.progressParams ?: ProgressParams()
+    private val progressData: ProgressData = builder.progressData ?: object: ProgressData() {}
 
     private val headerMap: Map<String, String> = builder.headerMap
     private val queryMap: Map<String, String> = builder.queryMap
 
     init {
         builder.requestType?.let {
-            progressParams.requestType = it
+            progressData.requestType = it
         } ?: throw IllegalStateException("Internal error: Request type is null.")
     }
 
@@ -48,7 +48,7 @@ class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, buil
         val networkResponse: LiveData<NetworkResponse<String>> = cudLayer.createCall(controller,
                 headerMap, prepareUrl(url), queryMap, raw)
 
-        if (showProgress) progressController?.internalShow(url, progressParams)
+        if (showProgress) progressController?.internalShow(url, progressData)
 
         if (requiresLogin) {
             checkLogin(networkResponse)
