@@ -12,6 +12,8 @@ abstract class ProgressController constructor(private val requestProvider: Reque
     private val queryProgressParams: LinkedList<ProgressData> = LinkedList()
     private val queryUrl: LinkedList<String> = LinkedList()
 
+    private val syncLock = Any()
+
     var isShowingProgress = false
         private set
 
@@ -27,36 +29,52 @@ abstract class ProgressController constructor(private val requestProvider: Reque
     }
 
     internal fun internalShow(url: String, progressData: ProgressData?) {
-        increaseSourceCount(url)
+        synchronized(syncLock) {
+            increaseSourceCount(url)
 
-        if (isShowingProgress) {
-            isShowingProgress = true
-            onShow(url, progressData)
-        } else {
-            queryProgressParams.addFirst(progressData)
-            queryUrl.addFirst(url)
+            if (isShowingProgress) {
+                isShowingProgress = true
+                onShow(url, progressData)
+            } else {
+                queryProgressParams.addFirst(progressData)
+                queryUrl.addFirst(url)
+            }
         }
     }
 
     internal fun internalClose(url: String) {
-        decreaseSourceCount(url)
-        if (sourceMap.isEmpty()) {
-            isShowingProgress = false
-            onClose()
-        } else {
-            onShow(queryUrl.pollLast(), queryProgressParams.pollLast())
+        synchronized(syncLock) {
+            decreaseSourceCount(url)
+            if (sourceMap.isEmpty()) {
+                isShowingProgress = false
+                onClose()
+            } else {
+                onShow(queryUrl.pollLast(), queryProgressParams.pollLast())
+            }
         }
     }
 
-    internal abstract fun onShow(url: String, progressData: ProgressData?)
-    internal abstract fun onClose()
+    protected abstract fun onShow(url: String, progressData: ProgressData?)
+    protected abstract fun onClose()
 
-    open fun cancel() {
-        sourceMap.clear()
-        requestProvider?.cancelAllRequests() ?: Log.w(ProgressController::class.java.name,
-                "RequestProvider is null. This progress layer will be closed but nothing " +
-                        "else will happen. Not taking care of the running calls, could " +
-                        "confuse your users and damage the reputation of your app.")
-        onClose()
+    fun cancel() {
+        synchronized(syncLock) {
+            sourceMap.clear()
+            requestProvider?.cancelAllRequests() ?: Log.w(ProgressController::class.java.name,
+                    "RequestProvider is null. This progress layer will be closed but nothing " +
+                            "else will happen. Not taking care of the running calls, could " +
+                            "confuse your users and damage the reputation of your app.")
+            onClose()
+        }
+    }
+
+    fun resetController() {
+        synchronized(syncLock) {
+            sourceMap.clear()
+            queryProgressParams.clear()
+            queryUrl.clear()
+            isShowingProgress = false
+            onClose()
+        }
     }
 }
