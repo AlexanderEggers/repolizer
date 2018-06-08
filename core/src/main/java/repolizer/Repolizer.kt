@@ -8,8 +8,8 @@ import repolizer.database.provider.GlobalDatabaseProvider
 import repolizer.repository.api.DefaultNetworkController
 import repolizer.repository.api.NetworkController
 import repolizer.repository.api.NetworkInterface
-import repolizer.repository.provider.GlobalRepositoryProvider
 import repolizer.repository.progress.ProgressController
+import repolizer.repository.provider.GlobalRepositoryProvider
 import repolizer.repository.response.RequestProvider
 import repolizer.repository.response.ResponseService
 import repolizer.repository.retrofit.LiveDataCallAdapterFactory
@@ -22,7 +22,8 @@ class Repolizer private constructor(val context: Context, builder: Builder) {
     private val httpClient: OkHttpClient? = builder.httpClient
     private val requestProvider: RequestProvider? = builder.requestProvider
 
-    internal val baseUrl: String = builder.baseUrl!!
+    internal val baseUrl: String = builder.baseUrl
+            ?: throw IllegalStateException("Internal error: Base url required.")
     internal val networkController: NetworkController
     internal var gson: Gson = builder.gson
 
@@ -31,18 +32,22 @@ class Repolizer private constructor(val context: Context, builder: Builder) {
     internal val responseService: ResponseService? = builder.responseService
 
     init {
-        val retrofitBuilder = Retrofit.Builder()
-                .baseUrl(baseUrl)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .addCallAdapterFactory(LiveDataCallAdapterFactory(requestProvider))
-
-        if (httpClient != null) {
-            retrofitBuilder.client(httpClient)
+        val retrofitBuilder = Retrofit.Builder().apply {
+            baseUrl(baseUrl)
+            addConverterFactory(ScalarsConverterFactory.create())
+            addCallAdapterFactory(LiveDataCallAdapterFactory(requestProvider))
         }
 
-        val networkInterface = retrofitBuilder.build().create(NetworkInterface::class.java)
-        networkController = builder.networkControllerClass.getConstructor(
-                NetworkInterface::class.java, Gson::class.java).newInstance(networkInterface, gson)
+        httpClient?.let {
+            retrofitBuilder.client(it)
+        }
+
+        val networkInterface = retrofitBuilder.build()?.create(NetworkInterface::class.java)
+        networkController = networkInterface
+                ?.let { builder.networkControllerClass.getConstructor(NetworkInterface::class.java, Gson::class.java) }
+                ?.newInstance(networkInterface, gson)
+                ?: throw IllegalStateException("Internal error: NetworkController is null. " +
+                "Usage of reflection to create an instance of your NetworkController failed.")
     }
 
     @Suppress("UNCHECKED_CAST")
