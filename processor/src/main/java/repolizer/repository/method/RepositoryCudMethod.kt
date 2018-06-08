@@ -35,6 +35,8 @@ class RepositoryCudMethod {
             val classGenericTypeForMethod = if (entityBodyAsList) ParameterizedTypeName.get(classList, entity) else entity
             val cudType = methodElement.getAnnotation(CUD::class.java).cudType
 
+            val annotationMapKey = "${element.simpleName}.${methodElement.simpleName}"
+
             val cudMethodBuilder = MethodSpec.methodBuilder(methodElement.simpleName.toString())
                     .addModifiers(Modifier.PUBLIC)
                     .addAnnotation(Override::class.java)
@@ -52,8 +54,7 @@ class RepositoryCudMethod {
             val requestType = getRequestType(cudType)
 
             cudMethodBuilder.addStatement("String url = \"$url\"")
-            RepositoryMapHolder.urlParameterAnnotationMap[element.simpleName.toString() + "." +
-                    methodElement.simpleName.toString()]?.forEach {
+            RepositoryMapHolder.urlParameterAnnotationMap[annotationMapKey]?.forEach {
                 cudMethodBuilder.addStatement("url = url.replace(\":${it.simpleName}\", \"$it\")")
             }
             cudMethodBuilder.addCode("\n")
@@ -64,21 +65,22 @@ class RepositoryCudMethod {
             cudMethodBuilder.addStatement("builder.setRequiresLogin($requiresLogin)")
             cudMethodBuilder.addStatement("builder.setShowProgress($showProgress)")
 
-            RepositoryMapHolder.requestBodyAnnotationMap[element.simpleName.toString() + "." +
-                    methodElement.simpleName.toString()]?.forEach {
+            RepositoryMapHolder.requestBodyAnnotationMap[annotationMapKey]?.forEach {
                 cudMethodBuilder.addStatement("builder.setRaw(${it.simpleName})")
             }
 
-            RepositoryMapHolder.headerAnnotationMap[element.simpleName.toString() + "." +
-                    methodElement.simpleName.toString()]?.forEach {
+            RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {
                 cudMethodBuilder.addStatement("builder.addHeader(" +
                         "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName})")
             }
 
-            RepositoryMapHolder.urlQueryAnnotationMap[element.simpleName.toString() + "." +
-                    methodElement.simpleName.toString()]?.forEach {
+            RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]?.forEach {
                 cudMethodBuilder.addStatement("builder.addQuery(" +
                         "\"${it.getAnnotation(UrlQuery::class.java).key}\", ${it.simpleName})")
+            }
+
+            RepositoryMapHolder.progressParamsAnnotationMap[annotationMapKey]?.forEach {
+                cudMethodBuilder.addStatement("builder.setProgressParams(${it.simpleName})")
             }
 
             val networkGetLayerClass = createNetworkPostLayerAnonymousClass(

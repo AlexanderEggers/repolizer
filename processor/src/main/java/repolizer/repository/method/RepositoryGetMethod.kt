@@ -19,7 +19,6 @@ class RepositoryGetMethod {
 
     private val classNetworkBuilder = ClassName.get("repolizer.repository.network", "NetworkBuilder")
     private val classNetworkLayer = ClassName.get("repolizer.repository.network", "NetworkGetLayer")
-    private val classRequestType = ClassName.get("repolizer.repository.util", "RequestType")
     private val classCacheItem = ClassName.get("repolizer.database.cache", "CacheItem")
     private val classCacheState = ClassName.get("repolizer.database.cache", "CacheState")
 
@@ -44,10 +43,13 @@ class RepositoryGetMethod {
         classEntity = entity
         classArrayWithEntity = ArrayTypeName.of(entity)
 
-        val list = RepositoryMapHolder.getAnnotationMap[element.simpleName.toString()] ?: ArrayList()
+        val list = RepositoryMapHolder.getAnnotationMap[element.simpleName.toString()]
+                ?: ArrayList()
         for (methodElement in list) {
             val getAsList = methodElement.getAnnotation(GET::class.java).getAsList
             val classGenericTypeForMethod = if (getAsList) ParameterizedTypeName.get(classList, entity) else entity
+
+            val annotationMapKey = "${element.simpleName}.${methodElement.simpleName}"
 
             val getMethodBuilder = MethodSpec.methodBuilder(methodElement.simpleName.toString())
                     .addModifiers(Modifier.PUBLIC)
@@ -91,7 +93,7 @@ class RepositoryGetMethod {
             }
 
             val daoParamList = ArrayList<String>()
-            RepositoryMapHolder.sqlParameterAnnotationMap["${element.simpleName}.${methodElement.simpleName}"]?.forEach {
+            RepositoryMapHolder.sqlParameterAnnotationMap[annotationMapKey]?.forEach {
                 val elementType = ClassName.get(it.asType())
                 daoQueryMethodBuilder.addParameter(elementType, it.simpleName.toString())
                 daoParamList.add(it.simpleName.toString())
@@ -105,13 +107,11 @@ class RepositoryGetMethod {
             val classWithNetworkBuilder = ParameterizedTypeName.get(classNetworkBuilder, classGenericTypeForMethod)
 
             getMethodBuilder.addStatement("String url = \"$url\"")
-            RepositoryMapHolder.urlParameterAnnotationMap[element.simpleName.toString() + "." +
-                    methodElement.simpleName.toString()]?.forEach {
+            RepositoryMapHolder.urlParameterAnnotationMap[annotationMapKey]?.forEach {
                 getMethodBuilder.addStatement("url = url.replace(\":${it.simpleName}\", \"$it\")")
             }
 
-            val urlQueryList = RepositoryMapHolder.urlQueryAnnotationMap[element.simpleName.toString() + "." +
-                    methodElement.simpleName.toString()]
+            val urlQueryList = RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]
             if (urlQueryList?.isEmpty() == false) {
                 getMethodBuilder.addStatement("url += \"?\"")
 
@@ -131,13 +131,11 @@ class RepositoryGetMethod {
 
             getMethodBuilder.addStatement("$classNetworkBuilder builder = new $classWithNetworkBuilder()")
             getMethodBuilder.addStatement("builder.setTypeToken(new $classWithTypeToken() {})")
-            getMethodBuilder.addStatement("builder.setRequestType($classRequestType.GET)")
             getMethodBuilder.addStatement("builder.setUrl(url)")
             getMethodBuilder.addStatement("builder.setRequiresLogin($requiresLogin)")
             getMethodBuilder.addStatement("builder.setShowProgress($showProgress)")
 
-            RepositoryMapHolder.headerAnnotationMap[element.simpleName.toString() + "." +
-                    methodElement.simpleName.toString()]?.forEach {
+            RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {
                 getMethodBuilder.addStatement("builder.addHeader(" +
                         "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName})")
             }
@@ -147,11 +145,14 @@ class RepositoryGetMethod {
                         "\"${it.getAnnotation(UrlQuery::class.java).key}\", ${it.simpleName})")
             }
 
+            RepositoryMapHolder.progressParamsAnnotationMap[annotationMapKey]?.forEach {
+                getMethodBuilder.addStatement("builder.setProgressParams(${it.simpleName})")
+            }
+
             var allowFetchParamName: String? = null
             var deleteIfCacheIsTooOldParamName: String? = null
 
-            RepositoryMapHolder.repositoryParameterAnnotationMap[element.simpleName.toString() + "." +
-                    methodElement.simpleName.toString()]?.forEach { variable ->
+            RepositoryMapHolder.repositoryParameterAnnotationMap[annotationMapKey]?.forEach { variable ->
                 val type = variable.getAnnotation(RepositoryParameter::class.java).type
                 when (type) {
                     ParameterType.ALLOW_FETCH -> allowFetchParamName = variable.simpleName.toString()

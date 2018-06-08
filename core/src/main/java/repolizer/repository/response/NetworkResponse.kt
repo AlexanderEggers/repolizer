@@ -10,7 +10,7 @@ internal constructor(val body: T?,
         return status == NetworkResponseStatus.SUCCESS
     }
 
-    internal fun <R> withBody(body: R?): NetworkResponse<R> {
+    internal fun <R> withBody(body: R): NetworkResponse<R> {
         return NetworkResponse(body, url, statusCode, status)
     }
 }

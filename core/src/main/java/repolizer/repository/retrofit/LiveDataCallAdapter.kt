@@ -36,16 +36,16 @@ class LiveDataCallAdapter internal constructor(
                                         url,
                                         response.code(),
                                         if (response.isSuccessful) NetworkResponseStatus.SUCCESS else NetworkResponseStatus.FAILED))
-                                requestProvider?.removeRequest(call)
+                                requestProvider?.removeRequest(url, call)
                             }
 
                             override fun onFailure(call: Call<String>, throwable: Throwable) {
                                 postValue(NetworkResponse(null, url, 0, NetworkResponseStatus.NETWORK_ERROR))
-                                requestProvider?.removeRequest(call)
+                                requestProvider?.removeRequest(url, call)
                             }
                         })
 
-                        requestProvider?.addRequest(call)
+                        requestProvider?.addRequest(url, call)
                     }
                 }
             }
@@ -56,12 +56,13 @@ class LiveDataCallAdapter internal constructor(
         return responseType
     }
 
-    private fun getErrorBody(response: Response<String>?): String {
-        try {
-            return response?.errorBody()?.toString() ?: ""
+    private fun getErrorBody(response: Response<String>): String {
+        return try {
+            response.errorBody()?.toString() ?: ""
         } catch (e: IOException) {
             Log.e(LiveDataCallAdapter::class.java.name, e.message)
+            e.printStackTrace()
+            ""
         }
-        return ""
     }
 }

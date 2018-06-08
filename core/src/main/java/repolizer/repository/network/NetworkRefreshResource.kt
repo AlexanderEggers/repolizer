@@ -9,10 +9,12 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
 import repolizer.repository.api.NetworkController
+import repolizer.repository.progress.ProgressController
+import repolizer.repository.progress.ProgressParams
 import repolizer.repository.response.NetworkResponse
-import repolizer.repository.response.ProgressController
 import repolizer.repository.response.ResponseService
 import repolizer.repository.util.*
+import repolizer.repository.util.Utils.Companion.makeUrlId
 import repolizer.repository.util.Utils.Companion.prepareUrl
 
 class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, builder: NetworkBuilder<Entity>) {
@@ -38,23 +40,28 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
         repolizer.baseUrl + builder.url
     }
 
-    private val requestType: RequestType = builder.requestType!!
-    private val bodyType: TypeToken<*> = builder.typeToken!!
+    private val progressParams: ProgressParams = builder.progressParams ?: ProgressParams()
+    private val bodyType: TypeToken<*> = builder.typeToken
+            ?: throw IllegalStateException("Internal error: Body type is null.")
 
     private val headerMap: Map<String, String> = builder.headerMap
     private val queryMap: Map<String, String> = builder.queryMap
 
-    private lateinit var callFinishedCallback: FetchSecurityLayer
+    private lateinit var fetchSecurityLayer: FetchSecurityLayer
+
+    init {
+        progressParams.requestType = RequestType.REFRESH
+    }
 
     @MainThread
     fun execute(fetchSecurityLayer: FetchSecurityLayer): LiveData<String> {
-        this.callFinishedCallback = fetchSecurityLayer
+        this.fetchSecurityLayer = fetchSecurityLayer
 
         if (fetchSecurityLayer.allowFetch()) {
             val apiResponse = controller.get(headerMap, prepareUrl(url), queryMap)
 
             if (showProgress) {
-                progressController?.show(url, requestType)
+                progressController?.internalShow(url, progressParams)
             }
 
             if (requiresLogin) {
@@ -70,52 +77,56 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
     }
 
     private fun checkLogin(networkResponse: LiveData<NetworkResponse<String>>) {
-        appExecutor.workerThread.execute({
-            if (loginManager == null) {
-                throw IllegalStateException("Checking the login requires a LoginManager. Use the " +
-                        "setter of the Repolizer class to set your custom implementation.")
-            }
-
-            result.addSource(loginManager.isCurrentLoginValid(), { isLoginValid ->
-                if (isLoginValid != null) {
-                    if (isLoginValid) {
-                        loginManager.onLoginInvalid(context)
-                    } else {
+        loginManager?.let {
+            result.addSource(it.isCurrentLoginValid(), { isLoginValid ->
+                isLoginValid?.run {
+                    if (this) {
                         executeCall(networkResponse)
+                    } else {
+                        appExecutor.mainThread.execute {
+                            loginManager.onLoginInvalid(context)
+                        }
                     }
                 }
             })
-        })
+        }
+                ?: throw IllegalStateException("Checking the login requires a LoginManager. " +
+                        "Use the setter of the Repolizer class to set your custom " +
+                        "implementation.")
     }
 
     private fun executeCall(networkResponse: LiveData<NetworkResponse<String>>) {
         result.addSource(networkResponse) { response ->
-            result.removeSource(networkResponse)
+            response?.run {
+                result.removeSource(networkResponse)
 
-            appExecutor.workerThread.execute {
-                var body: Entity? = null
-                try {
-                    body = gson.fromJson<Entity>(response!!.body, bodyType.type)
-                } catch (e: Exception) {
-                    Log.e("Error parsing JSON:\n" + response!!.body + "\n", e.message)
+                appExecutor.workerThread.execute {
+                    if (showProgress) progressController?.internalClose(fullUrl)
+
+                    if (isSuccessful()) {
+                        var objectResponse: NetworkResponse<Entity>? = null
+
+                        try {
+                            gson.fromJson<Entity>(body, bodyType.type)?.let {
+                                objectResponse = withBody(it)
+                            }
+                        } catch (e: Exception) {
+                            Log.e(NetworkRefreshResource::class.java.name, e.message)
+                            e.printStackTrace()
+                        }
+
+                        objectResponse?.body?.let {
+                            responseService?.handleSuccess(this)
+                            updateLayer.updateDB(it)
+                            updateLayer.updateFetchTime(makeUrlId(fullUrl))
+                            result.postValue(body)
+                        } ?: responseService?.handleGesonError(response)
+                    } else {
+                        responseService?.handleRequestError(response)
+                    }
+
+                    fetchSecurityLayer.onFetchFinished()
                 }
-
-                val objectResponse: NetworkResponse<Entity> = response!!.withBody(body)
-
-                if (showProgress) {
-                    progressController?.close()
-                }
-
-                if (response.isSuccessful() && objectResponse.body != null) {
-                    responseService?.handleSuccess(response)
-                    updateLayer.updateDB(objectResponse.body)
-                    updateLayer.updateFetchTime(Utils.makeUrlId(fullUrl))
-                } else {
-                    responseService?.handleError(response)
-                }
-
-                callFinishedCallback.onFetchFinished()
-                result.postValue(response.body)
             }
         }
     }

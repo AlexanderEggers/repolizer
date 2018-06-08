@@ -16,7 +16,6 @@ class RepositoryRefreshMethod {
 
     private val classNetworkBuilder = ClassName.get("repolizer.repository.network", "NetworkBuilder")
     private val classNetworkLayer = ClassName.get("repolizer.repository.network", "NetworkRefreshLayer")
-    private val classRequestType = ClassName.get("repolizer.repository.util", "RequestType")
     private val classCacheItem = ClassName.get("repolizer.database.cache", "CacheItem")
 
     private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
@@ -37,10 +36,13 @@ class RepositoryRefreshMethod {
         classEntity = entity
         classArrayWithEntity = ArrayTypeName.of(entity)
 
-        val list = RepositoryMapHolder.refreshAnnotationMap[element.simpleName.toString()] ?: ArrayList()
+        val list = RepositoryMapHolder.refreshAnnotationMap[element.simpleName.toString()]
+                ?: ArrayList()
         for (methodElement in list) {
             val getAsList = methodElement.getAnnotation(REFRESH::class.java).getAsList
             val classGenericTypeForMethod = if (getAsList) ParameterizedTypeName.get(classList, entity) else entity
+
+            val annotationMapKey = "${element.simpleName}.${methodElement.simpleName}"
 
             val refreshMethodBuilder = MethodSpec.methodBuilder(methodElement.simpleName.toString())
                     .addModifiers(Modifier.PUBLIC)
@@ -68,29 +70,29 @@ class RepositoryRefreshMethod {
             val classWithNetworkBuilder = ParameterizedTypeName.get(classNetworkBuilder, classGenericTypeForMethod)
 
             refreshMethodBuilder.addStatement("String url = \"$url\"")
-            RepositoryMapHolder.urlParameterAnnotationMap[element.simpleName.toString() + "." +
-                    methodElement.simpleName.toString()]?.forEach {
+            RepositoryMapHolder.urlParameterAnnotationMap[annotationMapKey]?.forEach {
                 refreshMethodBuilder.addStatement("url = url.replace(\":${it.simpleName}\", \"$it\")")
             }
             refreshMethodBuilder.addCode("\n")
 
             refreshMethodBuilder.addStatement("$classNetworkBuilder builder = new $classWithNetworkBuilder()")
             refreshMethodBuilder.addStatement("builder.setTypeToken(new $classWithTypeToken() {})")
-            refreshMethodBuilder.addStatement("builder.setRequestType($classRequestType.REFRESH)")
             refreshMethodBuilder.addStatement("builder.setUrl(url)")
             refreshMethodBuilder.addStatement("builder.setRequiresLogin($requiresLogin)")
             refreshMethodBuilder.addStatement("builder.setShowProgress($showProgress)")
 
-            RepositoryMapHolder.headerAnnotationMap[element.simpleName.toString() + "." +
-                    methodElement.simpleName.toString()]?.forEach {
+            RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {
                 refreshMethodBuilder.addStatement("builder.addHeader(" +
                         "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName})")
             }
 
-            RepositoryMapHolder.urlQueryAnnotationMap[element.simpleName.toString() + "." +
-                    methodElement.simpleName.toString()]?.forEach {
+            RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]?.forEach {
                 refreshMethodBuilder.addStatement("builder.addQuery(" +
                         "\"${it.getAnnotation(UrlQuery::class.java).key}\", ${it.simpleName})")
+            }
+
+            RepositoryMapHolder.progressParamsAnnotationMap[annotationMapKey]?.forEach {
+                refreshMethodBuilder.addStatement("builder.setProgressParams(${it.simpleName})")
             }
 
             val networkGetLayerClass = createNetworkGetLayerAnonymousClass(classGenericTypeForMethod,

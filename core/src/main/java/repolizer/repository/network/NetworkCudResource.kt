@@ -7,11 +7,11 @@ import android.support.annotation.MainThread
 import repolizer.Repolizer
 import repolizer.repository.api.NetworkController
 import repolizer.repository.response.NetworkResponse
-import repolizer.repository.response.ProgressController
+import repolizer.repository.progress.ProgressController
+import repolizer.repository.progress.ProgressParams
 import repolizer.repository.response.ResponseService
 import repolizer.repository.util.AppExecutor
 import repolizer.repository.util.LoginManager
-import repolizer.repository.util.RequestType
 import repolizer.repository.util.Utils.Companion.prepareUrl
 
 class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, builder: NetworkBuilder<Entity>) {
@@ -31,19 +31,24 @@ class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, buil
 
     private val url: String = builder.url
     private val raw: Entity? = builder.raw
-    private val requestType: RequestType = builder.requestType!!
+
+    private val progressParams: ProgressParams = builder.progressParams ?: ProgressParams()
 
     private val headerMap: Map<String, String> = builder.headerMap
     private val queryMap: Map<String, String> = builder.queryMap
 
+    init {
+        builder.requestType?.let {
+            progressParams.requestType = it
+        } ?: throw IllegalStateException("Internal error: Request type is null.")
+    }
+
     @MainThread
     fun execute(): LiveData<String> {
-        val networkResponse: LiveData<NetworkResponse<String>> = cudLayer.createCall(controller, headerMap,
-                prepareUrl(url), queryMap, raw)
+        val networkResponse: LiveData<NetworkResponse<String>> = cudLayer.createCall(controller,
+                headerMap, prepareUrl(url), queryMap, raw)
 
-        if (showProgress) {
-            progressController?.show(url, requestType)
-        }
+        if (showProgress) progressController?.internalShow(url, progressParams)
 
         if (requiresLogin) {
             checkLogin(networkResponse)
@@ -55,40 +60,37 @@ class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, buil
     }
 
     private fun checkLogin(networkResponse: LiveData<NetworkResponse<String>>) {
-        appExecutor.workerThread.execute({
-            if (loginManager == null) {
-                throw IllegalStateException("Checking the login requires a LoginManager. Use the " +
-                        "setter of the Repolizer class to set your custom implementation.")
-            }
-
-            result.addSource(loginManager.isCurrentLoginValid(), { isLoginValid ->
-                if (isLoginValid != null) {
-                    if (isLoginValid) {
-                        loginManager.onLoginInvalid(context)
-                    } else {
+        loginManager?.let {
+            result.addSource(it.isCurrentLoginValid(), { isLoginValid ->
+                isLoginValid?.run {
+                    if (this) {
                         executeCall(networkResponse)
+                    } else {
+                        appExecutor.mainThread.execute {
+                            loginManager.onLoginInvalid(context)
+                        }
                     }
                 }
             })
-        })
+        }
+                ?: throw IllegalStateException("Checking the login requires a LoginManager. " +
+                        "Use the setter of the Repolizer class to set your custom " +
+                        "implementation.")
     }
 
     private fun executeCall(networkResponse: LiveData<NetworkResponse<String>>) {
         result.addSource<NetworkResponse<String>>(networkResponse) { response ->
-            if (response != null) {
+            response?.run {
                 result.removeSource<NetworkResponse<String>>(networkResponse)
 
-                if (showProgress) {
-                    progressController?.close()
-                }
+                if (showProgress) progressController?.internalClose(url)
 
-                if (response.isSuccessful()) {
-                    responseService?.handleSuccess(response)
+                if (isSuccessful()) {
+                    responseService?.handleSuccess(this)
+                    result.value = body
                 } else {
-                    responseService?.handleError(response)
+                    responseService?.handleRequestError(this)
                 }
-
-                result.value = response.body
             }
         }
     }

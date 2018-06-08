@@ -9,7 +9,7 @@ import repolizer.repository.api.DefaultNetworkController
 import repolizer.repository.api.NetworkController
 import repolizer.repository.api.NetworkInterface
 import repolizer.repository.provider.GlobalRepositoryProvider
-import repolizer.repository.response.ProgressController
+import repolizer.repository.progress.ProgressController
 import repolizer.repository.response.RequestProvider
 import repolizer.repository.response.ResponseService
 import repolizer.repository.retrofit.LiveDataCallAdapterFactory
@@ -46,11 +46,11 @@ class Repolizer private constructor(val context: Context, builder: Builder) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T> create(repositoryClass: Class<*>): T {
-        return GlobalRepositoryProvider.getRepository(this, repositoryClass) as T
+    fun <T> create(repositoryClass: Class<*>): T? {
+        return GlobalRepositoryProvider.getRepository(this, repositoryClass) as? T
     }
 
-    fun getDatabase(databaseClass: Class<*>): RoomDatabase {
+    fun getDatabase(databaseClass: Class<*>): RoomDatabase? {
         return GlobalDatabaseProvider.getDatabase(context, databaseClass)
     }
 
@@ -62,7 +62,6 @@ class Repolizer private constructor(val context: Context, builder: Builder) {
     }
 
     class Builder {
-
         internal var httpClient: OkHttpClient? = null
         internal var baseUrl: String? = null
         internal var gson: Gson = Gson()
