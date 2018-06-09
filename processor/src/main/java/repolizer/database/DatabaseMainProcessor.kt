@@ -145,7 +145,7 @@ class DatabaseMainProcessor {
             }
         }
 
-        return converterList.joinToString(separator = ", ")
+        return converterList.joinToString()
     }
 
     private fun initMigrationAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
