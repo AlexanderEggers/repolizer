@@ -39,8 +39,4 @@ abstract class BaseRepository<Entity> constructor(private val repolizer: Repoliz
     override fun onFetchFinished() {
         fetchingData.set(false)
     }
-
-    fun getContext(): Context {
-        return repolizer.appContext
-    }
 }
