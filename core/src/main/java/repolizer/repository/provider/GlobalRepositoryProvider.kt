@@ -19,7 +19,10 @@ object GlobalRepositoryProvider {
                         ?.let { it.newInstance(repolizer) as? BaseRepository<*> }
                         ?.also { repositorySingletonMap[repositoryClass.simpleName] = it }
             }
-            else -> null
+            else -> throw IllegalStateException("Internal error: Your used class for the " +
+                    "function Repolzer.getRepository(Class<*>) is missing the @Repository " +
+                    "annotation. Are you sure that you have tried to use the correct class for " +
+                    "the function?.")
         }
     }
 }

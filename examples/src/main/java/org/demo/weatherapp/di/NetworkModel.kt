@@ -22,7 +22,7 @@ class NetworkModel {
                 .setBaseUrl(context.getString(R.string.server_base_url))
                 .setClient(okHttpClient)
                 .build(context)
-                .create(WeatherRepository::class.java)
+                .getRepository(WeatherRepository::class.java)
     }
 
     @Provides

@@ -51,14 +51,16 @@ class Repolizer private constructor(internal val appContext: Context, builder: B
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T> create(repositoryClass: Class<*>): T {
+    fun <T> getRepository(repositoryClass: Class<*>): T {
         return GlobalRepositoryProvider.getRepository(this, repositoryClass) as? T
                 ?: throw IllegalStateException("Internal error: Repository is null. Make sure " +
                         "that you used the correct class for the function Repolizer.create(Class<*>).")
     }
 
-    fun getDatabase(databaseClass: Class<*>): RoomDatabase? {
+    fun getDatabase(databaseClass: Class<*>): RoomDatabase {
         return GlobalDatabaseProvider.getDatabase(appContext, databaseClass)
+                ?: throw IllegalStateException("Internal error: Database is null. Make sure " +
+                        "that you used the correct class for the function Repolizer.getDatabase(Class<*>).")
     }
 
     companion object {
