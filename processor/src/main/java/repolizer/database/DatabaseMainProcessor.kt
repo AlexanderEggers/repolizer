@@ -6,6 +6,7 @@ import repolizer.ProcessorUtil
 import repolizer.ProcessorUtil.Companion.getGeneratedDatabaseName
 import repolizer.annotation.database.Database
 import repolizer.annotation.database.Migration
+import javax.annotation.processing.Filer
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.Element
@@ -28,12 +29,14 @@ class DatabaseMainProcessor {
         for (databaseElement in roundEnv.getElementsAnnotatedWith(Database::class.java)) {
             val typeElement = databaseElement as TypeElement
 
+            //checks if the annotated @Database file has the correct file type
             if (!databaseElement.kind.isInterface) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
                         "be applied to an interface. Error for ${typeElement.simpleName}")
                 continue
             }
 
+            //@Database does not support parent interface classes
             if (!typeElement.interfaces.isEmpty()) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Parent " +
                         "interfaces are not allowed. Error for ${typeElement.simpleName}")
@@ -51,105 +54,121 @@ class DatabaseMainProcessor {
             val version = databaseElement.getAnnotation(Database::class.java).version
             val exportSchema = databaseElement.getAnnotation(Database::class.java).exportSchema
 
-            val fileBuilder = TypeSpec.classBuilder(getGeneratedDatabaseName(databaseName))
-                    .superclass(classRepolizerDatabase)
-                    .addSuperinterface(databaseClassName)
-                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+            //Collecting and preparing entities for the room annotation
+            val entities = DatabaseMapHolder.entityMap[databaseName] ?: ArrayList()
+            val entitiesFormat: String = addEntityClassesToDatabase(entities)
 
-            val entities = DatabaseMapHolder.entityMap[databaseName]
-            val entitiesFormat: String = if (entities != null) addEntityClassesToDatabase(entities)
-            else addEntityClassesToDatabase(ArrayList())
+            //Collecting and preparing dao classes for the room annotation
+            val daoClasses = DatabaseMapHolder.daoMap[databaseName] ?: ArrayList()
 
-            val daoClasses: ArrayList<ClassName>? = DatabaseMapHolder.daoMap[databaseName]
-            addDaoClassesToDatabase(daoClasses, fileBuilder)
+            //Initialising database class and it's annotations for Room
+            TypeSpec.classBuilder(getGeneratedDatabaseName(databaseName)).apply {
+                superclass(classRepolizerDatabase)
+                addSuperinterface(databaseClassName)
+                addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
 
-            fileBuilder.addAnnotation(AnnotationSpec.builder(classAnnotationDatabase)
-                    .addMember("entities", entitiesFormat)
-                    .addMember("version", "$version")
-                    .addMember("exportSchema", "$exportSchema")
-                    .build())
+                AnnotationSpec.builder(classAnnotationDatabase)
+                        .addMember("entities", entitiesFormat)
+                        .addMember("version", "$version")
+                        .addMember("exportSchema", "$exportSchema")
+                        .build()
 
-            val converterFormat = addConvertersToDatabase(databaseElement)
-            if (!converterFormat.isEmpty()) {
-                fileBuilder.addAnnotation(AnnotationSpec.builder(classAnnotationTypeConverters)
-                        .addMember("value", converterFormat)
-                        .build())
+                val converterFormat = addConvertersToDatabase(databaseElement)
+                converterFormat.run {
+                    if (isNotEmpty()) {
+                        addAnnotation(AnnotationSpec.builder(classAnnotationTypeConverters)
+                                .addMember("value", converterFormat)
+                                .build())
+                    }
+                }
+
+                addDaoClassesToDatabase(daoClasses).forEach {
+                    addMethod(it)
+                }
+            }.build().also {
+                JavaFile.builder(databasePackageName, it)
+                        .build()
+                        .writeTo(mainProcessor.filer)
             }
 
-            val providerFile = DatabaseProvider().build(databaseElement, databaseName, realDatabaseClassName)
-            JavaFile.builder(databasePackageName, providerFile)
-                    .build()
-                    .writeTo(mainProcessor.filer)
+            //Creation of the related database provider which will create and provide this
+            //database via the GlobalDatabaseProvider
+            createDatabaseProvider(mainProcessor.filer, databaseElement, databaseName,
+                    realDatabaseClassName, databasePackageName)
+        }
+    }
 
-            val repoFile = fileBuilder.build()
-            JavaFile.builder(databasePackageName, repoFile)
+    private fun createDatabaseProvider(filer: Filer, databaseElement: Element, databaseName: String,
+                                       realDatabaseClassName: ClassName, databasePackageName: String) {
+        DatabaseProvider().build(databaseElement, databaseName, realDatabaseClassName).also { file ->
+            JavaFile.builder(databasePackageName, file)
                     .build()
-                    .writeTo(mainProcessor.filer)
+                    .writeTo(filer)
         }
     }
 
     private fun addEntityClassesToDatabase(entities: ArrayList<ClassName>): String {
-        var format = "{$classCacheItem.class"
-
-        entities.forEach { entityName ->
-            format += ", $entityName.class"
-        }
-
-        return "$format}"
-    }
-
-    private fun addDaoClassesToDatabase(daoList: ArrayList<ClassName>?, fileBuilder: TypeSpec.Builder) {
-        daoList?.forEach { daoClassName ->
-            fileBuilder.addMethod(createDatabaseDaoFunction(daoClassName))
+        return "{$classCacheItem.class".apply {
+            entities.forEach { entityName ->
+                plus(", $entityName.class")
+            }
+            plus("}")
         }
     }
 
-    private fun createDatabaseDaoFunction(daoClassName: ClassName): MethodSpec {
-        return MethodSpec.methodBuilder("get${daoClassName.simpleName()}")
-                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                .returns(daoClassName)
-                .build()
+    private fun addDaoClassesToDatabase(daoList: ArrayList<ClassName>): List<MethodSpec> {
+        return ArrayList<MethodSpec>().apply {
+            daoList.forEach { daoClassName ->
+                add(MethodSpec.methodBuilder("get${daoClassName.simpleName()}")
+                        .apply {
+                            addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                            returns(daoClassName)
+                        }.build())
+            }
+        }
     }
 
     @Suppress("UNCHECKED_CAST")
     private fun addConvertersToDatabase(element: Element): String {
-        var converterFormat = ""
-        element.annotationMirrors.forEach {
-            it.elementValues.forEach {
-                val key = it.key.simpleName.toString()
-                val value = it.value.value
+        return "{" + String().apply {
+            element.annotationMirrors.forEach { annotations ->
+                annotations.elementValues.forEach { annotationValue ->
+                    val key = annotationValue.key.simpleName.toString()
+                    val value = annotationValue.value.value
 
-                if (key == "value") {
-                    val typeMirrors = value as List<AnnotationValue>
-                    typeMirrors.forEach {
-                        val declaredType = it.value as DeclaredType
-                        val objectClass = declaredType.asElement()
+                    if (key == "typeConverter") {
+                        val typeMirrors = value as List<AnnotationValue>
+                        typeMirrors.forEach {
+                            val declaredType = it.value as DeclaredType
+                            val objectClass = declaredType.asElement()
 
-                        if (!converterFormat.isEmpty()) {
-                            converterFormat += ", "
+                            if (isNotEmpty()) {
+                                plus(", ")
+                            }
+                            plus("$objectClass.class")
                         }
-                        converterFormat += "$objectClass.class"
                     }
                 }
             }
+            plus("}")
         }
-        return "{$converterFormat}"
     }
 
     private fun initMigrationAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
-        val hashMap: HashMap<String, ArrayList<Element>> = DatabaseMapHolder.migrationAnnotationMap
+        DatabaseMapHolder.migrationAnnotationMap.apply {
+            for (databaseElement in roundEnv.getElementsAnnotatedWith(Migration::class.java)) {
+                if (!databaseElement.kind.isInterface) {
+                    mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
+                            "be applied to an interface. Error for ${databaseElement.simpleName}")
+                    continue
+                }
 
-        for (it in roundEnv.getElementsAnnotatedWith(Migration::class.java)) {
-            if (!it.kind.isInterface) {
-                mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                        "be applied to an interface. Error for ${it.simpleName}")
-                continue
+                val key = databaseElement.simpleName.toString()
+                val currentList: ArrayList<Element> = get(key) ?: ArrayList()
+
+                currentList.add(databaseElement)
+                put(databaseElement.simpleName.toString(), currentList)
             }
-
-            val key = it.simpleName.toString()
-            val currentList: ArrayList<Element> = hashMap[key] ?: ArrayList()
-            currentList.add(it)
-            hashMap[it.simpleName.toString()] = currentList
         }
     }
 }
