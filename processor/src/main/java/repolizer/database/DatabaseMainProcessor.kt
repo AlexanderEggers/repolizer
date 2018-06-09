@@ -67,17 +67,17 @@ class DatabaseMainProcessor {
                 addSuperinterface(databaseClassName)
                 addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
 
-                AnnotationSpec.builder(classAnnotationDatabase)
-                        .addMember("entities", entitiesFormat)
+                addAnnotation(AnnotationSpec.builder(classAnnotationDatabase)
+                        .addMember("entities", "{$entitiesFormat}")
                         .addMember("version", "$version")
                         .addMember("exportSchema", "$exportSchema")
-                        .build()
+                        .build())
 
                 val converterFormat = addConvertersToDatabase(databaseElement)
                 converterFormat.run {
                     if (isNotEmpty()) {
                         addAnnotation(AnnotationSpec.builder(classAnnotationTypeConverters)
-                                .addMember("value", converterFormat)
+                                .addMember("value", "{$converterFormat}")
                                 .build())
                     }
                 }
@@ -108,12 +108,7 @@ class DatabaseMainProcessor {
     }
 
     private fun addEntityClassesToDatabase(entities: ArrayList<ClassName>): String {
-        return "{$classCacheItem.class".apply {
-            entities.forEach { entityName ->
-                plus(", $entityName.class")
-            }
-            plus("}")
-        }
+        return entities.joinToString(prefix = "$classCacheItem.class") { entityName -> ", $entityName.class" }
     }
 
     private fun addDaoClassesToDatabase(daoList: ArrayList<ClassName>): List<MethodSpec> {
@@ -130,28 +125,25 @@ class DatabaseMainProcessor {
 
     @Suppress("UNCHECKED_CAST")
     private fun addConvertersToDatabase(element: Element): String {
-        return "{" + String().apply {
-            element.annotationMirrors.forEach { annotations ->
-                annotations.elementValues.forEach { annotationValue ->
-                    val key = annotationValue.key.simpleName.toString()
-                    val value = annotationValue.value.value
+        val converterList: ArrayList<String> = ArrayList()
 
-                    if (key == "typeConverter") {
-                        val typeMirrors = value as List<AnnotationValue>
-                        typeMirrors.forEach {
-                            val declaredType = it.value as DeclaredType
-                            val objectClass = declaredType.asElement()
+        element.annotationMirrors.forEach { annotations ->
+            annotations.elementValues.forEach { annotationValue ->
+                val key = annotationValue.key.simpleName.toString()
+                val value = annotationValue.value.value
 
-                            if (isNotEmpty()) {
-                                plus(", ")
-                            }
-                            plus("$objectClass.class")
-                        }
+                if (key == "typeConverter") {
+                    val typeMirrors = value as List<AnnotationValue>
+                    typeMirrors.forEach {
+                        val declaredType = it.value as DeclaredType
+                        val objectClass = declaredType.asElement()
+                        converterList.add("$objectClass.class")
                     }
                 }
             }
-            plus("}")
         }
+
+        return converterList.joinToString(separator = ", ")
     }
 
     private fun initMigrationAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {

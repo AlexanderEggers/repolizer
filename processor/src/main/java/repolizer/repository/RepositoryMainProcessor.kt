@@ -99,7 +99,7 @@ class RepositoryMainProcessor {
                 addField(FieldSpec.builder(classRealDatabase, "db")
                         .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                         .initializer("$classGlobalDatabaseProvider.INSTANCE." +
-                                "getDatabase(super.getContext(), $classDatabase.class)")
+                                "getDatabase(super.getAppContext(), $classDatabase.class)")
                         .build())
                 addField(FieldSpec.builder(classDatabaseDao, "dataDao")
                         .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
