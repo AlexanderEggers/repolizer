@@ -9,19 +9,15 @@ object GlobalRepositoryProvider {
 
     private val repositorySingletonMap: HashMap<String, BaseRepository<*>> = HashMap()
 
-    @Suppress("UNCHECKED_CAST")
     fun getRepository(repolizer: Repolizer, repositoryClass: Class<*>): BaseRepository<*>? {
         return when {
             repositorySingletonMap.containsKey(repositoryClass.simpleName) -> repositorySingletonMap[repositoryClass.simpleName]
             repositoryClass.isAnnotationPresent(Repository::class.java) -> {
-                val repository: BaseRepository<*>? = repositoryClass
-                        .let { repositoryClass.`package`.name }
+                return repositoryClass.`package`.name
                         .let { "$it.${getGeneratedRepositoryName(repositoryClass)}" }
                         .let { Class.forName(it) }.getConstructor(Repolizer::class.java)
-                        .run { newInstance(repolizer) as BaseRepository<*> }
-                return repository?.also {
-                    repositorySingletonMap[repositoryClass.simpleName] = it
-                }
+                        ?.let { it.newInstance(repolizer) as? BaseRepository<*> }
+                        ?.also { repositorySingletonMap[repositoryClass.simpleName] = it }
             }
             else -> null
         }
