@@ -10,7 +10,7 @@ object GlobalDatabaseProvider {
     private val databaseSingletonMap: HashMap<String, RoomDatabase> = HashMap()
 
     @Suppress("UNCHECKED_CAST")
-    fun <T: RoomDatabase> getDatabase(context: Context, databaseClass: Class<*>): T? {
+    fun <T> getDatabase(context: Context, databaseClass: Class<*>): T? {
         return when {
             databaseSingletonMap.containsKey(databaseClass.simpleName) -> databaseSingletonMap[databaseClass.simpleName] as? T
             databaseClass.isAnnotationPresent(Database::class.java) -> {
