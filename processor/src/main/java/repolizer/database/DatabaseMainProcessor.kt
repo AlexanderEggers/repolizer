@@ -108,7 +108,9 @@ class DatabaseMainProcessor {
     }
 
     private fun addEntityClassesToDatabase(entities: ArrayList<ClassName>): String {
-        return entities.joinToString(prefix = "$classCacheItem.class") { entityName -> ", $entityName.class" }
+        return entities.joinToString(prefix = "$classCacheItem.class", separator = "") { entityName ->
+            ", $entityName.class"
+        }
     }
 
     private fun addDaoClassesToDatabase(daoList: ArrayList<ClassName>): List<MethodSpec> {
