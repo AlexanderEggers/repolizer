@@ -1,4 +1,4 @@
-package repolizer.repository.util
+package repolizer.repository.login
 
 import android.arch.lifecycle.LiveData
 import android.content.Context

@@ -11,14 +11,15 @@ import repolizer.repository.progress.ProgressController
 import repolizer.repository.progress.ProgressData
 import repolizer.repository.response.ResponseService
 import repolizer.repository.util.AppExecutor
-import repolizer.repository.util.LoginManager
+import repolizer.repository.login.LoginManager
+import repolizer.repository.response.RequestType
 import repolizer.repository.util.Utils.Companion.prepareUrl
 
 class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, builder: NetworkBuilder<Entity>) {
 
     private val result = MediatorLiveData<String>()
 
-    private val context: Context = repolizer.context
+    private val context: Context = repolizer.appContext
     private val controller: NetworkController = repolizer.networkController
     private val progressController: ProgressController? = repolizer.progressController
     private val loginManager: LoginManager? = repolizer.loginManager
@@ -32,15 +33,15 @@ class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, buil
     private val url: String = builder.url
     private val raw: Entity? = builder.raw
 
+    private val requestType: RequestType = builder.requestType
+            ?: throw IllegalStateException("Internal error: Request type is null.")
     private val progressData: ProgressData = builder.progressData ?: object: ProgressData() {}
 
     private val headerMap: Map<String, String> = builder.headerMap
     private val queryMap: Map<String, String> = builder.queryMap
 
     init {
-        builder.requestType?.let {
-            progressData.requestType = it
-        } ?: throw IllegalStateException("Internal error: Request type is null.")
+        progressData.requestType = requestType
     }
 
     @MainThread
@@ -86,10 +87,10 @@ class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, buil
                 if (showProgress) progressController?.internalClose(url)
 
                 if (isSuccessful()) {
-                    responseService?.handleSuccess(this@run)
+                    responseService?.handleSuccess(requestType,this@run)
                     result.value = body
                 } else {
-                    responseService?.handleRequestError(this@run)
+                    responseService?.handleRequestError(requestType,this@run)
                 }
             }
         }

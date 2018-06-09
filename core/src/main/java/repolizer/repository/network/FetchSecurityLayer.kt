@@ -1,4 +1,4 @@
-package repolizer.repository.util
+package repolizer.repository.network
 
 interface FetchSecurityLayer {
     fun allowFetch(): Boolean

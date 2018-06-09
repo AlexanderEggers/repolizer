@@ -3,7 +3,7 @@ package repolizer.repository.network
 import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
 import repolizer.repository.progress.ProgressData
-import repolizer.repository.util.RequestType
+import repolizer.repository.response.RequestType
 
 class NetworkBuilder<Entity> {
 

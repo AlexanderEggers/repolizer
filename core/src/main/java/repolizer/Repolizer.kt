@@ -13,11 +13,11 @@ import repolizer.repository.provider.GlobalRepositoryProvider
 import repolizer.repository.response.RequestProvider
 import repolizer.repository.response.ResponseService
 import repolizer.repository.retrofit.LiveDataCallAdapterFactory
-import repolizer.repository.util.LoginManager
+import repolizer.repository.login.LoginManager
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
-class Repolizer private constructor(val context: Context, builder: Builder) {
+class Repolizer private constructor(internal val appContext: Context, builder: Builder) {
 
     private val httpClient: OkHttpClient? = builder.httpClient
     private val requestProvider: RequestProvider? = builder.requestProvider
@@ -56,7 +56,7 @@ class Repolizer private constructor(val context: Context, builder: Builder) {
     }
 
     fun getDatabase(databaseClass: Class<*>): RoomDatabase? {
-        return GlobalDatabaseProvider.getDatabase(context, databaseClass)
+        return GlobalDatabaseProvider.getDatabase(appContext, databaseClass)
     }
 
     companion object {
@@ -117,8 +117,8 @@ class Repolizer private constructor(val context: Context, builder: Builder) {
             return this@Builder
         }
 
-        fun build(context: Context): Repolizer {
-            return Repolizer(context, this@Builder)
+        fun build(appContext: Context): Repolizer {
+            return Repolizer(appContext, this@Builder)
         }
     }
 }

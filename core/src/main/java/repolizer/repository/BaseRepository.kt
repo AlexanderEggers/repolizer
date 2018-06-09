@@ -5,7 +5,7 @@ import android.content.Context
 import repolizer.Repolizer
 import repolizer.repository.database.DatabaseBuilder
 import repolizer.repository.network.NetworkBuilder
-import repolizer.repository.util.FetchSecurityLayer
+import repolizer.repository.network.FetchSecurityLayer
 import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class BaseRepository<Entity> constructor(private val repolizer: Repolizer) : FetchSecurityLayer {
@@ -41,6 +41,6 @@ abstract class BaseRepository<Entity> constructor(private val repolizer: Repoliz
     }
 
     fun getContext(): Context {
-        return repolizer.context
+        return repolizer.appContext
     }
 }

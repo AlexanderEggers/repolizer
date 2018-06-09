@@ -16,9 +16,8 @@ import repolizer.repository.progress.ProgressData
 import repolizer.repository.response.NetworkResponse
 import repolizer.repository.response.ResponseService
 import repolizer.repository.util.AppExecutor
-import repolizer.repository.util.FetchSecurityLayer
-import repolizer.repository.util.LoginManager
-import repolizer.repository.util.RequestType
+import repolizer.repository.login.LoginManager
+import repolizer.repository.response.RequestType
 import repolizer.repository.util.Utils.Companion.makeUrlId
 import repolizer.repository.util.Utils.Companion.prepareUrl
 
@@ -26,7 +25,7 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
 
     private val result = MediatorLiveData<Entity>()
 
-    private val context: Context = repolizer.context
+    private val context: Context = repolizer.appContext
     private val gson: Gson = repolizer.gson
     private val controller: NetworkController = repolizer.networkController
     private val progressController: ProgressController? = repolizer.progressController
@@ -46,6 +45,7 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
         "${repolizer.baseUrl}${builder.url}"
     }
 
+    private val requestType: RequestType = RequestType.GET
     private val progressData: ProgressData = builder.progressData ?: object : ProgressData() {}
     private val bodyType: TypeToken<*> = builder.typeToken
             ?: throw IllegalStateException("Internal error: Body type is null.")
@@ -57,7 +57,7 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
     private lateinit var cacheState: CacheState
 
     init {
-        progressData.requestType = RequestType.GET
+        progressData.requestType = requestType
     }
 
     @MainThread
@@ -69,11 +69,11 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
             result.removeSource(testSource)
 
             val needsFetchByTime = getLayer.needsFetchByTime(makeUrlId(fullUrl))
-            result.addSource(needsFetchByTime, { cacheState ->
-                cacheState?.run {
+            result.addSource(needsFetchByTime, { currentCacheState ->
+                currentCacheState?.run {
                     result.removeSource(needsFetchByTime)
 
-                    this@NetworkGetResource.cacheState = this@run
+                    cacheState = this@run
                     val needsFetch = cacheState == CacheState.NEEDS_SOFT_REFRESH ||
                             this@run == CacheState.NEEDS_HARD_REFRESH || this@run == CacheState.NO_CACHE
 
@@ -146,16 +146,16 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
                         }
 
                         objectResponse?.body?.let {
-                            responseService?.handleSuccess(this@run)
+                            responseService?.handleSuccess(requestType,this@run)
                             getLayer.updateDB(it)
                             getLayer.updateFetchTime(makeUrlId(fullUrl))
                             establishConnection()
                         } ?: run {
-                            responseService?.handleGesonError(this)
+                            responseService?.handleGesonError(requestType,this)
                             handleCacheIfTooOld()
                         }
                     } else {
-                        responseService?.handleRequestError(this@run)
+                        responseService?.handleRequestError(requestType,this@run)
                         handleCacheIfTooOld()
                     }
 

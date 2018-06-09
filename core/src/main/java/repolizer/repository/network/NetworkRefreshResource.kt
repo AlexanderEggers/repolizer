@@ -9,9 +9,11 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
 import repolizer.repository.api.NetworkController
+import repolizer.repository.login.LoginManager
 import repolizer.repository.progress.ProgressController
 import repolizer.repository.progress.ProgressData
 import repolizer.repository.response.NetworkResponse
+import repolizer.repository.response.RequestType
 import repolizer.repository.response.ResponseService
 import repolizer.repository.util.*
 import repolizer.repository.util.Utils.Companion.makeUrlId
@@ -21,7 +23,7 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
 
     private val result = MediatorLiveData<String>()
 
-    private val context: Context = repolizer.context
+    private val context: Context = repolizer.appContext
     private val gson: Gson = repolizer.gson
     private val controller: NetworkController = repolizer.networkController
     private val progressController: ProgressController? = repolizer.progressController
@@ -40,6 +42,7 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
         repolizer.baseUrl + builder.url
     }
 
+    private val requestType: RequestType = RequestType.REFRESH
     private val progressData: ProgressData = builder.progressData ?: object: ProgressData() {}
     private val bodyType: TypeToken<*> = builder.typeToken
             ?: throw IllegalStateException("Internal error: Body type is null.")
@@ -50,7 +53,7 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
     private lateinit var fetchSecurityLayer: FetchSecurityLayer
 
     init {
-        progressData.requestType = RequestType.REFRESH
+        progressData.requestType = requestType
     }
 
     @MainThread
@@ -116,13 +119,13 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
                         }
 
                         objectResponse?.body?.let {
-                            responseService?.handleSuccess(this@run)
+                            responseService?.handleSuccess(requestType,this@run)
                             updateLayer.updateDB(it)
                             updateLayer.updateFetchTime(makeUrlId(fullUrl))
                             result.postValue(body)
-                        } ?: responseService?.handleGesonError(this@run)
+                        } ?: responseService?.handleGesonError(requestType,this@run)
                     } else {
-                        responseService?.handleRequestError(this@run)
+                        responseService?.handleRequestError(requestType,this@run)
                     }
 
                     fetchSecurityLayer.onFetchFinished()
