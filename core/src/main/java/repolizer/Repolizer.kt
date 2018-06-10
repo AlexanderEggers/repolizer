@@ -8,38 +8,36 @@ import repolizer.database.provider.GlobalDatabaseProvider
 import repolizer.repository.api.DefaultNetworkController
 import repolizer.repository.api.NetworkController
 import repolizer.repository.api.NetworkInterface
+import repolizer.repository.login.LoginManager
 import repolizer.repository.progress.ProgressController
 import repolizer.repository.provider.GlobalRepositoryProvider
 import repolizer.repository.response.RequestProvider
 import repolizer.repository.response.ResponseService
 import repolizer.repository.retrofit.LiveDataCallAdapterFactory
-import repolizer.repository.login.LoginManager
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
-class Repolizer private constructor(internal val appContext: Context, builder: Builder) {
+class Repolizer private constructor(val appContext: Context, builder: Builder) {
 
-    private val httpClient: OkHttpClient? = builder.httpClient
-    private val requestProvider: RequestProvider? = builder.requestProvider
+    val httpClient: OkHttpClient? = builder.httpClient
+    val requestProvider: RequestProvider? = builder.requestProvider
 
-    internal val baseUrl: String = builder.baseUrl
+    val baseUrl: String = builder.baseUrl
             ?: throw IllegalStateException("Internal error: Base url required.")
-    internal val networkController: NetworkController
-    internal var gson: Gson = builder.gson
+    val networkController: NetworkController
+    val gson: Gson = builder.gson
 
-    internal val progressController: ProgressController? = builder.progressController
-    internal val loginManager: LoginManager? = builder.loginManager
-    internal val responseService: ResponseService? = builder.responseService
+    val progressController: ProgressController? = builder.progressController
+    val loginManager: LoginManager? = builder.loginManager
+    val responseService: ResponseService? = builder.responseService
 
     init {
         val retrofitBuilder = Retrofit.Builder().apply {
             baseUrl(baseUrl)
             addConverterFactory(ScalarsConverterFactory.create())
             addCallAdapterFactory(LiveDataCallAdapterFactory(requestProvider))
-        }
 
-        httpClient?.let {
-            retrofitBuilder.client(it)
+            httpClient?.let { client(it) }
         }
 
         val networkInterface = retrofitBuilder.build()?.create(NetworkInterface::class.java)
@@ -65,21 +63,31 @@ class Repolizer private constructor(internal val appContext: Context, builder: B
 
     companion object {
 
+        @JvmStatic
         fun newBuilder(): Builder {
             return Builder()
         }
     }
 
     class Builder {
-        internal var httpClient: OkHttpClient? = null
-        internal var baseUrl: String? = null
-        internal var gson: Gson = Gson()
-        internal var networkControllerClass: Class<out NetworkController> = DefaultNetworkController::class.java
+        var httpClient: OkHttpClient? = null
+            private set
+        var requestProvider: RequestProvider? = null
+            private set
 
-        internal var progressController: ProgressController? = null
-        internal var loginManager: LoginManager? = null
-        internal var responseService: ResponseService? = null
-        internal var requestProvider: RequestProvider? = null
+        var baseUrl: String? = null
+            private set
+        var networkControllerClass: Class<out NetworkController> = DefaultNetworkController::class.java
+            private set
+        var gson: Gson = Gson()
+            private set
+
+        var progressController: ProgressController? = null
+            private set
+        var loginManager: LoginManager? = null
+            private set
+        var responseService: ResponseService? = null
+            private set
 
         fun setClient(httpClient: OkHttpClient): Builder {
             this@Builder.httpClient = httpClient
