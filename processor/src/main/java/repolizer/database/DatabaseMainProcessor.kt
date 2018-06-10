@@ -127,25 +127,23 @@ class DatabaseMainProcessor {
 
     @Suppress("UNCHECKED_CAST")
     private fun addConvertersToDatabase(element: Element): String {
-        val converterList: ArrayList<String> = ArrayList()
+        return ArrayList<String>().apply {
+            element.annotationMirrors.forEach { annotations ->
+                annotations.elementValues.forEach { annotationValue ->
+                    val key = annotationValue.key.simpleName.toString()
+                    val value = annotationValue.value.value
 
-        element.annotationMirrors.forEach { annotations ->
-            annotations.elementValues.forEach { annotationValue ->
-                val key = annotationValue.key.simpleName.toString()
-                val value = annotationValue.value.value
-
-                if (key == "typeConverter") {
-                    val typeMirrors = value as List<AnnotationValue>
-                    typeMirrors.forEach {
-                        val declaredType = it.value as DeclaredType
-                        val objectClass = declaredType.asElement()
-                        converterList.add("$objectClass.class")
+                    if (key == "typeConverter") {
+                        val typeMirrors = value as List<AnnotationValue>
+                        typeMirrors.forEach {
+                            val declaredType = it.value as DeclaredType
+                            val objectClass = declaredType.asElement()
+                            add("$objectClass.class")
+                        }
                     }
                 }
             }
-        }
-
-        return converterList.joinToString()
+        }.joinToString()
     }
 
     private fun initMigrationAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
