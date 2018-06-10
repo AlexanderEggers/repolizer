@@ -43,7 +43,7 @@ class RepositoryProcessorUtil {
                     continue
                 }
 
-                val key = typeElement.simpleName.toString() + "." + methodElement.simpleName.toString()
+                val key = "${typeElement.simpleName}.${methodElement.simpleName}"
                 val currentList: ArrayList<VariableElement> = hashMap[key] ?: ArrayList()
                 currentList.add(it as VariableElement)
                 hashMap[key] = currentList

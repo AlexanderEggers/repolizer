@@ -30,7 +30,7 @@ class DatabaseMainProcessor {
             val typeElement = databaseElement as TypeElement
 
             //checks if the annotated @Database file has the correct file type
-            if (!databaseElement.kind.isInterface) {
+            if (!typeElement.kind.isInterface) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
                         "be applied to an interface. Error for ${typeElement.simpleName}")
                 continue
@@ -44,15 +44,15 @@ class DatabaseMainProcessor {
             }
 
             //Database annotation general data
-            val databaseName = databaseElement.simpleName.toString()
-            val databasePackageName = ProcessorUtil.getPackageName(mainProcessor, databaseElement)
+            val databaseName = typeElement.simpleName.toString()
+            val databasePackageName = ProcessorUtil.getPackageName(mainProcessor, typeElement)
             val databaseClassName = ClassName.get(databasePackageName, databaseName)
 
             val realDatabaseName = getGeneratedDatabaseName(databaseName)
             val realDatabaseClassName = ClassName.get(databasePackageName, realDatabaseName)
 
-            val version = databaseElement.getAnnotation(Database::class.java).version
-            val exportSchema = databaseElement.getAnnotation(Database::class.java).exportSchema
+            val version = typeElement.getAnnotation(Database::class.java).version
+            val exportSchema = typeElement.getAnnotation(Database::class.java).exportSchema
 
             //Collecting and preparing entities for the room annotation
             val entities = DatabaseMapHolder.entityMap[databaseName] ?: ArrayList()
@@ -67,13 +67,13 @@ class DatabaseMainProcessor {
                 addSuperinterface(databaseClassName)
                 addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
 
-                addAnnotation(AnnotationSpec.builder(classAnnotationDatabase)
-                        .addMember("entities", "{$entitiesFormat}")
-                        .addMember("version", "$version")
-                        .addMember("exportSchema", "$exportSchema")
-                        .build())
+                addAnnotation(AnnotationSpec.builder(classAnnotationDatabase).apply {
+                    addMember("entities", "{$entitiesFormat}")
+                    addMember("version", "$version")
+                    addMember("exportSchema", "$exportSchema")
+                }.build())
 
-                val converterFormat = addConvertersToDatabase(databaseElement)
+                val converterFormat = addConvertersToDatabase(typeElement)
                 converterFormat.run {
                     if (isNotEmpty()) {
                         addAnnotation(AnnotationSpec.builder(classAnnotationTypeConverters)
@@ -85,21 +85,22 @@ class DatabaseMainProcessor {
                 addDaoClassesToDatabase(daoClasses).forEach {
                     addMethod(it)
                 }
-            }.build().also {
-                JavaFile.builder(databasePackageName, it)
+            }.build().also { file ->
+                JavaFile.builder(databasePackageName, file)
                         .build()
                         .writeTo(mainProcessor.filer)
             }
 
             //Creation of the related database provider which will create and provide this
             //database via the GlobalDatabaseProvider
-            createDatabaseProvider(mainProcessor.filer, databaseElement, databaseName,
+            createDatabaseProvider(mainProcessor.filer, typeElement, databaseName,
                     realDatabaseClassName, databasePackageName)
         }
     }
 
     private fun createDatabaseProvider(filer: Filer, databaseElement: Element, databaseName: String,
                                        realDatabaseClassName: ClassName, databasePackageName: String) {
+
         DatabaseProvider().build(databaseElement, databaseName, realDatabaseClassName).also { file ->
             JavaFile.builder(databasePackageName, file)
                     .build()

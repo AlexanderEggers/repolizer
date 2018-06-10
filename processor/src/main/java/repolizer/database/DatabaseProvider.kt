@@ -26,44 +26,35 @@ class DatabaseProvider {
     private val classJournalMode = ClassName.get("android.arch.persistence.room.RoomDatabase", "JournalMode")
 
     fun build(element: Element, databaseName: String, realDatabaseClassName: ClassName): TypeSpec {
-        val providerBuilder = TypeSpec.classBuilder(getGeneratedDatabaseProviderName(databaseName))
-                .addSuperinterface(classDatabaseProvider)
-                .addModifiers(Modifier.PUBLIC)
+        return TypeSpec.classBuilder(getGeneratedDatabaseProviderName(databaseName)).apply {
+            addSuperinterface(classDatabaseProvider)
+            addModifiers(Modifier.PUBLIC)
 
-        val methodBuilder = MethodSpec.methodBuilder("getDatabase")
-                .addAnnotation(Override::class.java)
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(classContext, "context")
-                .returns(classRoomDatabase)
+            addMethod(MethodSpec.methodBuilder("getDatabase").apply {
+                addAnnotation(Override::class.java)
+                addModifiers(Modifier.PUBLIC)
+                addParameter(classContext, "context")
+                returns(classRoomDatabase)
 
+                addStatement(getDatabaseType(element, realDatabaseClassName))
+                addStatement("builder.setJournalMode(${getJournalMode(element)})")
+                addCode(addMigrationToMethod(element))
+
+                addCode(getDestructiveMigration(element))
+
+                addStatement("return builder.build()")
+            }.build())
+        }.build()
+    }
+
+    private fun getDatabaseType(element: Element, realDatabaseClassName: ClassName): String {
         val databaseType = element.getAnnotation(Database::class.java).type
-        if (databaseType == DatabaseType.PERSISTENT) {
+        return if (databaseType == DatabaseType.PERSISTENT) {
             val databaseFileName = element.getAnnotation(Database::class.java).name
-            methodBuilder.addStatement("$classRoomDatabaseBuilder builder = $classRoom.databaseBuilder(context, $realDatabaseClassName.class, \"$databaseFileName\")")
+            "$classRoomDatabaseBuilder builder = $classRoom.databaseBuilder(context, $realDatabaseClassName.class, \"$databaseFileName\")"
         } else {
-            methodBuilder.addStatement("$classRoomDatabaseBuilder builder = $classRoom.inMemoryDatabaseBuilder(context, $realDatabaseClassName.class)")
+            "$classRoomDatabaseBuilder builder = $classRoom.inMemoryDatabaseBuilder(context, $realDatabaseClassName.class)"
         }
-
-        val journalMode = getJournalMode(element)
-        methodBuilder.addStatement("builder.setJournalMode($journalMode)")
-
-        handleDestructiveMigration(element, methodBuilder)
-
-        val migrationFormat = getMigrationFormat(element)
-        if (!migrationFormat.isEmpty()) {
-            methodBuilder.addCode("\n")
-            methodBuilder.addCode("try {\n")
-            methodBuilder.addCode("     builder.addMigrations($migrationFormat);\n")
-            methodBuilder.addCode("} catch(InstantiationException|IllegalAccessException e) {\n")
-            methodBuilder.addCode("     e.printStackTrace();\n")
-            methodBuilder.addCode("}\n\n")
-        }
-
-        methodBuilder.addStatement("return builder.build()")
-
-        return providerBuilder
-                .addMethod(methodBuilder.build())
-                .build()
     }
 
     private fun getJournalMode(element: Element): String {
@@ -75,58 +66,65 @@ class DatabaseProvider {
         }
     }
 
+    private fun addMigrationToMethod(element: Element): String {
+        return ArrayList<String>().apply {
+            val migrationFormat = getMigrationFormat(element)
+            if (!migrationFormat.isEmpty()) {
+                add("\n")
+                add("try {\n")
+                add("     builder.addMigrations($migrationFormat);\n")
+                add("} catch(InstantiationException|IllegalAccessException e) {\n")
+                add("     e.printStackTrace();\n")
+                add("}\n\n")
+            }
+        }.joinToString(separator = "")
+    }
+
     @Suppress("UNCHECKED_CAST")
     private fun getMigrationFormat(element: Element): String {
-        var migrationFormat = ""
-        element.annotationMirrors.forEach {
-            it.elementValues.forEach {
-                val key = it.key.simpleName.toString()
-                val value = it.value.value
+        return ArrayList<String>().apply {
+            element.annotationMirrors.forEach {
+                it.elementValues.forEach {
+                    val key = it.key.simpleName.toString()
+                    val value = it.value.value
 
-                if (key == "migrations") {
-                    val typeMirrors = value as List<AnnotationValue>
-                    typeMirrors.forEach {
-                        val declaredType = it.value as DeclaredType
-                        val objectClass = declaredType.asElement()
-
-                        if (!migrationFormat.isEmpty()) {
-                            migrationFormat += ", "
+                    if (key == "migrations") {
+                        val typeMirrors = value as List<AnnotationValue>
+                        typeMirrors.forEach {
+                            val declaredType = it.value as DeclaredType
+                            val objectClass = declaredType.asElement()
+                            add("$objectClass.class.newInstance()")
                         }
-                        migrationFormat += "$objectClass.class.newInstance()"
                     }
                 }
             }
-        }
-        return migrationFormat
+        }.joinToString()
     }
 
-    private fun handleDestructiveMigration(element: Element, builder: MethodSpec.Builder) {
-        var foundDestructiveMigration = false
-        var destructiveVersionsFormat = ""
+    private fun getDestructiveMigration(element: Element): String {
+        return ArrayList<String>().apply {
+            var foundDestructiveMigration = false
+            val destructiveVersionsFormat: ArrayList<String> = ArrayList()
 
-        DatabaseMapHolder.migrationAnnotationMap[element.simpleName.toString()]?.forEach {
-            if (!foundDestructiveMigration) {
-                val migrationType = it.getAnnotation(Migration::class.java).migrationType
-                if (migrationType == MigrationType.DESTRUCTIVE) {
-                    foundDestructiveMigration = true
+            DatabaseMapHolder.migrationAnnotationMap[element.simpleName.toString()]?.forEach {
+                if (!foundDestructiveMigration) {
+                    val migrationType = it.getAnnotation(Migration::class.java).migrationType
+                    if (migrationType == MigrationType.DESTRUCTIVE) {
+                        foundDestructiveMigration = true
+                        add("builder.fallbackToDestructiveMigration();\n")
+                    }
                 }
+
+                val destructiveVersions = it.getAnnotation(Migration::class.java).destructiveFrom
+                destructiveVersionsFormat.add(destructiveVersions.joinToString { version ->
+                    version.toString()
+                })
             }
 
-            val destructiveVersions = it.getAnnotation(Migration::class.java).destructiveFrom
-            destructiveVersions.forEach {
-                if (!destructiveVersionsFormat.isEmpty()) {
-                    destructiveVersionsFormat += ", "
-                }
-                destructiveVersionsFormat += it.toString()
+            if (!destructiveVersionsFormat.isEmpty()) {
+                val fullFormat = destructiveVersionsFormat.joinToString()
+                add("builder.fallbackToDestructiveMigrationFrom($fullFormat);\n")
             }
-        }
-
-        if (foundDestructiveMigration) {
-            builder.addStatement("builder.fallbackToDestructiveMigration()")
-        }
-
-        if (!destructiveVersionsFormat.isEmpty()) {
-            builder.addStatement("builder.fallbackToDestructiveMigrationFrom($destructiveVersionsFormat)")
-        }
+        }.joinToString(separator = "")
     }
 }

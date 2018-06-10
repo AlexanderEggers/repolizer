@@ -92,32 +92,32 @@ class RepositoryMainProcessor {
                 addModifiers(Modifier.PUBLIC, Modifier.FINAL)
 
                 //Class members
-                addField(FieldSpec.builder(classAppExecutor, "appExecutor")
-                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                        .initializer("AppExecutor.INSTANCE")
-                        .build())
-                addField(FieldSpec.builder(classRealDatabase, "db")
-                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                        .initializer("$classGlobalDatabaseProvider.INSTANCE." +
-                                "getDatabase(super.getAppContext(), $classDatabase.class)")
-                        .build())
-                addField(FieldSpec.builder(classDatabaseDao, "dataDao")
-                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                        .initializer("db.get$daoName()")
-                        .build())
-                addField(FieldSpec.builder(classCacheDao, "cacheDao")
-                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                        .initializer("db.getCacheDao()")
-                        .build())
-                addMethod(MethodSpec.constructorBuilder()
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(classRepolizer, "repolizer")
-                        .addStatement("super(repolizer)")
-                        .build())
+                addField(FieldSpec.builder(classAppExecutor, "appExecutor").apply {
+                    addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                    initializer("AppExecutor.INSTANCE")
+                }.build())
+                addField(FieldSpec.builder(classRealDatabase, "db").apply {
+                    addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                    initializer("$classGlobalDatabaseProvider.INSTANCE." +
+                            "getDatabase(super.getAppContext(), $classDatabase.class)")
+                }.build())
+                addField(FieldSpec.builder(classDatabaseDao, "dataDao").apply {
+                    addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                    initializer("db.get$daoName()")
+                }.build())
+                addField(FieldSpec.builder(classCacheDao, "cacheDao").apply {
+                    addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                    initializer("db.getCacheDao()")
+                }.build())
+                addMethod(MethodSpec.constructorBuilder().apply {
+                    addModifiers(Modifier.PUBLIC)
+                    addParameter(classRepolizer, "repolizer")
+                    addStatement("super(repolizer)")
+                }.build())
 
                 //Methods
-                getRepositoryMethods(daoBuilder, mainProcessor.messager, repositoryElement,
-                        classEntity).forEach { addMethod(it) }
+                getRepositoryMethods(daoBuilder, mainProcessor.messager,
+                        repositoryElement, classEntity).forEach { addMethod(it) }
             }.build().also { repoFile ->
                 //create repository class file
                 JavaFile.builder(repositoryPackageName, repoFile)
