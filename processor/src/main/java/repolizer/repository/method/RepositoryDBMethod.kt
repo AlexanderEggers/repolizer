@@ -89,7 +89,7 @@ class RepositoryDBMethod {
             if (returnValue == liveDataOfBoolean) {
                 dbMethodBuilder.returns(ClassName.get(methodElement.returnType))
                 dbMethodBuilder.addStatement("return super.executeDB(builder)")
-            } else if (methodElement.returnType == TypeKind.VOID) {
+            } else if (methodElement.returnType.kind == TypeKind.VOID) {
                 dbMethodBuilder.addStatement("super.executeDB(builder)")
             } else {
                 messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
