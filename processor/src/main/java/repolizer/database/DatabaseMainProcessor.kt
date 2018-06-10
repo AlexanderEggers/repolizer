@@ -26,21 +26,19 @@ class DatabaseMainProcessor {
     fun process(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
         initMigrationAnnotations(mainProcessor, roundEnv)
 
-        for (databaseElement in roundEnv.getElementsAnnotatedWith(Database::class.java)) {
+        roundEnv.getElementsAnnotatedWith(Database::class.java).forEach { databaseElement ->
             val typeElement = databaseElement as TypeElement
 
             //checks if the annotated @Database file has the correct file type
             if (!typeElement.kind.isInterface) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
                         "be applied to an interface. Error for ${typeElement.simpleName}")
-                continue
             }
 
             //@Database does not support parent interface classes
             if (!typeElement.interfaces.isEmpty()) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Parent " +
                         "interfaces are not allowed. Error for ${typeElement.simpleName}")
-                continue
             }
 
             //Database annotation general data

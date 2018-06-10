@@ -35,21 +35,19 @@ class RepositoryMainProcessor {
     fun process(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
         initAnnotations(mainProcessor, roundEnv)
 
-        for (repositoryElement in roundEnv.getElementsAnnotatedWith(Repository::class.java)) {
+        roundEnv.getElementsAnnotatedWith(Repository::class.java).forEach { repositoryElement ->
             val typeElement = repositoryElement as TypeElement
 
             //checks if the annotated @Repository file has the correct file type
             if (!repositoryElement.kind.isInterface) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
                         "be applied to an interface. Error for ${typeElement.simpleName}")
-                continue
             }
 
             //@Repository does not support parent interface classes
             if (!typeElement.interfaces.isEmpty()) {
                 mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Parent " +
                         "interfaces are not allowed. Error for ${typeElement.simpleName}")
-                continue
             }
 
             //Repository annotation general data

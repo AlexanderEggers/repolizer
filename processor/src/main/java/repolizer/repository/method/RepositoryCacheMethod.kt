@@ -20,95 +20,67 @@ class RepositoryCacheMethod {
     private val classDatabaseLayer = ClassName.get("repolizer.repository.database", "DatabaseLayer")
     private val classCacheItem = ClassName.get("repolizer.database.cache", "CacheItem")
 
-    private val classString = ClassName.get(String::class.java)
-
     private val classLiveData = ClassName.get("android.arch.lifecycle", "LiveData")
     private val liveDataOfBoolean = ParameterizedTypeName.get(classLiveData, ClassName.get(java.lang.Boolean::class.java))
 
     fun build(messager: Messager, element: Element): List<MethodSpec> {
-        val builderList = ArrayList<MethodSpec>()
+        return ArrayList<MethodSpec>().apply {
+            addAll(RepositoryMapHolder.cacheAnnotationMap[element.simpleName.toString()]
+                    ?.map { methodElement ->
+                        MethodSpec.methodBuilder(methodElement.simpleName.toString()).apply {
+                            addModifiers(Modifier.PUBLIC)
+                            addAnnotation(Override::class.java)
 
-        val list = RepositoryMapHolder.cacheAnnotationMap[element.simpleName.toString()]
-                ?: ArrayList()
-        for (methodElement in list) {
-            val operation = methodElement.getAnnotation(CACHE::class.java).operation
+                            methodElement.parameters.forEach { varElement ->
+                                val varType = ClassName.get(varElement.asType())
+                                addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
+                            }
 
-            val cacheMethodBuilder = MethodSpec.methodBuilder(methodElement.simpleName.toString())
-                    .addModifiers(Modifier.PUBLIC)
-                    .addAnnotation(Override::class.java)
+                            val operation = methodElement.getAnnotation(CACHE::class.java).operation
+                            val networkCacheLayerClass = createCacheLayerForInsert(element,
+                                    methodElement, operation == CacheOperation.INSERT)
 
-            methodElement.parameters.forEach { varElement ->
-                val varType = ClassName.get(varElement.asType())
-                cacheMethodBuilder.addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
-            }
+                            addStatement("$classDatabaseBuilder builder = new $classDatabaseBuilder()")
+                            addStatement("builder.setDatabaseLayer($networkCacheLayerClass)")
 
-            val networkCacheLayerClass = createCacheLayerForInsert(element, methodElement,
-                    operation == CacheOperation.INSERT)
-
-            cacheMethodBuilder.addStatement("$classDatabaseBuilder builder = new $classDatabaseBuilder()")
-            cacheMethodBuilder.addStatement("builder.setDatabaseLayer($networkCacheLayerClass)")
-
-            val returnValue = ClassName.get(methodElement.returnType)
-            if (returnValue == liveDataOfBoolean) {
-                cacheMethodBuilder.returns(ClassName.get(methodElement.returnType))
-                cacheMethodBuilder.addStatement("return super.executeDB(builder)")
-            } else if (methodElement.returnType == TypeKind.VOID) {
-                cacheMethodBuilder.addStatement("super.executeDB(builder)")
-            } else {
-                messager.printMessage(Diagnostic.Kind.ERROR, "Methods that are using the " +
-                        "@CACHE annotation are only accepting LiveData<Boolean> or Void as a " +
-                        "return type. Error for ${element.simpleName}.${methodElement.simpleName}")
-                continue
-            }
-
-            builderList.add(cacheMethodBuilder.build())
+                            val returnValue = ClassName.get(methodElement.returnType)
+                            when {
+                                returnValue == liveDataOfBoolean -> {
+                                    returns(ClassName.get(methodElement.returnType))
+                                    addStatement("return super.executeDB(builder)")
+                                }
+                                methodElement.returnType.kind == TypeKind.VOID -> addStatement("super.executeDB(builder)")
+                                else -> messager.printMessage(Diagnostic.Kind.ERROR, "Methods that are using the " +
+                                        "@CACHE annotation are only accepting LiveData<Boolean> or void as a " +
+                                        "return type. Error for ${element.simpleName}.${methodElement.simpleName}")
+                            }
+                        }.build()
+                    } ?: ArrayList())
         }
-
-        return builderList
     }
 
     private fun createCacheLayerForInsert(element: Element, methodElement: ExecutableElement, isInsert: Boolean): TypeSpec {
-        val bodyCacheItemParamList = ArrayList<String>()
-        val bodyStringParamList = ArrayList<String>()
-        val doaCallStart = if (isInsert) "cacheDao.insert(" else "cacheDao.delete("
+        return TypeSpec.anonymousClassBuilder("").apply {
+            addSuperinterface(classDatabaseLayer)
 
-        RepositoryMapHolder.databaseBodyAnnotationMap["${element.simpleName}.${methodElement.simpleName}"]?.forEach { varElement ->
-            val varType = ClassName.get(varElement.asType())
-
-            if (varType == classCacheItem) {
-                bodyCacheItemParamList.add(varElement.simpleName.toString())
-            } else if (varType == classString) {
-                bodyStringParamList.add(varElement.simpleName.toString())
-            }
-        }
-
-        val builder = TypeSpec.anonymousClassBuilder("")
-                .addSuperinterface(classDatabaseLayer)
-
-        val methodBuilder = MethodSpec.methodBuilder("updateDB")
-                .addAnnotation(Override::class.java)
-                .addModifiers(Modifier.PUBLIC)
-
-        if (!bodyCacheItemParamList.isEmpty()) {
-            methodBuilder.addStatement(createDaoCall(doaCallStart, bodyCacheItemParamList))
-        } else if (!bodyStringParamList.isEmpty()) {
-            if (!isInsert) {
-                methodBuilder.addStatement(createDaoCall(doaCallStart, bodyStringParamList))
-            }
-        }
-
-        return builder.addMethod(methodBuilder.build()).build()
+            addMethod(MethodSpec.methodBuilder("updateDB").apply {
+                addAnnotation(Override::class.java)
+                addModifiers(Modifier.PUBLIC)
+                addStatement(createDaoCall(element, methodElement, isInsert))
+            }.build())
+        }.build()
     }
 
-    private fun createDaoCall(doaCallStart: String, list: ArrayList<String>): String {
-        var daoCall = doaCallStart
+    private fun createDaoCall(element: Element, methodElement: ExecutableElement, isInsert: Boolean): String {
+        return ArrayList<String>().apply {
+            RepositoryMapHolder.databaseBodyAnnotationMap["${element.simpleName}.${methodElement.simpleName}"]
+                    ?.forEach { varElement ->
+                        val varType = ClassName.get(varElement.asType())
 
-        val iterator = list.iterator()
-        while (iterator.hasNext()) {
-            daoCall += iterator.next()
-            daoCall += if (iterator.hasNext()) ", " else ""
-        }
-
-        return "$daoCall)"
+                        if (varType == classCacheItem) {
+                            add(varElement.simpleName.toString())
+                        }
+                    }
+        }.joinToString(prefix = if (isInsert) "cacheDao.insert(" else "cacheDao.delete(", postfix = ")")
     }
 }

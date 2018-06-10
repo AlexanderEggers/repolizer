@@ -30,6 +30,8 @@ class DatabaseProvider {
             addSuperinterface(classDatabaseProvider)
             addModifiers(Modifier.PUBLIC)
 
+            //Method that overrides the required getDatabase which will be used to create a
+            //certain RoomDatabase instance
             addMethod(MethodSpec.methodBuilder("getDatabase").apply {
                 addAnnotation(Override::class.java)
                 addModifiers(Modifier.PUBLIC)
@@ -69,7 +71,7 @@ class DatabaseProvider {
     private fun addMigrationToMethod(element: Element): String {
         return ArrayList<String>().apply {
             val migrationFormat = getMigrationFormat(element)
-            if (!migrationFormat.isEmpty()) {
+            if (migrationFormat.isNotEmpty()) {
                 add("\n")
                 add("try {\n")
                 add("     builder.addMigrations($migrationFormat);\n")
@@ -121,7 +123,7 @@ class DatabaseProvider {
                 })
             }
 
-            if (!destructiveVersionsFormat.isEmpty()) {
+            if (destructiveVersionsFormat.isNotEmpty()) {
                 val fullFormat = destructiveVersionsFormat.joinToString()
                 add("builder.fallbackToDestructiveMigrationFrom($fullFormat);\n")
             }
