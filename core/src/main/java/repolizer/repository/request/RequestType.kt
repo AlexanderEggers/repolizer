@@ -1,4 +1,4 @@
-package repolizer.repository.response
+package repolizer.repository.request
 
 enum class RequestType {
     REFRESH,

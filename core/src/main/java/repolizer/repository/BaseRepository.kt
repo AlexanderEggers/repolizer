@@ -6,6 +6,7 @@ import repolizer.Repolizer
 import repolizer.repository.database.DatabaseBuilder
 import repolizer.repository.network.NetworkBuilder
 import repolizer.repository.network.FetchSecurityLayer
+import java.io.Serializable
 import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class BaseRepository<Entity> constructor(private val repolizer: Repolizer) : FetchSecurityLayer {
@@ -22,7 +23,7 @@ abstract class BaseRepository<Entity> constructor(private val repolizer: Repoliz
                 .execute(this, allowFetch)
     }
 
-    protected fun executeCud(builder: NetworkBuilder<Entity>): LiveData<String> {
+    protected fun executeCud(builder: NetworkBuilder<Serializable>): LiveData<String> {
         return builder.buildCud(repolizer)
                 .execute()
     }

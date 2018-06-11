@@ -11,7 +11,7 @@ import repolizer.repository.api.NetworkInterface
 import repolizer.repository.login.LoginManager
 import repolizer.repository.progress.ProgressController
 import repolizer.repository.provider.GlobalRepositoryProvider
-import repolizer.repository.response.RequestProvider
+import repolizer.repository.request.RequestProvider
 import repolizer.repository.response.ResponseService
 import repolizer.repository.retrofit.LiveDataCallAdapterFactory
 import retrofit2.Retrofit

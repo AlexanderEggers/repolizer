@@ -1,7 +1,7 @@
 package repolizer.repository.progress
 
 import android.util.Log
-import repolizer.repository.response.RequestProvider
+import repolizer.repository.request.RequestProvider
 import java.util.*
 import kotlin.collections.HashMap
 

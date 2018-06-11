@@ -1,10 +1,9 @@
-package repolizer.repository.response
+package repolizer.repository.request
 
 import retrofit2.Call
 
 interface RequestProvider {
     fun addRequest(url: String, call: Call<String>)
     fun removeRequest(url: String, call: Call<String>)
-    fun cancelRequestByUrl(url: String)
     fun cancelAllRequests()
 }

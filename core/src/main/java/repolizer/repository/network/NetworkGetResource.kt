@@ -17,7 +17,7 @@ import repolizer.repository.response.NetworkResponse
 import repolizer.repository.response.ResponseService
 import repolizer.repository.util.AppExecutor
 import repolizer.repository.login.LoginManager
-import repolizer.repository.response.RequestType
+import repolizer.repository.request.RequestType
 import repolizer.repository.util.Utils.Companion.makeUrlId
 import repolizer.repository.util.Utils.Companion.prepareUrl
 

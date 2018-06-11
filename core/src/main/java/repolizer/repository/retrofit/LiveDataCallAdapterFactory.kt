@@ -2,7 +2,7 @@ package repolizer.repository.retrofit
 
 import android.arch.lifecycle.LiveData
 import repolizer.repository.response.NetworkResponse
-import repolizer.repository.response.RequestProvider
+import repolizer.repository.request.RequestProvider
 import repolizer.repository.util.AppExecutor
 import retrofit2.CallAdapter
 import retrofit2.Retrofit

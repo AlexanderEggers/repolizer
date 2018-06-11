@@ -1,6 +1,6 @@
 package repolizer.repository.progress
 
-import repolizer.repository.response.RequestType
+import repolizer.repository.request.RequestType
 
 abstract class ProgressData {
     lateinit var requestType: RequestType

@@ -12,7 +12,7 @@ import repolizer.repository.progress.ProgressData
 import repolizer.repository.response.ResponseService
 import repolizer.repository.util.AppExecutor
 import repolizer.repository.login.LoginManager
-import repolizer.repository.response.RequestType
+import repolizer.repository.request.RequestType
 import repolizer.repository.util.Utils.Companion.prepareUrl
 
 class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, builder: NetworkBuilder<Entity>) {

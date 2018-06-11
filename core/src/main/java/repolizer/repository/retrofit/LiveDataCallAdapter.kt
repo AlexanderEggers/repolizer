@@ -4,7 +4,7 @@ import android.arch.lifecycle.LiveData
 import android.util.Log
 import repolizer.repository.response.NetworkResponse
 import repolizer.repository.response.NetworkResponseStatus
-import repolizer.repository.response.RequestProvider
+import repolizer.repository.request.RequestProvider
 import repolizer.repository.util.AppExecutor
 import retrofit2.Call
 import retrofit2.CallAdapter

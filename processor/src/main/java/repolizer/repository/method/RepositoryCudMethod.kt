@@ -20,7 +20,7 @@ class RepositoryCudMethod {
     private val classNetworkBuilder = ClassName.get("repolizer.repository.network", "NetworkBuilder")
     private val classNetworkLayer = ClassName.get("repolizer.repository.network", "NetworkCudLayer")
     private val classNetworkController = ClassName.get("repolizer.repository.api", "NetworkController")
-    private val classRequestType = ClassName.get("repolizer.repository.util", "RequestType")
+    private val classRequestType = ClassName.get("repolizer.repository.request", "RequestType")
     private val classNetworkResponse = ClassName.get("repolizer.repository.response", "NetworkResponse")
 
     private val classSerializable = ClassName.get(Serializable::class.java)
@@ -32,7 +32,7 @@ class RepositoryCudMethod {
 
     fun build(messager: Messager, element: Element): List<MethodSpec> {
         return ArrayList<MethodSpec>().apply {
-            addAll(RepositoryMapHolder.cacheAnnotationMap[element.simpleName.toString()]
+            addAll(RepositoryMapHolder.cudAnnotationMap[element.simpleName.toString()]
                     ?.map { methodElement ->
                         MethodSpec.methodBuilder(methodElement.simpleName.toString()).apply {
                             addModifiers(Modifier.PUBLIC)
@@ -77,7 +77,7 @@ class RepositoryCudMethod {
     private fun getBuilderCode(annotationMapKey: String, annotation: CUD): String {
         return ArrayList<String>().apply {
             val classWithNetworkBuilder = ParameterizedTypeName.get(classNetworkBuilder, classSerializable)
-            add("$classNetworkBuilder builder = new $classWithNetworkBuilder();")
+            add("$classWithNetworkBuilder builder = new $classNetworkBuilder();")
 
             add("builder.setRequestType($classRequestType.${annotation.cudType.name});")
             add("builder.setRequiresLogin(${annotation.requiresLogin});")
