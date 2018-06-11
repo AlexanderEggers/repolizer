@@ -9,7 +9,6 @@ import repolizer.annotation.repository.util.CacheOperation
 import repolizer.repository.RepositoryMapHolder
 import javax.annotation.processing.Messager
 import javax.lang.model.element.Element
-import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
 import javax.lang.model.type.TypeKind
 import javax.tools.Diagnostic
@@ -31,18 +30,21 @@ class RepositoryCacheMethod {
                             addModifiers(Modifier.PUBLIC)
                             addAnnotation(Override::class.java)
 
+                            //Copy all interface parameter to the method implementation
                             methodElement.parameters.forEach { varElement ->
                                 val varType = ClassName.get(varElement.asType())
                                 addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
                             }
 
+                            val annotationMapKey = "${element.simpleName}.${methodElement.simpleName}"
                             val operation = methodElement.getAnnotation(CACHE::class.java).operation
-                            val networkCacheLayerClass = createCacheLayerForInsert(element,
-                                    methodElement, operation == CacheOperation.INSERT)
+                            val networkCacheLayerClass = createCacheLayerForInsert(annotationMapKey,
+                                    operation == CacheOperation.INSERT)
 
                             addStatement("$classDatabaseBuilder builder = new $classDatabaseBuilder()")
                             addStatement("builder.setDatabaseLayer($networkCacheLayerClass)")
 
+                            //Determine the return value and if it's correct used by the user
                             val returnValue = ClassName.get(methodElement.returnType)
                             when {
                                 returnValue == liveDataOfBoolean -> {
@@ -59,21 +61,21 @@ class RepositoryCacheMethod {
         }
     }
 
-    private fun createCacheLayerForInsert(element: Element, methodElement: ExecutableElement, isInsert: Boolean): TypeSpec {
+    private fun createCacheLayerForInsert(annotationKey: String, isInsert: Boolean): TypeSpec {
         return TypeSpec.anonymousClassBuilder("").apply {
             addSuperinterface(classDatabaseLayer)
 
             addMethod(MethodSpec.methodBuilder("updateDB").apply {
                 addAnnotation(Override::class.java)
                 addModifiers(Modifier.PUBLIC)
-                addStatement(createDaoCall(element, methodElement, isInsert))
+                addStatement(createDaoCall(annotationKey, isInsert))
             }.build())
         }.build()
     }
 
-    private fun createDaoCall(element: Element, methodElement: ExecutableElement, isInsert: Boolean): String {
+    private fun createDaoCall(annotationKey: String, isInsert: Boolean): String {
         return ArrayList<String>().apply {
-            RepositoryMapHolder.databaseBodyAnnotationMap["${element.simpleName}.${methodElement.simpleName}"]
+            RepositoryMapHolder.databaseBodyAnnotationMap[annotationKey]
                     ?.forEach { varElement ->
                         val varType = ClassName.get(varElement.asType())
 

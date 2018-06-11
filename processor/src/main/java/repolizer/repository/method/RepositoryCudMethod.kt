@@ -1,6 +1,9 @@
 package repolizer.repository.method
 
-import com.squareup.javapoet.*
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterizedTypeName
+import com.squareup.javapoet.TypeSpec
 import repolizer.annotation.repository.CUD
 import repolizer.annotation.repository.parameter.Header
 import repolizer.annotation.repository.parameter.UrlQuery
@@ -36,6 +39,7 @@ class RepositoryCudMethod {
                             addAnnotation(Override::class.java)
                             returns(ClassName.get(methodElement.returnType))
 
+                            //Copy all interface parameter to the method implementation
                             methodElement.parameters.forEach { varElement ->
                                 val varType = ClassName.get(varElement.asType())
                                 addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)

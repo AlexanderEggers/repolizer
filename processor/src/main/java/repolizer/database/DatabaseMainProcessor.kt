@@ -147,11 +147,10 @@ class DatabaseMainProcessor {
 
     private fun initMigrationAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
         DatabaseMapHolder.migrationAnnotationMap.apply {
-            for (databaseElement in roundEnv.getElementsAnnotatedWith(Migration::class.java)) {
+            roundEnv.getElementsAnnotatedWith(Migration::class.java)?.forEach{ databaseElement ->
                 if (!databaseElement.kind.isInterface) {
                     mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
                             "be applied to an interface. Error for ${databaseElement.simpleName}")
-                    continue
                 }
 
                 val key = databaseElement.simpleName.toString()
