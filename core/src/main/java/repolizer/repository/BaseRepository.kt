@@ -13,7 +13,7 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
 
     private val fetchingData = AtomicBoolean(false)
 
-    protected fun executeRefresh(builder: NetworkBuilder<*>): LiveData<String> {
+    protected fun executeRefresh(builder: NetworkBuilder<*>): LiveData<Boolean> {
         return builder.buildRefresh(repolizer)
                 .execute(this)
     }
@@ -28,7 +28,7 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
                 .execute()
     }
 
-    protected fun executeDB(builder: DatabaseBuilder<*>): LiveData<Boolean> {
+    protected fun executeDB(builder: DatabaseBuilder): LiveData<Boolean> {
         return builder.build()
                 .execute()
     }

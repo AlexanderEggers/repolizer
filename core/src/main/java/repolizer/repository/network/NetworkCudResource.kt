@@ -25,7 +25,8 @@ class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, buil
     private val loginManager: LoginManager? = repolizer.loginManager
     private val responseService: ResponseService? = repolizer.responseService
     private val appExecutor: AppExecutor = AppExecutor
-    private val cudLayer: NetworkCudLayer<Entity> = builder.networkLayer as NetworkCudLayer<Entity>
+    private val cudLayer: NetworkCudLayer<Entity> = builder.networkLayer as? NetworkCudLayer<Entity>
+            ?: throw IllegalStateException("Internal error: Network layer is null.")
 
     private val requiresLogin: Boolean = builder.requiresLogin
     private val showProgress: Boolean = builder.showProgress

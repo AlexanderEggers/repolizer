@@ -32,7 +32,8 @@ class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, buil
     private val loginManager: LoginManager? = repolizer.loginManager
     private val responseService: ResponseService? = repolizer.responseService
     private val appExecutor: AppExecutor = AppExecutor
-    private val getLayer: NetworkGetLayer<Entity> = builder.networkLayer as NetworkGetLayer<Entity>
+    private val getLayer: NetworkGetLayer<Entity> = builder.networkLayer as? NetworkGetLayer<Entity>
+            ?: throw IllegalStateException("Internal error: Network layer is null.")
 
     private val requiresLogin: Boolean = builder.requiresLogin
     private val showProgress: Boolean = builder.showProgress

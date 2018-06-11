@@ -1,10 +1,10 @@
 package repolizer.repository.database
 
-class DatabaseBuilder<Entity> {
+class DatabaseBuilder {
 
     var databaseLayer: DatabaseLayer? = null
 
-    fun build(): DatabaseResource<Entity> {
+    fun build(): DatabaseResource {
         return DatabaseResource(this)
     }
 }
