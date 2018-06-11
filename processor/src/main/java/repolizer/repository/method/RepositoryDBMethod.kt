@@ -93,7 +93,7 @@ class RepositoryDBMethod {
                 dbMethodBuilder.addStatement("super.executeDB(builder)")
             } else {
                 messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
-                        "@DB annotation are only accepting LiveData<Boolean> or Void as a return " +
+                        "@DB annotation are only accepting LiveData<Boolean> or void as a return " +
                         "type. Error for ${element.simpleName}.${methodElement.simpleName}")
                 continue
             }
