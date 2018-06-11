@@ -129,7 +129,7 @@ class RepositoryGetMethod {
 
             getMethodBuilder.addCode("\n")
 
-            getMethodBuilder.addStatement("$classNetworkBuilder builder = new $classWithNetworkBuilder()")
+            getMethodBuilder.addStatement("$classWithNetworkBuilder builder = new $classNetworkBuilder()")
             getMethodBuilder.addStatement("builder.setTypeToken(new $classWithTypeToken() {})")
             getMethodBuilder.addStatement("builder.setUrl(url)")
             getMethodBuilder.addStatement("builder.setRequiresLogin($requiresLogin)")

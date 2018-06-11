@@ -23,7 +23,6 @@ import javax.tools.Diagnostic
 class RepositoryMainProcessor {
 
     private val classBaseRepository = ClassName.get("repolizer.repository", "BaseRepository")
-    private val classAppExecutor = ClassName.get("repolizer.repository.util", "AppExecutor")
 
     private val classGlobalDatabaseProvider = ClassName.get("repolizer.database.provider", "GlobalDatabaseProvider")
     private val classCacheDao = ClassName.get("repolizer.database.cache", "CacheDao")
@@ -78,22 +77,14 @@ class RepositoryMainProcessor {
             //Initialising dao file builder which is needed for the repository to save it's data
             val daoBuilder = getDaoFileBuilder(daoName)
 
-            //Repository parent class data which needs the entity provided by the annotation
-            val classRepositoryParent: TypeName = ParameterizedTypeName.get(classBaseRepository,
-                    classEntity)
-
             //Initialising repository class including needed fields and constructor
             TypeSpec.classBuilder(getGeneratedRepositoryName(repositoryName)).apply {
                 //Class general configs
-                superclass(classRepositoryParent)
+                superclass(classBaseRepository)
                 addSuperinterface(repositoryClassName)
                 addModifiers(Modifier.PUBLIC, Modifier.FINAL)
 
                 //Class members
-                addField(FieldSpec.builder(classAppExecutor, "appExecutor").apply {
-                    addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                    initializer("AppExecutor.INSTANCE")
-                }.build())
                 addField(FieldSpec.builder(classRealDatabase, "db").apply {
                     addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                     initializer("$classGlobalDatabaseProvider.INSTANCE." +
