@@ -21,7 +21,7 @@ import repolizer.repository.util.Utils.Companion.prepareUrl
 
 class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, builder: NetworkBuilder<Entity>) {
 
-    private val result = MediatorLiveData<String>()
+    private val result = MediatorLiveData<Boolean>()
 
     private val context: Context = repolizer.appContext
     private val gson: Gson = repolizer.gson
@@ -57,7 +57,7 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
     }
 
     @MainThread
-    fun execute(fetchSecurityLayer: FetchSecurityLayer): LiveData<String> {
+    fun execute(fetchSecurityLayer: FetchSecurityLayer): LiveData<Boolean> {
         this.fetchSecurityLayer = fetchSecurityLayer
 
         if (fetchSecurityLayer.allowFetch()) {
@@ -122,7 +122,7 @@ class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, 
                             responseService?.handleSuccess(requestType,this@run)
                             updateLayer.updateDB(it)
                             updateLayer.updateFetchTime(makeUrlId(fullUrl))
-                            result.postValue(body)
+                            result.postValue(true)
                         } ?: responseService?.handleGesonError(requestType,this@run)
                     } else {
                         responseService?.handleRequestError(requestType,this@run)

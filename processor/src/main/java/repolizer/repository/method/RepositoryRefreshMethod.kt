@@ -25,7 +25,7 @@ class RepositoryRefreshMethod {
     private val classOnConflictStrategy = ClassName.get("android.arch.persistence.room", "OnConflictStrategy")
 
     private val classLiveData = ClassName.get("android.arch.lifecycle", "LiveData")
-    private val liveDataOfString = ParameterizedTypeName.get(classLiveData, ClassName.get(String::class.java))
+    private val liveDataOfBoolean = ParameterizedTypeName.get(classLiveData, ClassName.get(java.lang.Boolean::class.java))
 
     private lateinit var classEntity: TypeName
     private lateinit var classArrayWithEntity: TypeName
@@ -100,11 +100,11 @@ class RepositoryRefreshMethod {
             refreshMethodBuilder.addStatement("builder.setNetworkLayer($networkGetLayerClass)")
 
             val returnValue = ClassName.get(methodElement.returnType)
-            if (returnValue == liveDataOfString) {
+            if (returnValue == liveDataOfBoolean) {
                 refreshMethodBuilder.addStatement("return super.executeRefresh(builder)")
             } else {
                 messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
-                        "@REFRESH annotation are only accepting LiveData<String> as a return type." +
+                        "@REFRESH annotation are only accepting LiveData<Boolean> as a return type." +
                         "Error for ${element.simpleName}.${methodElement.simpleName}")
                 continue
             }
