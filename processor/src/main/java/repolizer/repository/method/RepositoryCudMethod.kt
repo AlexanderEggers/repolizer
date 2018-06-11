@@ -47,12 +47,18 @@ class RepositoryCudMethod {
 
                             val annotationMapKey = "${element.simpleName}.${methodElement.simpleName}"
 
+                            //Generates the code which used to retrieve the url from the annotation
+                            //and dynamic parameter with method parameter (like the url part
+                            //':myVar' could be the value '0'
                             val url = methodElement.getAnnotation(CUD::class.java).url
                             addStatement("String url = \"$url\"")
                             addCode(buildUrl(annotationMapKey))
 
+                            //Generates the code which will be used for the NetworkBuilder to
+                            //initialise it's values
                             addCode(getBuilderCode(annotationMapKey, methodElement.getAnnotation(CUD::class.java)))
 
+                            //Determine the return value and if it's correct used by the user
                             val returnValue = ClassName.get(methodElement.returnType)
                             if (returnValue == liveDataOfString) {
                                 addStatement("return super.executeCud(builder)")
