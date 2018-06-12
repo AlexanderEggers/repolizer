@@ -132,8 +132,6 @@ class RepositoryMainProcessor {
                     classEntity, daoBuilder))
             addAll(RepositoryGetMethod().build(messager, repositoryClassElement,
                     classEntity, daoBuilder))
-            addAll(RepositoryRefreshMethod().build(messager, repositoryClassElement,
-                    classEntity, daoBuilder))
             addAll(RepositoryCudMethod().build(messager, repositoryClassElement))
             addAll(RepositoryDBMethod().build(messager, repositoryClassElement,
                     daoBuilder))

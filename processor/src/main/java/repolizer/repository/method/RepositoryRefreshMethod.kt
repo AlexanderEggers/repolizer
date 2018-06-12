@@ -27,119 +27,130 @@ class RepositoryRefreshMethod {
     private val classLiveData = ClassName.get("android.arch.lifecycle", "LiveData")
     private val liveDataOfBoolean = ParameterizedTypeName.get(classLiveData, ClassName.get(java.lang.Boolean::class.java))
 
-    private lateinit var classEntity: TypeName
-    private lateinit var classArrayWithEntity: TypeName
-
     fun build(messager: Messager, element: Element, entity: ClassName, daoClassBuilder: TypeSpec.Builder): List<MethodSpec> {
-        val builderList = ArrayList<MethodSpec>()
 
-        classEntity = entity
-        classArrayWithEntity = ArrayTypeName.of(entity)
+        return ArrayList<MethodSpec>().apply {
+            addAll(RepositoryMapHolder.refreshAnnotationMap[element.simpleName.toString()]?.map { methodElement ->
+                //Creates DAO method which will be used to communicate between this repository
+                //and the database
+                daoClassBuilder.addMethod(createDaoMethod(methodElement, entity))
 
-        val list = RepositoryMapHolder.refreshAnnotationMap[element.simpleName.toString()]
-                ?: ArrayList()
-        for (methodElement in list) {
-            val getAsList = methodElement.getAnnotation(REFRESH::class.java).getAsList
+                MethodSpec.methodBuilder(methodElement.simpleName.toString()).apply {
+                    addModifiers(Modifier.PUBLIC)
+                    addAnnotation(Override::class.java)
+                    returns(ClassName.get(methodElement.returnType))
+
+                    val annotationMapKey = "${element.simpleName}.${methodElement.simpleName}"
+
+                    //Generates the code which used to retrieve the url from the annotation
+                    //and dynamic parameter with method parameter (like the url part
+                    //':myVar' could be the value '0'
+                    val url = methodElement.getAnnotation(REFRESH::class.java).url
+                    addStatement("String url = \"$url\"")
+                    addCode(buildUrl(annotationMapKey))
+
+                    //Generates the code which will be used for the NetworkBuilder to
+                    //initialise it's values
+                    addCode(getBuilderCode(annotationMapKey, methodElement, entity))
+
+                    //Determine the return value and if it's correct used by the user
+                    val returnValue = ClassName.get(methodElement.returnType)
+                    if (returnValue == liveDataOfBoolean) {
+                        addStatement("return super.executeRefresh(builder)")
+                    } else {
+                        messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
+                                "@REFRESH annotation are only accepting LiveData<Boolean> as a return type." +
+                                "Error for ${element.simpleName}.${methodElement.simpleName}")
+                    }
+                }.build()
+            } ?: ArrayList())
+        }
+    }
+
+    private fun createDaoMethod(methodElement: Element, entity: ClassName): MethodSpec {
+        return MethodSpec.methodBuilder("insertFor_${methodElement.simpleName}").apply {
+            addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+
+            val onConflictStrategy = methodElement.getAnnotation(REFRESH::class.java).onConflictStrategy
+            addAnnotation(AnnotationSpec.builder(classAnnotationRoomInsert).apply {
+                addMember("onConflict", "$classOnConflictStrategy.$onConflictStrategy")
+            }.build())
+
+            val classArrayWithEntity = ArrayTypeName.of(entity)
+            addParameter(classArrayWithEntity, "elements")
+            varargs()
+        }.build()
+    }
+
+    private fun buildUrl(annotationMapKey: String): String {
+        return ArrayList<String>().apply {
+            addAll(RepositoryMapHolder.urlParameterAnnotationMap[annotationMapKey]?.map {
+                "url = url.replace(\":${it.simpleName}\", \"$it\");"
+            } ?: ArrayList())
+        }.joinToString(separator = "\n", postfix = "\n")
+    }
+
+    private fun getBuilderCode(annotationMapKey: String, methodElement: Element, entity: ClassName): String {
+
+        return ArrayList<String>().apply {
+            val annotation = methodElement.getAnnotation(REFRESH::class.java)
+
+            val getAsList = annotation.getAsList
             val classGenericTypeForMethod = if (getAsList) ParameterizedTypeName.get(classList, entity) else entity
-
-            val annotationMapKey = "${element.simpleName}.${methodElement.simpleName}"
-
-            val refreshMethodBuilder = MethodSpec.methodBuilder(methodElement.simpleName.toString())
-                    .addModifiers(Modifier.PUBLIC)
-                    .addAnnotation(Override::class.java)
-                    .returns(ClassName.get(methodElement.returnType))
-
-            val daoInsertMethodBuilder = MethodSpec.methodBuilder("insertFor_${methodElement.simpleName}")
-                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                    .addAnnotation(AnnotationSpec.builder(classAnnotationRoomInsert)
-                            .addMember("onConflict", "$classOnConflictStrategy.REPLACE")
-                            .build())
-                    .addParameter(classArrayWithEntity, "elements")
-                    .varargs()
-
-            methodElement.parameters.forEach { varElement ->
-                val varType = ClassName.get(varElement.asType())
-                refreshMethodBuilder.addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
-            }
-
-            val url = methodElement.getAnnotation(REFRESH::class.java).url
-            val requiresLogin = methodElement.getAnnotation(REFRESH::class.java).requiresLogin
-            val showProgress = methodElement.getAnnotation(REFRESH::class.java).showProgress
-
             val classWithTypeToken = ParameterizedTypeName.get(classTypeToken, classGenericTypeForMethod)
             val classWithNetworkBuilder = ParameterizedTypeName.get(classNetworkBuilder, classGenericTypeForMethod)
 
-            refreshMethodBuilder.addStatement("String url = \"$url\"")
-            RepositoryMapHolder.urlParameterAnnotationMap[annotationMapKey]?.forEach {
-                refreshMethodBuilder.addStatement("url = url.replace(\":${it.simpleName}\", \"$it\")")
-            }
-            refreshMethodBuilder.addCode("\n")
+            add("$classWithNetworkBuilder builder = new $classNetworkBuilder()")
 
-            refreshMethodBuilder.addStatement("$classNetworkBuilder builder = new $classWithNetworkBuilder()")
-            refreshMethodBuilder.addStatement("builder.setTypeToken(new $classWithTypeToken() {})")
-            refreshMethodBuilder.addStatement("builder.setUrl(url)")
-            refreshMethodBuilder.addStatement("builder.setRequiresLogin($requiresLogin)")
-            refreshMethodBuilder.addStatement("builder.setShowProgress($showProgress)")
+            add("builder.setTypeToken(new $classWithTypeToken() {});")
+            add("builder.setUrl(url);")
+            add("builder.setRequiresLogin(${annotation.requiresLogin});")
+            add("builder.setShowProgress(${annotation.showProgress});")
 
             RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {
-                refreshMethodBuilder.addStatement("builder.addHeader(" +
-                        "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName})")
+                add("builder.addHeader(" +
+                        "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName});")
             }
 
             RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]?.forEach {
-                refreshMethodBuilder.addStatement("builder.addQuery(" +
-                        "\"${it.getAnnotation(UrlQuery::class.java).key}\", ${it.simpleName})")
+                add("builder.addQuery(" +
+                        "\"${it.getAnnotation(UrlQuery::class.java).key}\", ${it.simpleName});")
             }
 
             RepositoryMapHolder.progressParamsAnnotationMap[annotationMapKey]?.forEach {
-                refreshMethodBuilder.addStatement("builder.setProgressParams(${it.simpleName})")
+                add("builder.setProgressParams(${it.simpleName});")
             }
 
             val networkGetLayerClass = createNetworkGetLayerAnonymousClass(classGenericTypeForMethod,
-                    methodElement.simpleName.toString(), getAsList)
-            refreshMethodBuilder.addStatement("builder.setNetworkLayer($networkGetLayerClass)")
-
-            val returnValue = ClassName.get(methodElement.returnType)
-            if (returnValue == liveDataOfBoolean) {
-                refreshMethodBuilder.addStatement("return super.executeRefresh(builder)")
-            } else {
-                messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
-                        "@REFRESH annotation are only accepting LiveData<Boolean> as a return type." +
-                        "Error for ${element.simpleName}.${methodElement.simpleName}")
-                continue
-            }
-
-            daoClassBuilder.addMethod(daoInsertMethodBuilder.build())
-            builderList.add(refreshMethodBuilder.build())
-        }
-
-        return builderList
+                    methodElement.simpleName.toString(), entity, getAsList)
+            add("builder.setNetworkLayer($networkGetLayerClass);")
+        }.joinToString(separator = "\n", postfix = "\n")
     }
 
     private fun createNetworkGetLayerAnonymousClass(classGenericTypeForMethod: TypeName, methodName: String,
-                                                    getAsList: Boolean): TypeSpec {
-
+                                                    entity: ClassName, getAsList: Boolean): TypeSpec {
         val daoInsertStatement = if (getAsList) {
-            "$classArrayWithEntity insertValue = value.toArray(new $classEntity[value.size()])"
+            val classArrayWithEntity = ArrayTypeName.of(entity)
+            "$classArrayWithEntity insertValue = value.toArray(new $entity[value.size()])"
         } else {
-            "$classGenericTypeForMethod insertValue = value"
+            "$entity insertValue = value"
         }
 
-        return TypeSpec.anonymousClassBuilder("")
-                .addSuperinterface(ParameterizedTypeName.get(classNetworkLayer, classGenericTypeForMethod))
-                .addMethod(MethodSpec.methodBuilder("updateDB")
-                        .addAnnotation(Override::class.java)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(classGenericTypeForMethod, "value")
-                        .addStatement(daoInsertStatement)
-                        .addStatement("dataDao.insertFor_$methodName(insertValue)")
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("updateFetchTime")
-                        .addAnnotation(Override::class.java)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(String::class.java, "fullUrlId")
-                        .addStatement("cacheDao.insert(new $classCacheItem(fullUrlId, System.currentTimeMillis()))")
-                        .build())
-                .build()
+        return TypeSpec.anonymousClassBuilder("").apply {
+            addSuperinterface(ParameterizedTypeName.get(classNetworkLayer, classGenericTypeForMethod))
+            addMethod(MethodSpec.methodBuilder("updateDB").apply {
+                addAnnotation(Override::class.java)
+                addModifiers(Modifier.PUBLIC)
+                addParameter(classGenericTypeForMethod, "value")
+                addStatement(daoInsertStatement)
+                addStatement("dataDao.insertFor_$methodName(insertValue)")
+            }.build())
+            addMethod(MethodSpec.methodBuilder("updateFetchTime").apply {
+                addAnnotation(Override::class.java)
+                addModifiers(Modifier.PUBLIC)
+                addParameter(String::class.java, "fullUrlId")
+                addStatement("cacheDao.insert(new $classCacheItem(fullUrlId, System.currentTimeMillis()))")
+            }.build())
+        }.build()
     }
 }

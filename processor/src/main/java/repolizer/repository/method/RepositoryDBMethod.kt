@@ -89,18 +89,18 @@ class RepositoryDBMethod {
         val sql = element.getAnnotation(DB::class.java).sql
         val databaseOperation = methodElement.getAnnotation(DB::class.java).databaseOperation
         val onConflictStrategyName = methodElement.getAnnotation(DB::class.java).onConflictStrategy.name
-        
+
         return (if (sql.isEmpty()) {
             when (databaseOperation) {
                 DatabaseOperation.INSERT -> {
-                    AnnotationSpec.builder(annotationRoomInsert)
-                            .addMember("onConflict", "$classOnConflictStrategy.$onConflictStrategyName")
-                            .build()
+                    AnnotationSpec.builder(annotationRoomInsert).apply {
+                        addMember("onConflict", "$classOnConflictStrategy.$onConflictStrategyName")
+                    }.build()
                 }
                 DatabaseOperation.UPDATE -> {
-                    AnnotationSpec.builder(annotationRoomUpdate)
-                            .addMember("onConflict", "$classOnConflictStrategy.$onConflictStrategyName")
-                            .build()
+                    AnnotationSpec.builder(annotationRoomUpdate).apply {
+                        addMember("onConflict", "$classOnConflictStrategy.$onConflictStrategyName")
+                    }.build()
                 }
                 DatabaseOperation.DELETE -> {
                     AnnotationSpec.builder(annotationRoomDelete).build()
@@ -110,32 +110,31 @@ class RepositoryDBMethod {
                             "DatabaseOperation.QUERY, you need to define the sql value as well." +
                             "Error for ${element.simpleName}.${methodElement.simpleName}")
 
-                    AnnotationSpec.builder(annotationRoomQuery)
-                            .addMember("value", "\"$sql\"")
-                            .build()
+                    AnnotationSpec.builder(annotationRoomQuery).apply {
+                        addMember("value", "\"$sql\"")
+                    }.build()
                 }
             }
         } else {
-            AnnotationSpec.builder(annotationRoomQuery)
-                    .addMember("value", "\"$sql\"")
-                    .build()
+            AnnotationSpec.builder(annotationRoomQuery).apply {
+                addMember("value", "\"$sql\"")
+            }.build()
         })
     }
 
-    private fun createDatabaseLayerAnonymousClass(methodName: String,
-                                                  daoParamList: ArrayList<VariableElement>): TypeSpec {
+    private fun createDatabaseLayerAnonymousClass(methodName: String, daoParamList: ArrayList<VariableElement>): TypeSpec {
         val daoQueryCall = daoParamList.joinToString(prefix = "dataDao.dbFor_$methodName(", postfix = ")") {
             it.simpleName.toString()
         }
 
-        return TypeSpec.anonymousClassBuilder("")
-                .addSuperinterface(classDatabaseLayer)
-                .addMethod(MethodSpec.methodBuilder("updateDB")
-                        .addAnnotation(Override::class.java)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addStatement(daoQueryCall)
-                        .build())
-                .build()
+        return TypeSpec.anonymousClassBuilder("").apply {
+            addSuperinterface(classDatabaseLayer)
+            addMethod(MethodSpec.methodBuilder("updateDB").apply {
+                addAnnotation(Override::class.java)
+                addModifiers(Modifier.PUBLIC)
+                addStatement(daoQueryCall)
+            }.build())
+        }.build()
     }
 
     private fun getDaoParamList(element: Element, methodElement: Element, messager: Messager): ArrayList<VariableElement> {
