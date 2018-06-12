@@ -7,6 +7,7 @@ import repolizer.repository.RepositoryMapHolder
 import javax.annotation.processing.Messager
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
+import javax.lang.model.element.VariableElement
 import javax.lang.model.type.TypeKind
 import javax.tools.Diagnostic
 
@@ -25,94 +26,108 @@ class RepositoryDBMethod {
     private val liveDataOfBoolean = ParameterizedTypeName.get(classLiveData, ClassName.get(java.lang.Boolean::class.java))
 
     fun build(messager: Messager, element: Element, daoClassBuilder: TypeSpec.Builder): List<MethodSpec> {
-        val builderList = ArrayList<MethodSpec>()
+        return ArrayList<MethodSpec>().apply {
+            addAll(RepositoryMapHolder.dbAnnotationMap[element.simpleName.toString()]
+                    ?.map { methodElement ->
+                        //Collects all DB annotation related parameters from the source method. Those
+                        //values will be used to create the DAO method and to assign the correct values
+                        //to the database via the DatabaseResource/DatabaseLayer
+                        val daoParamList = getDaoParamList(element, methodElement, messager)
 
-        val list = RepositoryMapHolder.dbAnnotationMap[element.simpleName.toString()] ?: ArrayList()
-        for (methodElement in list) {
-            val dbMethodBuilder = MethodSpec.methodBuilder(methodElement.simpleName.toString())
-                    .addModifiers(Modifier.PUBLIC)
-                    .addAnnotation(Override::class.java)
+                        //Creates DAO method which will be used to communicate between this repository
+                        //and the database
+                        daoClassBuilder.addMethod(createDaoMethod(messager, element, methodElement, daoParamList))
 
-            val daoMethodBuilder = MethodSpec.methodBuilder("dbFor_${methodElement.simpleName}")
-                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                        MethodSpec.methodBuilder(methodElement.simpleName.toString()).apply {
+                            addModifiers(Modifier.PUBLIC)
+                            addAnnotation(Override::class.java)
+
+                            //Copy all interface parameter to the method implementation
+                            methodElement.parameters.forEach { varElement ->
+                                val varType = ClassName.get(varElement.asType())
+                                addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
+                            }
+
+                            //Creates the database layer which will talk to the DAO
+                            val networkGetLayerClass = createDatabaseLayerAnonymousClass(
+                                    methodElement.simpleName.toString(), daoParamList)
+
+                            addStatement("$classDatabaseBuilder builder = new $classDatabaseBuilder()")
+                            addStatement("builder.setDatabaseLayer($networkGetLayerClass)")
+
+                            //Determine the return value and if it's correct used by the user
+                            val returnValue = ClassName.get(methodElement.returnType)
+                            when {
+                                returnValue == liveDataOfBoolean -> {
+                                    returns(ClassName.get(methodElement.returnType))
+                                    addStatement("return super.executeDB(builder)")
+                                }
+                                methodElement.returnType.kind == TypeKind.VOID -> addStatement("super.executeDB(builder)")
+                                else -> messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
+                                        "@DB annotation are only accepting LiveData<Boolean> or void as a return " +
+                                        "type. Error for ${element.simpleName}.${methodElement.simpleName}")
+                            }
+                        }.build()
+                    } ?: ArrayList())
+        }
+    }
+
+    private fun createDaoMethod(messager: Messager, element: Element, methodElement: Element,
+                                daoParamList: ArrayList<VariableElement>): MethodSpec {
+        return MethodSpec.methodBuilder("dbFor_${methodElement.simpleName}").apply {
+            addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
 
             val databaseOperation = methodElement.getAnnotation(DB::class.java).databaseOperation
             val sql = methodElement.getAnnotation(DB::class.java).sql
-            var objectExpected = false
+            addAnnotation(getDaoMethodAnnotation(messager, element, methodElement,
+                    databaseOperation, sql))
 
-            val annotation = (if (sql.isEmpty()) {
-                when (databaseOperation) {
-                    DatabaseOperation.INSERT -> {
-                        objectExpected = true
-                        AnnotationSpec.builder(annotationRoomInsert)
-                                .addMember("onConflict", "$classOnConflictStrategy.REPLACE")
-                                .build()
-                    }
-                    DatabaseOperation.UPDATE -> {
-                        objectExpected = true
-                        AnnotationSpec.builder(annotationRoomUpdate)
-                                .addMember("onConflict", "$classOnConflictStrategy.REPLACE")
-                                .build()
-                    }
-                    DatabaseOperation.DELETE -> {
-                        objectExpected = true
-                        AnnotationSpec.builder(annotationRoomDelete).build()
-                    }
-                    DatabaseOperation.QUERY -> {
-                        messager.printMessage(Diagnostic.Kind.ERROR, "If you want to use the " +
-                                "DatabaseOperation.QUERY, you need to define the sql value as well." +
-                                "Error for ${element.simpleName}.${methodElement.simpleName}")
-                        null
-                    }
-                }
-            } else {
-                AnnotationSpec.builder(annotationRoomQuery)
-                        .addMember("value", "\"$sql\"")
-                        .build()
-            }) ?: continue
-            daoMethodBuilder.addAnnotation(annotation)
-
-            methodElement.parameters.forEach { varElement ->
-                val varType = ClassName.get(varElement.asType())
-                dbMethodBuilder.addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
+            daoParamList.forEach {
+                val elementType = ClassName.get(it.asType())
+                addParameter(elementType, it.simpleName.toString())
             }
-
-            val daoParamList = getDaoParamList(objectExpected, element, methodElement, messager,
-                    daoMethodBuilder)
-            val networkGetLayerClass = createDatabaseLayerAnonymousClass(methodElement.simpleName.toString(),
-                    daoParamList)
-
-            dbMethodBuilder.addStatement("$classDatabaseBuilder builder = new $classDatabaseBuilder()")
-            dbMethodBuilder.addStatement("builder.setDatabaseLayer($networkGetLayerClass)")
-
-            val returnValue = ClassName.get(methodElement.returnType)
-            if (returnValue == liveDataOfBoolean) {
-                dbMethodBuilder.returns(ClassName.get(methodElement.returnType))
-                dbMethodBuilder.addStatement("return super.executeDB(builder)")
-            } else if (methodElement.returnType.kind == TypeKind.VOID) {
-                dbMethodBuilder.addStatement("super.executeDB(builder)")
-            } else {
-                messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
-                        "@DB annotation are only accepting LiveData<Boolean> or void as a return " +
-                        "type. Error for ${element.simpleName}.${methodElement.simpleName}")
-                continue
-            }
-
-            daoClassBuilder.addMethod(daoMethodBuilder.build())
-            builderList.add(dbMethodBuilder.build())
-        }
-
-        return builderList
+        }.build()
     }
 
-    private fun createDatabaseLayerAnonymousClass(methodName: String, daoParamList: ArrayList<String>): TypeSpec {
-        var daoQueryCall = "dataDao.dbFor_$methodName("
-        val iterator = daoParamList.iterator()
-        while (iterator.hasNext()) {
-            daoQueryCall += iterator.next()
-            daoQueryCall += if (iterator.hasNext()) ", " else ""
+    private fun getDaoMethodAnnotation(messager: Messager, element: Element, methodElement: Element,
+                                       databaseOperation: DatabaseOperation, sql: String?): AnnotationSpec {
+        return (if (sql?.isEmpty() == true) {
+            when (databaseOperation) {
+                DatabaseOperation.INSERT -> {
+                    AnnotationSpec.builder(annotationRoomInsert)
+                            .addMember("onConflict", "$classOnConflictStrategy.REPLACE")
+                            .build()
+                }
+                DatabaseOperation.UPDATE -> {
+                    AnnotationSpec.builder(annotationRoomUpdate)
+                            .addMember("onConflict", "$classOnConflictStrategy.REPLACE")
+                            .build()
+                }
+                DatabaseOperation.DELETE -> {
+                    AnnotationSpec.builder(annotationRoomDelete).build()
+                }
+                DatabaseOperation.QUERY -> {
+                    messager.printMessage(Diagnostic.Kind.ERROR, "If you want to use the " +
+                            "DatabaseOperation.QUERY, you need to define the sql value as well." +
+                            "Error for ${element.simpleName}.${methodElement.simpleName}")
+
+                    AnnotationSpec.builder(annotationRoomQuery)
+                            .addMember("value", "\"$sql\"")
+                            .build()
+                }
+            }
+        } else {
+            AnnotationSpec.builder(annotationRoomQuery)
+                    .addMember("value", "\"$sql\"")
+                    .build()
+        })
+    }
+
+    private fun createDatabaseLayerAnonymousClass(methodName: String,
+                                                  daoParamList: ArrayList<VariableElement>): TypeSpec {
+        val daoQueryCall = daoParamList.joinToString(prefix = "dataDao.dbFor_$methodName(", postfix = ")") {
+            it.simpleName.toString()
         }
-        daoQueryCall += ")"
 
         return TypeSpec.anonymousClassBuilder("")
                 .addSuperinterface(classDatabaseLayer)
@@ -124,39 +139,31 @@ class RepositoryDBMethod {
                 .build()
     }
 
-    private fun getDaoParamList(objectExpected: Boolean, element: Element, methodElement: Element,
-                                messager: Messager, daoMethodBuilder: MethodSpec.Builder): ArrayList<String> {
-        val daoParamList = ArrayList<String>()
-        if (objectExpected) {
-            RepositoryMapHolder.databaseBodyAnnotationMap["${element.simpleName}.${methodElement.simpleName}"]?.forEach {
-                val elementType = ClassName.get(it.asType())
-                daoMethodBuilder.addParameter(elementType, it.simpleName.toString())
-                daoParamList.add(it.simpleName.toString())
-            }
+    private fun getDaoParamList(element: Element, methodElement: Element, messager: Messager): ArrayList<VariableElement> {
+        return ArrayList<VariableElement>().apply {
+            val objectExpected = methodElement.getAnnotation(DB::class.java).databaseOperation.objectExpected
+            if (objectExpected) {
+                addAll(RepositoryMapHolder.databaseBodyAnnotationMap["${element.simpleName}" +
+                        ".${methodElement.simpleName}"] ?: ArrayList())
 
-            if (daoParamList.isEmpty()) {
-                messager.printMessage(Diagnostic.Kind.ERROR, "The method " +
-                        "${methodElement.simpleName} needs to have at least one parameter " +
-                        "which is using the @DatabaseBody annotation. Error for " +
-                        "${element.simpleName}.${methodElement.simpleName}")
-                return ArrayList()
-            }
-        } else {
-            RepositoryMapHolder.sqlParameterAnnotationMap["${element.simpleName}.${methodElement.simpleName}"]?.forEach {
-                val elementType = ClassName.get(it.asType())
-                daoMethodBuilder.addParameter(elementType, it.simpleName.toString())
-                daoParamList.add(it.simpleName.toString())
-            }
+                if (isEmpty()) {
+                    messager.printMessage(Diagnostic.Kind.ERROR, "The method " +
+                            "${methodElement.simpleName} needs to have at least one parameter " +
+                            "which is using the @DatabaseBody annotation. Error for " +
+                            "${element.simpleName}.${methodElement.simpleName}")
+                }
+            } else {
+                addAll(RepositoryMapHolder.sqlParameterAnnotationMap["${element.simpleName}" +
+                        ".${methodElement.simpleName}"] ?: ArrayList())
 
-            if (daoParamList.isEmpty()) {
-                messager.printMessage(Diagnostic.Kind.NOTE, "The method " +
-                        "${methodElement.simpleName} has no parameter and will always " +
-                        "execute the same sql string. If that is your intention, you can " +
-                        "ignore this note. Info for " +
-                        "${element.simpleName}.${methodElement.simpleName}")
+                if (isEmpty()) {
+                    messager.printMessage(Diagnostic.Kind.NOTE, "The method " +
+                            "${methodElement.simpleName} has no parameter and will always " +
+                            "execute the same sql string. If that is your intention, you can " +
+                            "ignore this note. Info for " +
+                            "${element.simpleName}.${methodElement.simpleName}")
+                }
             }
         }
-
-        return daoParamList
     }
 }
