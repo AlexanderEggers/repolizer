@@ -303,21 +303,21 @@ class RepositoryGetMethod {
     }
 
     private fun createTransformationMapFunctionClass(maxCacheTime: Long, maxFreshTime: Long): TypeSpec {
-        return TypeSpec.anonymousClassBuilder("")
-                .addSuperinterface(ParameterizedTypeName.get(classFunction, classCacheItem, classCacheState))
-                .addMethod(MethodSpec.methodBuilder("apply")
-                        .addAnnotation(Override::class.java)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(classCacheItem, "cacheItem")
-                        .addStatement("if(cacheItem == null) return $classCacheState.NO_CACHE")
-                        .addCode("\n")
-                        .addStatement("long lifeSpanOfCache = System.currentTimeMillis() - cacheItem.getCacheTime()")
-                        .addStatement("if(lifeSpanOfCache >= Long.parseLong(\"$maxFreshTime\")) return $classCacheState.NEEDS_SOFT_REFRESH")
-                        .addStatement("else if(lifeSpanOfCache >= Long.parseLong(\"$maxCacheTime\")) return $classCacheState.NEEDS_HARD_REFRESH")
-                        .addStatement("else return $classCacheState.NEEDS_NO_REFRESH")
-                        .returns(classCacheState)
-                        .build())
-                .build()
+        return TypeSpec.anonymousClassBuilder("").apply {
+            addSuperinterface(ParameterizedTypeName.get(classFunction, classCacheItem, classCacheState))
+            addMethod(MethodSpec.methodBuilder("apply").apply {
+                addAnnotation(Override::class.java)
+                addModifiers(Modifier.PUBLIC)
+                addParameter(classCacheItem, "cacheItem")
+                addStatement("if(cacheItem == null) return $classCacheState.NO_CACHE")
+                addCode("\n")
+                addStatement("long lifeSpanOfCache = System.currentTimeMillis() - cacheItem.getCacheTime()")
+                addStatement("if(lifeSpanOfCache >= Long.parseLong(\"$maxFreshTime\")) return $classCacheState.NEEDS_SOFT_REFRESH")
+                addStatement("else if(lifeSpanOfCache >= Long.parseLong(\"$maxCacheTime\")) return $classCacheState.NEEDS_HARD_REFRESH")
+                addStatement("else return $classCacheState.NEEDS_NO_REFRESH")
+                returns(classCacheState)
+            }.build())
+        }.build()
     }
 
     private fun createDaoCall(methodName: String, daoParamList: ArrayList<VariableElement>): String {
