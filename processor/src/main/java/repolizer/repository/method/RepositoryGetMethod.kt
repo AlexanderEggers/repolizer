@@ -13,6 +13,7 @@ import repolizer.repository.RepositoryMapHolder
 import javax.annotation.processing.Messager
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
+import javax.lang.model.element.VariableElement
 import javax.tools.Diagnostic
 
 class RepositoryGetMethod {
@@ -33,122 +34,183 @@ class RepositoryGetMethod {
     private val classAnnotationRoomQuery = ClassName.get("android.arch.persistence.room", "Query")
     private val classOnConflictStrategy = ClassName.get("android.arch.persistence.room", "OnConflictStrategy")
 
-    private lateinit var classEntity: TypeName
-    private lateinit var classArrayWithEntity: TypeName
-
     fun build(messager: Messager, element: Element, entity: ClassName, daoClassBuilder: TypeSpec.Builder): List<MethodSpec> {
-        val builderList = ArrayList<MethodSpec>()
-        val tableName = element.getAnnotation(Repository::class.java).tableName
+        return ArrayList<MethodSpec>().apply {
+            addAll(RepositoryMapHolder.getAnnotationMap[element.simpleName.toString()]?.map { methodElement ->
+                //Collects all DB annotation related parameters from the source method. Those
+                //values will be used to create the DAO method and to assign the correct values
+                //to the database via the DatabaseResource/DatabaseLayer
+                val daoParamList = getDaoParamList(element, methodElement, messager)
 
-        classEntity = entity
-        classArrayWithEntity = ArrayTypeName.of(entity)
+                //Creates DAO methods which will be used to communicate between this repository
+                //and the database
+                daoClassBuilder.addMethod(createDaoInsertMethod(methodElement, entity))
+                daoClassBuilder.addMethod(createDaoQueryMethod(element, methodElement, entity, daoParamList))
+                daoClassBuilder.addMethod(createDaoDeleteMethod(element, methodElement))
 
-        val list = RepositoryMapHolder.getAnnotationMap[element.simpleName.toString()]
-                ?: ArrayList()
-        for (methodElement in list) {
-            val getAsList = methodElement.getAnnotation(GET::class.java).getAsList
-            val classGenericTypeForMethod = if (getAsList) ParameterizedTypeName.get(classList, entity) else entity
+                MethodSpec.methodBuilder(methodElement.simpleName.toString()).apply {
+                    addModifiers(Modifier.PUBLIC)
+                    addAnnotation(Override::class.java)
+                    returns(ClassName.get(methodElement.returnType))
 
-            val annotationMapKey = "${element.simpleName}.${methodElement.simpleName}"
+                    //Copy all interface parameter to the method implementation
+                    methodElement.parameters.forEach { varElement ->
+                        val varType = ClassName.get(varElement.asType())
+                        addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
+                    }
 
-            val getMethodBuilder = MethodSpec.methodBuilder(methodElement.simpleName.toString())
-                    .addModifiers(Modifier.PUBLIC)
-                    .addAnnotation(Override::class.java)
-                    .returns(ClassName.get(methodElement.returnType))
+                    val annotationMapKey = "${element.simpleName}.${methodElement.simpleName}"
 
-            val daoInsertMethodBuilder = MethodSpec.methodBuilder("insertFor_${methodElement.simpleName}")
-                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                    .addAnnotation(AnnotationSpec.builder(classAnnotationRoomInsert)
-                            .addMember("onConflict", "$classOnConflictStrategy.REPLACE")
-                            .build())
-                    .addParameter(classArrayWithEntity, "elements")
-                    .varargs()
+                    //Generates the code which used to retrieve the url from the annotation
+                    //and dynamic parameter with method parameter (like the url part
+                    //':myVar' could be the value '0'
+                    val url = methodElement.getAnnotation(GET::class.java).url
+                    addStatement("String url = \"$url\"")
+                    addCode(buildUrl(annotationMapKey))
 
-            var querySql = methodElement.getAnnotation(GET::class.java).querySql
-            if (querySql.isEmpty()) {
-                querySql = "SELECT * FROM $tableName"
-            }
+                    //Generates the code which will be used for the NetworkBuilder to
+                    //initialise it's values
+                    addCode(getBuilderCode(annotationMapKey, methodElement, entity, daoParamList))
 
-            val daoQueryMethodBuilder = MethodSpec.methodBuilder("queryFor_${methodElement.simpleName}")
-                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                    .addAnnotation(AnnotationSpec.builder(classAnnotationRoomQuery)
-                            .addMember("value", "\"$querySql\"")
-                            .build())
-                    .returns(ParameterizedTypeName.get(classLiveData, classGenericTypeForMethod))
+                    //Generates the code which is defined the @RepositoryParameter annotation.
+                    //Those values are used to tweak the behavior of the repository regarding certain
+                    //cases (like cannot refresh data due to error and cache is too old).
+                    addCode(getRepositoryCode(element, annotationMapKey))
 
-            var deleteSql = methodElement.getAnnotation(GET::class.java).deleteSql
-            if (deleteSql.isEmpty()) {
-                deleteSql = "DELETE FROM $tableName"
-            }
+                    //Determine the return value and if it's correct used by the user
+                    val getAsList = methodElement.getAnnotation(GET::class.java).getAsList
+                    val classGenericTypeForMethod = if (getAsList) ParameterizedTypeName.get(classList, entity) else entity
+                    val returnValue = ClassName.get(methodElement.returnType)
 
-            val daoDeleteAllMethodBuilder = MethodSpec.methodBuilder("deleteAllFor_${methodElement.simpleName}")
-                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                    .addAnnotation(AnnotationSpec.builder(classAnnotationRoomQuery)
-                            .addMember("value", "\"$deleteSql\"")
-                            .build())
+                    if (returnValue != ParameterizedTypeName.get(classLiveData, classGenericTypeForMethod)) {
+                        messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
+                                "@GET annotation are only accepting LiveData<ENTITY> as a return type." +
+                                "The ENTITY stands for the class which you have defined inside your" +
+                                "@Repository annotation under the field entity. Error for " +
+                                "${element.simpleName}.${methodElement.simpleName}")
+                    }
+                }.build()
+            } ?: ArrayList())
+        }
+    }
 
-            methodElement.parameters.forEach { varElement ->
-                val varType = ClassName.get(varElement.asType())
-                getMethodBuilder.addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
-            }
+    private fun createDaoInsertMethod(methodElement: Element, entity: ClassName): MethodSpec {
+        return MethodSpec.methodBuilder("insertFor_${methodElement.simpleName}").apply {
+            addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
 
-            val daoParamList = ArrayList<String>()
-            RepositoryMapHolder.sqlParameterAnnotationMap[annotationMapKey]?.forEach {
+            val onConflictStrategy = methodElement.getAnnotation(GET::class.java).onConflictStrategy
+            addAnnotation(AnnotationSpec.builder(classAnnotationRoomInsert).apply {
+                addMember("onConflict", "$classOnConflictStrategy.$onConflictStrategy")
+            }.build())
+
+            val classArrayWithEntity = ArrayTypeName.of(entity)
+            addParameter(classArrayWithEntity, "elements")
+            varargs()
+        }.build()
+    }
+
+    private fun createDaoQueryMethod(element: Element, methodElement: Element, entity: ClassName,
+                                     daoParamList: ArrayList<VariableElement>): MethodSpec {
+        val getAsList = methodElement.getAnnotation(GET::class.java).getAsList
+        val classGenericTypeForMethod = if (getAsList) ParameterizedTypeName.get(classList, entity) else entity
+
+        return MethodSpec.methodBuilder("queryFor_${methodElement.simpleName}").apply {
+            addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+            addAnnotation(AnnotationSpec.builder(classAnnotationRoomQuery).apply {
+                var querySql = methodElement.getAnnotation(GET::class.java).querySql
+                if (querySql.isEmpty()) {
+                    val tableName = element.getAnnotation(Repository::class.java).tableName
+                    querySql = "SELECT * FROM $tableName"
+                }
+
+                addMember("value", "\"$querySql\"")
+            }.build())
+            returns(ParameterizedTypeName.get(classLiveData, classGenericTypeForMethod))
+
+            daoParamList.forEach {
                 val elementType = ClassName.get(it.asType())
-                daoQueryMethodBuilder.addParameter(elementType, it.simpleName.toString())
-                daoParamList.add(it.simpleName.toString())
+                addParameter(elementType, it.simpleName.toString())
             }
+        }.build()
+    }
 
-            val url = methodElement.getAnnotation(GET::class.java).url
-            val requiresLogin = methodElement.getAnnotation(GET::class.java).requiresLogin
-            val showProgress = methodElement.getAnnotation(GET::class.java).showProgress
+    private fun createDaoDeleteMethod(element: Element, methodElement: Element): MethodSpec {
+        return MethodSpec.methodBuilder("deleteAllFor_${methodElement.simpleName}").apply {
+            addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+            addAnnotation(AnnotationSpec.builder(classAnnotationRoomQuery).apply {
+                var deleteSql = methodElement.getAnnotation(GET::class.java).deleteSql
+                if (deleteSql.isEmpty()) {
+                    val tableName = element.getAnnotation(Repository::class.java).tableName
+                    deleteSql = "DELETE FROM $tableName"
+                }
 
+                addMember("value", "\"$deleteSql\"")
+            }.build())
+
+        }.build()
+    }
+
+    private fun buildUrl(annotationMapKey: String): String {
+        return ArrayList<String>().apply {
+            addAll(RepositoryMapHolder.urlParameterAnnotationMap[annotationMapKey]?.map {
+                "url = url.replace(\":${it.simpleName}\", \"$it\");"
+            } ?: ArrayList())
+
+            val queries = RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]
+            if (queries?.isNotEmpty() == true) add(getFullUrlQueryPart(annotationMapKey))
+        }.joinToString(separator = "\n", postfix = "\n\n")
+    }
+
+    private fun getFullUrlQueryPart(annotationMapKey: String): String {
+        return ArrayList<String>().apply {
+            RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]?.map { urlQuery ->
+                add("url += " + "\"${urlQuery.getAnnotation(UrlQuery::class.java).key}=\" + ${urlQuery.simpleName};")
+            } ?: ArrayList()
+        }.joinToString(prefix = "url += \"?\";", separator = "\nurl += \"&\";\n")
+    }
+
+    private fun getBuilderCode(annotationMapKey: String, methodElement: Element, entity: ClassName,
+                               daoParamList: ArrayList<VariableElement>): String {
+
+        return ArrayList<String>().apply {
+            val annotation = methodElement.getAnnotation(GET::class.java)
+
+            val getAsList = annotation.getAsList
+            val classGenericTypeForMethod = if (getAsList) ParameterizedTypeName.get(classList, entity) else entity
             val classWithTypeToken = ParameterizedTypeName.get(classTypeToken, classGenericTypeForMethod)
             val classWithNetworkBuilder = ParameterizedTypeName.get(classNetworkBuilder, classGenericTypeForMethod)
 
-            getMethodBuilder.addStatement("String url = \"$url\"")
-            RepositoryMapHolder.urlParameterAnnotationMap[annotationMapKey]?.forEach {
-                getMethodBuilder.addStatement("url = url.replace(\":${it.simpleName}\", \"$it\")")
-            }
+            add("$classWithNetworkBuilder builder = new $classNetworkBuilder();")
 
-            val urlQueryList = RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]
-            if (urlQueryList?.isEmpty() == false) {
-                getMethodBuilder.addStatement("url += \"?\"")
-
-                val iterator = urlQueryList.iterator()
-                while (iterator.hasNext()) {
-                    val urlQuery = iterator.next()
-                    getMethodBuilder.addStatement("url += " +
-                            "\"${urlQuery.getAnnotation(UrlQuery::class.java).key}=\" + ${urlQuery.simpleName}")
-
-                    if (iterator.hasNext()) {
-                        getMethodBuilder.addStatement("url += \"&\"")
-                    }
-                }
-            }
-
-            getMethodBuilder.addCode("\n")
-
-            getMethodBuilder.addStatement("$classWithNetworkBuilder builder = new $classNetworkBuilder()")
-            getMethodBuilder.addStatement("builder.setTypeToken(new $classWithTypeToken() {})")
-            getMethodBuilder.addStatement("builder.setUrl(url)")
-            getMethodBuilder.addStatement("builder.setRequiresLogin($requiresLogin)")
-            getMethodBuilder.addStatement("builder.setShowProgress($showProgress)")
+            add("builder.setTypeToken(new $classWithTypeToken() {});")
+            add("builder.setUrl(url);")
+            add("builder.setRequiresLogin(${annotation.requiresLogin});")
+            add("builder.setShowProgress(${annotation.showProgress});")
 
             RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {
-                getMethodBuilder.addStatement("builder.addHeader(" +
-                        "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName})")
+                add("builder.addHeader(" +
+                        "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName});")
             }
 
-            urlQueryList?.forEach {
-                getMethodBuilder.addStatement("builder.addQuery(" +
-                        "\"${it.getAnnotation(UrlQuery::class.java).key}\", ${it.simpleName})")
+            RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]?.forEach {
+                add("builder.addQuery(" +
+                        "\"${it.getAnnotation(UrlQuery::class.java).key}\", ${it.simpleName});")
             }
 
             RepositoryMapHolder.progressParamsAnnotationMap[annotationMapKey]?.forEach {
-                getMethodBuilder.addStatement("builder.setProgressParams(${it.simpleName})")
+                add("builder.setProgressParams(${it.simpleName});")
             }
 
+            val networkGetLayerClass = createNetworkGetLayerAnonymousClass(classGenericTypeForMethod,
+                    entity, annotation.maxCacheTime, annotation.maxFreshTime,
+                    methodElement.simpleName.toString(), getAsList, daoParamList,
+                    annotation.url.isEmpty())
+            add("builder.setNetworkLayer($networkGetLayerClass);")
+        }.joinToString(separator = "\n", postfix = "\n")
+    }
+
+    private fun getRepositoryCode(element: Element, annotationMapKey: String): String {
+        return ArrayList<String>().apply {
             var allowFetchParamName: String? = null
             var deleteIfCacheIsTooOldParamName: String? = null
 
@@ -160,136 +222,84 @@ class RepositoryGetMethod {
                 }
             }
 
-            val networkGetLayerClass = if (url.isEmpty()) {
-                createNetworkGetLayerAnonymousClassForDBOnly(classGenericTypeForMethod,
-                        methodElement.simpleName.toString(), daoParamList)
-            } else {
-                val maxCacheTime = methodElement.getAnnotation(GET::class.java).maxCacheTime
-                val maxFreshTime = methodElement.getAnnotation(GET::class.java).maxFreshTime
-
-                createNetworkGetLayerAnonymousClass(classGenericTypeForMethod,
-                        maxCacheTime, maxFreshTime, methodElement.simpleName.toString(), getAsList, daoParamList)
-            }
-            getMethodBuilder.addStatement("builder.setNetworkLayer($networkGetLayerClass)")
-
             if (deleteIfCacheIsTooOldParamName != null) {
-                getMethodBuilder.addStatement("builder.setDeletingCacheIfTooOld($deleteIfCacheIsTooOldParamName)")
+                add("builder.setDeletingCacheIfTooOld($deleteIfCacheIsTooOldParamName);")
             } else {
                 val deleteIfCacheIsTooOldByDefault = element.getAnnotation(Repository::class.java).deleteIfCacheIsTooOld
-                getMethodBuilder.addStatement("builder.setDeletingCacheIfTooOld($deleteIfCacheIsTooOldByDefault)")
+                add("builder.setDeletingCacheIfTooOld($deleteIfCacheIsTooOldByDefault);")
             }
 
             if (allowFetchParamName != null) {
-                getMethodBuilder.addStatement("return super.executeGet(builder, $allowFetchParamName)")
+                add("return super.executeGet(builder, $allowFetchParamName);")
             } else {
                 val allowFetchByDefault = element.getAnnotation(Repository::class.java).allowFetchByDefault
-                getMethodBuilder.addStatement("return super.executeGet(builder, $allowFetchByDefault)")
+                add("return super.executeGet(builder, $allowFetchByDefault);")
             }
-
-            val returnValue = ClassName.get(methodElement.returnType)
-            if (returnValue != ParameterizedTypeName.get(classLiveData, classGenericTypeForMethod)) {
-                messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
-                        "@GET annotation are only accepting LiveData<ENTITY> as a return type." +
-                        "The ENTITY stands for the class which you have defined inside your" +
-                        "@Repository annotation under the field entity. Error for " +
-                        "${element.simpleName}.${methodElement.simpleName}")
-                continue
-            }
-
-            daoClassBuilder.addMethod(daoInsertMethodBuilder.build())
-            daoClassBuilder.addMethod(daoQueryMethodBuilder.build())
-            daoClassBuilder.addMethod(daoDeleteAllMethodBuilder.build())
-            builderList.add(getMethodBuilder.build())
-        }
-
-        return builderList
+        }.joinToString(separator = "\n", postfix = "\n")
     }
 
-    private fun createNetworkGetLayerAnonymousClassForDBOnly(classGenericTypeForMethod: TypeName,
-                                                             methodName: String,
-                                                             daoParamList: ArrayList<String>): TypeSpec {
-        return TypeSpec.anonymousClassBuilder("")
-                .addSuperinterface(ParameterizedTypeName.get(classNetworkLayer, classGenericTypeForMethod))
-                .addMethod(MethodSpec.methodBuilder("updateDB")
-                        .addAnnotation(Override::class.java)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(classGenericTypeForMethod, "value")
-                        .addStatement("dataDao.insertFor_$methodName(insertValue)")
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("needsFetchByTime")
-                        .addAnnotation(Override::class.java)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(String::class.java, "fullUrlId")
-                        .addStatement("$classMutableLiveData livedata = new ${ParameterizedTypeName.get(classMutableLiveData, classCacheState)}")
-                        .addStatement("livedata.setValue($classCacheState.NEEDS_NO_REFRESH)")
-                        .addStatement("return livedata")
-                        .returns(ParameterizedTypeName.get(classLiveData, classCacheState))
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("updateFetchTime")
-                        .addAnnotation(Override::class.java)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(String::class.java, "fullUrlId")
-                        .addStatement("cacheDao.insert(new $classCacheItem(fullUrlId, System.currentTimeMillis()))")
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("getData")
-                        .addAnnotation(Override::class.java)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addStatement("return ${createDaoCall(methodName, daoParamList)}")
-                        .returns(ParameterizedTypeName.get(classLiveData, classGenericTypeForMethod))
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("removeAllData")
-                        .addAnnotation(Override::class.java)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addStatement("dataDao.deleteAllFor_$methodName()")
-                        .build())
-                .build()
-    }
-
-    private fun createNetworkGetLayerAnonymousClass(classGenericTypeForMethod: TypeName, maxCacheTime: Long,
-                                                    maxFreshTime: Long, methodName: String, getAsList: Boolean,
-                                                    daoParamList: ArrayList<String>): TypeSpec {
+    private fun createNetworkGetLayerAnonymousClass(classGenericTypeForMethod: TypeName, entity: ClassName,
+                                                    maxCacheTime: Long, maxFreshTime: Long,
+                                                    methodName: String, getAsList: Boolean,
+                                                    daoParamList: ArrayList<VariableElement>,
+                                                    isDBOnly: Boolean): TypeSpec {
 
         val daoInsertStatement = if (getAsList) {
-            "$classArrayWithEntity insertValue = value.toArray(new $classEntity[value.size()])"
+            val classArrayWithEntity = ArrayTypeName.of(entity)
+            "$classArrayWithEntity insertValue = value.toArray(new $entity[value.size()])"
         } else {
-            "$classGenericTypeForMethod insertValue = value"
+            "$entity insertValue = value"
         }
 
-        return TypeSpec.anonymousClassBuilder("")
-                .addSuperinterface(ParameterizedTypeName.get(classNetworkLayer, classGenericTypeForMethod))
-                .addMethod(MethodSpec.methodBuilder("updateDB")
-                        .addAnnotation(Override::class.java)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(classGenericTypeForMethod, "value")
-                        .addStatement(daoInsertStatement)
-                        .addStatement("dataDao.insertFor_$methodName(insertValue)")
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("needsFetchByTime")
-                        .addAnnotation(Override::class.java)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(String::class.java, "fullUrlId")
-                        .addStatement("return $classTransformations.map(cacheDao.getCache(fullUrlId), " +
-                                "${createTransformationMapFunctionClass(maxCacheTime, maxFreshTime)})")
-                        .returns(ParameterizedTypeName.get(classLiveData, classCacheState))
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("updateFetchTime")
-                        .addAnnotation(Override::class.java)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(String::class.java, "fullUrlId")
-                        .addStatement("cacheDao.insert(new $classCacheItem(fullUrlId, System.currentTimeMillis()))")
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("getData")
-                        .addAnnotation(Override::class.java)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addStatement("return ${createDaoCall(methodName, daoParamList)}")
-                        .returns(ParameterizedTypeName.get(classLiveData, classGenericTypeForMethod))
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("removeAllData")
-                        .addAnnotation(Override::class.java)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addStatement("dataDao.deleteAllFor_$methodName()")
-                        .build())
-                .build()
+        return TypeSpec.anonymousClassBuilder("").apply {
+            addSuperinterface(ParameterizedTypeName.get(classNetworkLayer, classGenericTypeForMethod))
+            addMethod(MethodSpec.methodBuilder("updateDB")
+                    .addAnnotation(Override::class.java)
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(classGenericTypeForMethod, "value")
+                    .addStatement(daoInsertStatement)
+                    .addStatement("dataDao.insertFor_$methodName(insertValue)")
+                    .build())
+
+            if (isDBOnly) {
+                addMethod(MethodSpec.methodBuilder("needsFetchByTime").apply {
+                    addAnnotation(Override::class.java)
+                    addModifiers(Modifier.PUBLIC)
+                    addParameter(String::class.java, "fullUrlId")
+                    addStatement("$classMutableLiveData livedata = new ${ParameterizedTypeName.get(classMutableLiveData, classCacheState)}")
+                    addStatement("livedata.setValue($classCacheState.NEEDS_NO_REFRESH)")
+                    addStatement("return livedata")
+                    returns(ParameterizedTypeName.get(classLiveData, classCacheState))
+                }.build())
+            } else {
+                addMethod(MethodSpec.methodBuilder("needsFetchByTime").apply {
+                    addAnnotation(Override::class.java)
+                    addModifiers(Modifier.PUBLIC)
+                    addParameter(String::class.java, "fullUrlId")
+                    addStatement("return $classTransformations.map(cacheDao.getCache(fullUrlId), " +
+                            "${createTransformationMapFunctionClass(maxCacheTime, maxFreshTime)})")
+                    returns(ParameterizedTypeName.get(classLiveData, classCacheState))
+                }.build())
+            }
+
+            addMethod(MethodSpec.methodBuilder("updateFetchTime").apply {
+                addAnnotation(Override::class.java)
+                addModifiers(Modifier.PUBLIC)
+                addParameter(String::class.java, "fullUrlId")
+                addStatement("cacheDao.insert(new $classCacheItem(fullUrlId, System.currentTimeMillis()))")
+            }.build())
+            addMethod(MethodSpec.methodBuilder("getData").apply {
+                addAnnotation(Override::class.java)
+                addModifiers(Modifier.PUBLIC)
+                addStatement("return ${createDaoCall(methodName, daoParamList)}")
+                returns(ParameterizedTypeName.get(classLiveData, classGenericTypeForMethod))
+            }.build())
+            addMethod(MethodSpec.methodBuilder("removeAllData").apply {
+                addAnnotation(Override::class.java)
+                addModifiers(Modifier.PUBLIC)
+                addStatement("dataDao.deleteAllFor_$methodName()")
+            }.build())
+        }.build()
     }
 
     private fun createTransformationMapFunctionClass(maxCacheTime: Long, maxFreshTime: Long): TypeSpec {
@@ -310,13 +320,24 @@ class RepositoryGetMethod {
                 .build()
     }
 
-    private fun createDaoCall(methodName: String, daoParamList: ArrayList<String>): String {
-        var daoQueryCall = "dataDao.queryFor_$methodName("
-        val iterator = daoParamList.iterator()
-        while (iterator.hasNext()) {
-            daoQueryCall += iterator.next()
-            daoQueryCall += if (iterator.hasNext()) ", " else ""
+    private fun createDaoCall(methodName: String, daoParamList: ArrayList<VariableElement>): String {
+        return daoParamList.joinToString(prefix = "dataDao.queryFor_$methodName(", postfix = ")") {
+            it.simpleName.toString()
         }
-        return "$daoQueryCall)"
+    }
+
+    private fun getDaoParamList(element: Element, methodElement: Element, messager: Messager): ArrayList<VariableElement> {
+        return ArrayList<VariableElement>().apply {
+            addAll(RepositoryMapHolder.sqlParameterAnnotationMap["${element.simpleName}" +
+                    ".${methodElement.simpleName}"] ?: ArrayList())
+
+            if (isEmpty()) {
+                messager.printMessage(Diagnostic.Kind.NOTE, "The method " +
+                        "${methodElement.simpleName} has no parameter and will always " +
+                        "execute the same sql string. If that is your intention, you can " +
+                        "ignore this note. Info for " +
+                        "${element.simpleName}.${methodElement.simpleName}")
+            }
+        }
     }
 }

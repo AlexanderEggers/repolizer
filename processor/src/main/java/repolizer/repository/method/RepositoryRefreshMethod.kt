@@ -93,7 +93,18 @@ class RepositoryRefreshMethod {
             addAll(RepositoryMapHolder.urlParameterAnnotationMap[annotationMapKey]?.map {
                 "url = url.replace(\":${it.simpleName}\", \"$it\");"
             } ?: ArrayList())
-        }.joinToString(separator = "\n", postfix = "\n")
+
+            val queries = RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]
+            if(queries?.isNotEmpty() == true) add(getFullUrlQueryPart(annotationMapKey))
+        }.joinToString(separator = "\n", postfix = "\n\n")
+    }
+
+    private fun getFullUrlQueryPart(annotationMapKey: String): String {
+        return ArrayList<String>().apply {
+            RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]?.map { urlQuery ->
+                add("url += " + "\"${urlQuery.getAnnotation(UrlQuery::class.java).key}=\" + ${urlQuery.simpleName};")
+            } ?: ArrayList()
+        }.joinToString(prefix = "url += \"?\";", separator = "\nurl += \"&\";\n")
     }
 
     private fun getBuilderCode(annotationMapKey: String, methodElement: Element, entity: ClassName): String {
@@ -130,7 +141,7 @@ class RepositoryRefreshMethod {
             val networkGetLayerClass = createNetworkGetLayerAnonymousClass(classGenericTypeForMethod,
                     methodElement.simpleName.toString(), entity, getAsList)
             add("builder.setNetworkLayer($networkGetLayerClass);")
-        }.joinToString(separator = "\n", postfix = "\n\n")
+        }.joinToString(separator = "\n", postfix = "\n")
     }
 
     private fun createNetworkGetLayerAnonymousClass(classGenericTypeForMethod: TypeName, methodName: String,
