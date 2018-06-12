@@ -23,8 +23,7 @@ object GlobalDatabaseProvider {
             }
             else -> throw IllegalStateException("Internal error: Your used class for the " +
                     "function Repolzer.getDatabase(Class<*>) is missing the @Database " +
-                    "annotation. Are you sure that you have tried to use the correct class for " +
-                    "the function?.")
+                    "annotation.")
         }
     }
 }

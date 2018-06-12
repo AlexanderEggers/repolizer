@@ -15,14 +15,14 @@ object GlobalRepositoryProvider {
             repositoryClass.isAnnotationPresent(Repository::class.java) -> {
                 return repositoryClass.`package`.name
                         .let { "$it.${getGeneratedRepositoryName(repositoryClass)}" }
-                        .let { Class.forName(it) }.getConstructor(Repolizer::class.java)
+                        .let { Class.forName(it) }
+                        ?.getConstructor(Repolizer::class.java)
                         ?.let { it.newInstance(repolizer) as? BaseRepository }
                         ?.also { repositorySingletonMap[repositoryClass.simpleName] = it }
             }
             else -> throw IllegalStateException("Internal error: Your used class for the " +
                     "function Repolzer.getRepository(Class<*>) is missing the @Repository " +
-                    "annotation. Are you sure that you have tried to use the correct class for " +
-                    "the function?.")
+                    "annotation.")
         }
     }
 }
