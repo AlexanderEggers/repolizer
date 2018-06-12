@@ -40,6 +40,12 @@ class RepositoryRefreshMethod {
                     addAnnotation(Override::class.java)
                     returns(ClassName.get(methodElement.returnType))
 
+                    //Copy all interface parameter to the method implementation
+                    methodElement.parameters.forEach { varElement ->
+                        val varType = ClassName.get(varElement.asType())
+                        addParameter(varType, varElement.simpleName.toString(), Modifier.FINAL)
+                    }
+
                     val annotationMapKey = "${element.simpleName}.${methodElement.simpleName}"
 
                     //Generates the code which used to retrieve the url from the annotation
@@ -100,7 +106,7 @@ class RepositoryRefreshMethod {
             val classWithTypeToken = ParameterizedTypeName.get(classTypeToken, classGenericTypeForMethod)
             val classWithNetworkBuilder = ParameterizedTypeName.get(classNetworkBuilder, classGenericTypeForMethod)
 
-            add("$classWithNetworkBuilder builder = new $classNetworkBuilder()")
+            add("$classWithNetworkBuilder builder = new $classNetworkBuilder();")
 
             add("builder.setTypeToken(new $classWithTypeToken() {});")
             add("builder.setUrl(url);")
@@ -124,7 +130,7 @@ class RepositoryRefreshMethod {
             val networkGetLayerClass = createNetworkGetLayerAnonymousClass(classGenericTypeForMethod,
                     methodElement.simpleName.toString(), entity, getAsList)
             add("builder.setNetworkLayer($networkGetLayerClass);")
-        }.joinToString(separator = "\n", postfix = "\n")
+        }.joinToString(separator = "\n", postfix = "\n\n")
     }
 
     private fun createNetworkGetLayerAnonymousClass(classGenericTypeForMethod: TypeName, methodName: String,

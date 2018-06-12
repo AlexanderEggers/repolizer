@@ -77,7 +77,7 @@ class RepositoryCudMethod {
             addAll(RepositoryMapHolder.urlParameterAnnotationMap[annotationMapKey]?.map {
                 "url = url.replace(\":${it.simpleName}\", \"$it\");"
             } ?: ArrayList())
-        }.joinToString(separator = "\n", postfix = "\n")
+        }.joinToString(separator = "\n", postfix = "\n\n")
     }
 
     private fun getBuilderCode(annotationMapKey: String, annotation: CUD): String {
