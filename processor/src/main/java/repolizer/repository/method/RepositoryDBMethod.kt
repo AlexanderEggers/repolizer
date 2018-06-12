@@ -76,11 +76,7 @@ class RepositoryDBMethod {
                                 daoParamList: ArrayList<VariableElement>): MethodSpec {
         return MethodSpec.methodBuilder("dbFor_${methodElement.simpleName}").apply {
             addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-
-            val databaseOperation = methodElement.getAnnotation(DB::class.java).databaseOperation
-            val sql = methodElement.getAnnotation(DB::class.java).sql
-            addAnnotation(getDaoMethodAnnotation(messager, element, methodElement,
-                    databaseOperation, sql))
+            addAnnotation(getDaoMethodAnnotation(messager, element, methodElement))
 
             daoParamList.forEach {
                 val elementType = ClassName.get(it.asType())
@@ -89,18 +85,21 @@ class RepositoryDBMethod {
         }.build()
     }
 
-    private fun getDaoMethodAnnotation(messager: Messager, element: Element, methodElement: Element,
-                                       databaseOperation: DatabaseOperation, sql: String?): AnnotationSpec {
-        return (if (sql?.isEmpty() == true) {
+    private fun getDaoMethodAnnotation(messager: Messager, element: Element, methodElement: Element): AnnotationSpec {
+        val sql = element.getAnnotation(DB::class.java).sql
+        val databaseOperation = methodElement.getAnnotation(DB::class.java).databaseOperation
+        val onConflictStrategyName = methodElement.getAnnotation(DB::class.java).onConflictStrategy.name
+        
+        return (if (sql.isEmpty()) {
             when (databaseOperation) {
                 DatabaseOperation.INSERT -> {
                     AnnotationSpec.builder(annotationRoomInsert)
-                            .addMember("onConflict", "$classOnConflictStrategy.REPLACE")
+                            .addMember("onConflict", "$classOnConflictStrategy.$onConflictStrategyName")
                             .build()
                 }
                 DatabaseOperation.UPDATE -> {
                     AnnotationSpec.builder(annotationRoomUpdate)
-                            .addMember("onConflict", "$classOnConflictStrategy.REPLACE")
+                            .addMember("onConflict", "$classOnConflictStrategy.$onConflictStrategyName")
                             .build()
                 }
                 DatabaseOperation.DELETE -> {
