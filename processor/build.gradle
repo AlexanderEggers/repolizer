@@ -40,6 +40,8 @@ dependencies {
 
     implementation "com.google.auto.service:auto-service:$autoservice_version"
     kapt "com.google.auto.service:auto-service:$autoservice_version"
+
+    implementation "android.arch.persistence.room:compiler:$room_version"
 }
 
 apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
