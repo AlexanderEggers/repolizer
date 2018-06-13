@@ -18,18 +18,18 @@ repositories {
 
 dependencies {
   //includes all library artifacts
-  implementation 'org.repolizer:repolizer-core:0.2.1'
+  implementation 'org.repolizer:repolizer-core:0.3.0'
   //just annotations
-  implementation 'org.repolizer:repolizer-annotation:0.2.1'
+  implementation 'org.repolizer:repolizer-annotation:0.3.0'
   
-  kapt 'org.repolizer:repolizer-processor:0.2.1'
+  kapt 'org.repolizer:repolizer-processor:0.3.0'
   
   //Because of Room, you need one additional processor dependency inside your project:
   kapt "android.arch.persistence.room:compiler:1.1.1-rc1"
 }
 ```
 
-How do I use Repolizer? (Step-by-step introduction for 0.2.1)
+How do I use Repolizer? (Step-by-step introduction for 0.2.1; introduction for 0.3.0 will follow soon)
 -------------------
 Repolizer's design has been created similar to the Retrofit and Room usage. Therefore you need to create interfaces that will represent your repositories and databases.
 
