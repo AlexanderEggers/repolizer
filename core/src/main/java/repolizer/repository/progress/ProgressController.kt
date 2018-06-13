@@ -28,7 +28,7 @@ abstract class ProgressController constructor(private val requestProvider: Reque
         else sourceMap[url] = count
     }
 
-    internal fun internalShow(url: String, progressData: ProgressData?) {
+    internal fun internalShow(url: String, progressData: ProgressData) {
         synchronized(syncLock) {
             increaseSourceCount(url)
 
@@ -54,7 +54,7 @@ abstract class ProgressController constructor(private val requestProvider: Reque
         }
     }
 
-    protected abstract fun onShow(url: String, progressData: ProgressData?)
+    protected abstract fun onShow(url: String, progressData: ProgressData)
     protected abstract fun onClose()
 
     fun cancel() {
