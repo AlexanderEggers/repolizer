@@ -27,7 +27,8 @@ dependencies {
   kapt "org.repolizer:repolizer-processor:$repolizer_version"
   
   //the library requires you to use add the Room compiler dependency to your project (that will change with the next release)
-  kapt "android.arch.persistence.room:compiler:1.1.1-rc1"
+  def room_version = "1.1.1-rc1"
+  kapt "android.arch.persistence.room:compiler:$room_version"
 }
 ```
 
