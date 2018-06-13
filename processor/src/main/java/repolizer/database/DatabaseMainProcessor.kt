@@ -72,12 +72,10 @@ class DatabaseMainProcessor {
                 }.build())
 
                 val converterFormat = addConvertersToDatabase(typeElement)
-                converterFormat.run {
-                    if (isNotEmpty()) {
-                        addAnnotation(AnnotationSpec.builder(classAnnotationTypeConverters)
-                                .addMember("value", "{$converterFormat}")
-                                .build())
-                    }
+                if (converterFormat.isNotEmpty()) {
+                    addAnnotation(AnnotationSpec.builder(classAnnotationTypeConverters).apply {
+                        addMember("value", "{$converterFormat}")
+                    }.build())
                 }
 
                 addDaoClassesToDatabase(daoClasses).forEach {

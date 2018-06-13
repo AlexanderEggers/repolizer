@@ -22,12 +22,10 @@ import javax.tools.Diagnostic
 
 class RepositoryMainProcessor {
 
+    private val classRepolizer = ClassName.get("repolizer", "Repolizer")
     private val classBaseRepository = ClassName.get("repolizer.repository", "BaseRepository")
-
     private val classGlobalDatabaseProvider = ClassName.get("repolizer.database.provider", "GlobalDatabaseProvider")
     private val classCacheDao = ClassName.get("repolizer.database.cache", "CacheDao")
-
-    private val classRepolizer = ClassName.get("repolizer", "Repolizer")
 
     private val classAnnotationDao = ClassName.get("android.arch.persistence.room", "Dao")
 
