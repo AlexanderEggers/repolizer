@@ -42,14 +42,8 @@ dependencies {
     implementation "com.android.support:design:$support_lib_version"
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
 
-    implementation "android.arch.lifecycle:extensions:$livedata_version"
-    kapt "android.arch.lifecycle:compiler:$livedata_version"
-
     implementation "org.archknife:archknife-core:$archknife_version"
     kapt "org.archknife:archknife-processor:$archknife_version"
-
-    kapt "com.google.dagger:dagger-compiler:$dagger_version"
-    kapt "com.google.dagger:dagger-android-processor:$dagger_version"
 
     implementation project(":repolizer-core")
     kapt project(":repolizer-processor")
