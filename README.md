@@ -8,7 +8,7 @@ Since the release of Android Room most of the required work for backends has bee
 
 Repolizer provides you with a solution for that using a handful of annotations. There are two different areas this library will try to tackle. The library is using Retrofit and Room internally to simplify several implementations and to keep the generated classes to a minimum.
 
-If you need more information in how to use the library, take a look inside the [wiki][4].
+If you need more information in how to use the library, take a look inside **[this wiki][4]**.
 
 Download
 --------
