@@ -95,7 +95,7 @@ class RepositoryRefreshMethod {
             } ?: ArrayList())
 
             val queries = RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]
-            if(queries?.isNotEmpty() == true) add(getFullUrlQueryPart(annotationMapKey))
+            if (queries?.isNotEmpty() == true) add(getFullUrlQueryPart(annotationMapKey))
         }.joinToString(separator = "\n", postfix = "\n\n")
     }
 

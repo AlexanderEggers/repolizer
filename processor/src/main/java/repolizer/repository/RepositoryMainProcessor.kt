@@ -37,8 +37,8 @@ class RepositoryMainProcessor {
 
             //checks if the annotated @Repository file has the correct file type
             if (!repositoryElement.kind.isInterface) {
-                mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                        "be applied to an interface. Error for ${typeElement.simpleName}")
+                mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "@Repository can " +
+                        "only be applied to an interface. Error for ${typeElement.simpleName}")
             }
 
             //@Repository does not support parent interface classes

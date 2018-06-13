@@ -31,8 +31,8 @@ class DatabaseMainProcessor {
 
             //checks if the annotated @Database file has the correct file type
             if (!typeElement.kind.isInterface) {
-                mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                        "be applied to an interface. Error for ${typeElement.simpleName}")
+                mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "@Database " +
+                        "can only be applied to an interface. Error for ${typeElement.simpleName}")
             }
 
             //@Database does not support parent interface classes
@@ -145,10 +145,10 @@ class DatabaseMainProcessor {
 
     private fun initMigrationAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {
         DatabaseMapHolder.migrationAnnotationMap.apply {
-            roundEnv.getElementsAnnotatedWith(Migration::class.java)?.forEach{ databaseElement ->
+            roundEnv.getElementsAnnotatedWith(Migration::class.java)?.forEach { databaseElement ->
                 if (!databaseElement.kind.isInterface) {
-                    mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "Can only " +
-                            "be applied to an interface. Error for ${databaseElement.simpleName}")
+                    mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR, "@Migration " +
+                            "can only be applied to an interface. Error for ${databaseElement.simpleName}")
                 }
 
                 val key = databaseElement.simpleName.toString()
