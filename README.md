@@ -17,14 +17,16 @@ repositories {
 }
 
 dependencies {
-  //includes all library artifacts
-  implementation 'org.repolizer:repolizer-core:0.3.0'
+  def repolizer_version = "0.3.0"
+
+  //includes all library artifacts and required classes (this artifact is required if you want to use the processor)
+  implementation "org.repolizer:repolizer-core:$repolizer_version"
   //just annotations
-  implementation 'org.repolizer:repolizer-annotation:0.3.0'
+  implementation "org.repolizer:repolizer-annotation:$repolizer_version"
   
-  kapt 'org.repolizer:repolizer-processor:0.3.0'
+  kapt "org.repolizer:repolizer-processor:$repolizer_version"
   
-  //Because of Room, you need one additional processor dependency inside your project:
+  //the library requires you to use add the Room compiler dependency to your project (that will change with the next release)
   kapt "android.arch.persistence.room:compiler:1.1.1-rc1"
 }
 ```
