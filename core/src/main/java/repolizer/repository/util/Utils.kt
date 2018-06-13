@@ -1,6 +1,6 @@
 package repolizer.repository.util
 
-internal class Utils {
+class Utils {
 
     companion object {
         private const val CACHE_URL_FORMAT_BASE = "CID"

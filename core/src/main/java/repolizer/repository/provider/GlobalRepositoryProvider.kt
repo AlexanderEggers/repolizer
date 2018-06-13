@@ -21,7 +21,7 @@ object GlobalRepositoryProvider {
                         ?.also { repositorySingletonMap[repositoryClass.simpleName] = it }
             }
             else -> throw IllegalStateException("Internal error: Your used class for the " +
-                    "function Repolzer.getRepository(Class<*>) is missing the @Repository " +
+                    "function Repolizer.getRepository(Class<*>) is missing the @Repository " +
                     "annotation.")
         }
     }

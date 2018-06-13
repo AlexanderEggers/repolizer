@@ -22,7 +22,7 @@ object GlobalDatabaseProvider {
                         ?.also { databaseSingletonMap[databaseClass.simpleName] = it } as? T
             }
             else -> throw IllegalStateException("Internal error: Your used class for the " +
-                    "function Repolzer.getDatabase(Class<*>) is missing the @Database " +
+                    "function Repolizer.getDatabase(Class<*>) is missing the @Database " +
                     "annotation.")
         }
     }

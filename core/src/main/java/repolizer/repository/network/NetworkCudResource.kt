@@ -15,7 +15,7 @@ import repolizer.repository.login.LoginManager
 import repolizer.repository.request.RequestType
 import repolizer.repository.util.Utils.Companion.prepareUrl
 
-class NetworkCudResource<Entity> internal constructor(repolizer: Repolizer, builder: NetworkBuilder<Entity>) {
+class NetworkCudResource<Entity> constructor(repolizer: Repolizer, builder: NetworkBuilder<Entity>) {
 
     private val result = MediatorLiveData<String>()
 

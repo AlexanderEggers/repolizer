@@ -14,7 +14,7 @@ import java.io.IOException
 import java.lang.reflect.Type
 import java.util.concurrent.atomic.AtomicBoolean
 
-class LiveDataCallAdapter internal constructor(
+class LiveDataCallAdapter constructor(
         private val responseType: Type,
         private val requestProvider: RequestProvider?,
         private val appExecutor: AppExecutor) : CallAdapter<String, LiveData<NetworkResponse<String>>> {

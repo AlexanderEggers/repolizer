@@ -19,7 +19,7 @@ import repolizer.repository.util.*
 import repolizer.repository.util.Utils.Companion.makeUrlId
 import repolizer.repository.util.Utils.Companion.prepareUrl
 
-class NetworkRefreshResource<Entity> internal constructor(repolizer: Repolizer, builder: NetworkBuilder<Entity>) {
+class NetworkRefreshResource<Entity> constructor(repolizer: Repolizer, builder: NetworkBuilder<Entity>) {
 
     private val result = MediatorLiveData<Boolean>()
 

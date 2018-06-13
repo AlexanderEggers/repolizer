@@ -21,7 +21,7 @@ import repolizer.repository.request.RequestType
 import repolizer.repository.util.Utils.Companion.makeUrlId
 import repolizer.repository.util.Utils.Companion.prepareUrl
 
-class NetworkGetResource<Entity> internal constructor(repolizer: Repolizer, builder: NetworkBuilder<Entity>) {
+class NetworkGetResource<Entity> constructor(repolizer: Repolizer, builder: NetworkBuilder<Entity>) {
 
     private val result = MediatorLiveData<Entity>()
 
