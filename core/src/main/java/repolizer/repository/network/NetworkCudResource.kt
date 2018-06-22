@@ -63,7 +63,7 @@ class NetworkCudResource<Entity> constructor(repolizer: Repolizer, builder: Netw
 
     private fun checkLogin(networkResponse: LiveData<NetworkResponse<String>>) {
         loginManager?.let {
-            result.addSource(it.isCurrentLoginValid(), { isLoginValid ->
+            result.addSource(it.isCurrentLoginValid()) { isLoginValid ->
                 isLoginValid?.run {
                     if (this@run) {
                         executeCall(networkResponse)
@@ -73,7 +73,7 @@ class NetworkCudResource<Entity> constructor(repolizer: Repolizer, builder: Netw
                         }
                     }
                 }
-            })
+            }
         }
                 ?: throw IllegalStateException("Checking the login requires a LoginManager. " +
                         "Use the setter of the Repolizer class to set your custom " +

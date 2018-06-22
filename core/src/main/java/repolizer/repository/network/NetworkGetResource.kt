@@ -70,7 +70,7 @@ class NetworkGetResource<Entity> constructor(repolizer: Repolizer, builder: Netw
             result.removeSource(testSource)
 
             val needsFetchByTime = getLayer.needsFetchByTime(makeUrlId(fullUrl))
-            result.addSource(needsFetchByTime, { currentCacheState ->
+            result.addSource(needsFetchByTime) { currentCacheState ->
                 currentCacheState?.run {
                     result.removeSource(needsFetchByTime)
 
@@ -89,7 +89,7 @@ class NetworkGetResource<Entity> constructor(repolizer: Repolizer, builder: Netw
                         establishConnection()
                     }
                 }
-            })
+            }
         }
 
         return result
@@ -109,7 +109,7 @@ class NetworkGetResource<Entity> constructor(repolizer: Repolizer, builder: Netw
 
     private fun checkLogin(networkResponse: LiveData<NetworkResponse<String>>) {
         loginManager?.let {
-            result.addSource(it.isCurrentLoginValid(), { isLoginValid ->
+            result.addSource(it.isCurrentLoginValid()) { isLoginValid ->
                 isLoginValid?.run {
                     if (this@run) {
                         executeCall(networkResponse)
@@ -119,7 +119,7 @@ class NetworkGetResource<Entity> constructor(repolizer: Repolizer, builder: Netw
                         }
                     }
                 }
-            })
+            }
         }
                 ?: throw IllegalStateException("Checking the login requires a LoginManager. " +
                         "Use the setter of the Repolizer class to set your custom " +
@@ -175,10 +175,10 @@ class NetworkGetResource<Entity> constructor(repolizer: Repolizer, builder: Netw
 
     @MainThread
     private fun establishConnection() {
-        appExecutor.mainThread.execute({
+        appExecutor.mainThread.execute {
             val resultSource = loadCache()
             result.addSource(resultSource) { data -> data?.let { result.value = it } }
-        })
+        }
     }
 
     @MainThread
