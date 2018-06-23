@@ -16,7 +16,7 @@ buildscript {
 
         archknife_version = "0.6.0"
 
-        room_version = '1.1.1-rc1'
+        room_version = '1.1.1'
         livedata_version = '1.1.1'
 
         repolizer_library_version = "0.3.0"

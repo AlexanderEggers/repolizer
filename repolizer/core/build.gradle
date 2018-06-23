@@ -1,0 +1,68 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+ext {
+    bintrayRepo = 'android'
+    bintrayName = 'repolizer-core'
+
+    publishedGroupId = 'org.repolizer'
+    libraryName = 'repolizer-core'
+    artifact = 'repolizer-core'
+
+    libraryDescription = 'Android annotation processor to add a MVVM-based repository pattern to your App.'
+
+    siteUrl = 'https://github.com/Mordag/repolizer'
+    gitUrl = 'https://github.com/Mordag/repolizer.git'
+
+    libraryVersion = "$repolizer_library_version"
+
+    developerId = 'mordag'
+    developerName = 'Alexander Eggers'
+
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file("local.properties").newDataInputStream())
+    developerEmail = properties.getProperty("user.email", "")
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+}
+
+android {
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
+
+    defaultConfig {
+        minSdkVersion 14
+        versionName "$repolizer_library_version"
+        consumerProguardFiles 'proguard-rules.pro'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+}
+
+tasks.withType(Javadoc).all {
+    enabled = false
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+    api project(":repolizer:repolizer-annotation")
+    //api "org.repolizer:repolizer-annotation:$repolizer_library_version"
+
+    api "android.arch.persistence.room:runtime:$room_version"
+    api "android.arch.lifecycle:livedata:$livedata_version"
+
+    api "com.squareup.okhttp3:okhttp:$okhttp_version"
+    api "com.squareup.retrofit2:retrofit:$retrofit2_version"
+    api "com.squareup.retrofit2:converter-scalars:$retrofit2_version"
+    api "com.google.code.gson:gson:$gson_version"
+}
+
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'

@@ -1,10 +1,22 @@
-include ':examples', ':annotation', ':processor', ':core', ':adapter', ':room-annotation', ':room-core', ':room-processor'
-project(":examples").name = "repolizer-examples"
-project(":annotation").name = "repolizer-annotation"
-project(":processor").name = "repolizer-processor"
-project(":core").name = "repolizer-core"
-project(":adapter").name = "repolizer-adapter"
-project(":room-annotation").name = "repolizer-room-annotation"
-project(":room-core").name = "repolizer-room-core"
-project(":room-processor").name = "repolizer-room-processor"
+
+//Base library
+include ':repolizer:examples', ':repolizer:annotation', ':repolizer:processor', ':repolizer:core'
+project(":repolizer").name = "repolizer"
+project(":repolizer:annotation").name = "repolizer-annotation"
+project(":repolizer:core").name = "repolizer-core"
+project(":repolizer:examples").name = "repolizer-examples"
+project(":repolizer:processor").name = "repolizer-processor"
+
+//Adapter artifacts
+include ':repolizer-adapter:base'
+project(":repolizer-adapter").name = "adapter"
+project(":repolizer-adapter:base").name = "adapter-base"
+
+//Base artifact for the room adapter (cache & storage) implementation
+include ':repolizer-room:annotation', ':repolizer-room:core', ':repolizer-room:processor'
+project(":repolizer-room").name = "room"
+project(":repolizer-room:annotation").name = "room-annotation"
+project(":repolizer-room:core").name = "room-core"
+project(":repolizer-room:processor").name = "room-processor"
+
 rootProject.name = "repolizer-library"

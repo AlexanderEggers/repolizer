@@ -45,10 +45,8 @@ dependencies {
     implementation "org.archknife:archknife-core:$archknife_version"
     kapt "org.archknife:archknife-processor:$archknife_version"
 
-    implementation project(":repolizer-core")
-    kapt project(":repolizer-processor")
+    implementation project(":repolizer:repolizer-core")
+    kapt project(":repolizer:repolizer-processor")
 
     kapt "com.android.databinding:compiler:$android_studio_version"
-
-    testImplementation "junit:junit:$junit_version"
 }
