@@ -1,0 +1,11 @@
+include ':annotation', ':core', ':base'
+
+project(":annotation").projectDir = file("../repolizer/annotation")
+project(":annotation").name = "repolizer-annotation"
+
+project(":core").projectDir = file("../repolizer/core")
+project(":core").name = "repolizer-core"
+
+project(":base").name = "repolizer-adapter-base"
+
+rootProject.name = "repolizer-adapter"

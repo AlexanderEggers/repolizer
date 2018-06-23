@@ -52,7 +52,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-    api project(":repolizer:repolizer-annotation")
+    api project(":repolizer-annotation")
     //api "org.repolizer:repolizer-annotation:$repolizer_library_version"
 
     api "android.arch.persistence.room:runtime:$room_version"

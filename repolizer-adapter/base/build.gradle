@@ -52,7 +52,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-    api project(":repolizer:repolizer-core")
+    api project(":repolizer-core")
     //api "org.repolizer:repolizer-core:$repolizer_library_version"
 }
 

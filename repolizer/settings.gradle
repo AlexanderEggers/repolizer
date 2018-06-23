@@ -1,0 +1,11 @@
+include ':example', ':annotation', ':processor', ':core', ':adapter-base'
+
+project(":adapter-base").projectDir = file("../repolizer-adapter/base")
+project(":adapter-base").name = "repolizer-adapter-base"
+
+project(":annotation").name = "repolizer-annotation"
+project(":core").name = "repolizer-core"
+project(":example").name = "repolizer-example"
+project(":processor").name = "repolizer-processor"
+
+rootProject.name = "repolizer-library"

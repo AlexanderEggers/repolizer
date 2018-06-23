@@ -1,0 +1,7 @@
+include ':annotation', ':core', ':processor'
+
+project(":annotation").name = "repolizer-room-annotation"
+project(":core").name = "repolizer-room-core"
+project(":processor").name = "repolizer-room-processor"
+
+rootProject.name = "repolizer-room"
