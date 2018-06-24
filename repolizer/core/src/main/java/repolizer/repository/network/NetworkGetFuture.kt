@@ -21,7 +21,7 @@ import repolizer.repository.request.RequestType
 import repolizer.repository.util.Utils.Companion.makeUrlId
 import repolizer.repository.util.Utils.Companion.prepareUrl
 
-class NetworkGetResource<Entity> constructor(repolizer: Repolizer, builder: NetworkBuilder<Entity>) {
+class NetworkGetFuture<Entity> constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder<Entity>) {
 
     private val result = MediatorLiveData<Entity>()
 
@@ -32,27 +32,27 @@ class NetworkGetResource<Entity> constructor(repolizer: Repolizer, builder: Netw
     private val loginManager: LoginManager? = repolizer.loginManager
     private val responseService: ResponseService? = repolizer.responseService
     private val appExecutor: AppExecutor = AppExecutor
-    private val getLayer: NetworkGetLayer<Entity> = builder.networkLayer as? NetworkGetLayer<Entity>
+    private val getLayer: NetworkGetLayer<Entity> = futureBuilder.networkLayer as? NetworkGetLayer<Entity>
             ?: throw IllegalStateException("Internal error: Network layer is null.")
 
-    private val requiresLogin: Boolean = builder.requiresLogin
-    private val showProgress: Boolean = builder.showProgress
-    private val deleteIfCacheIsTooOld: Boolean = builder.isDeletingCacheIfTooOld
+    private val requiresLogin: Boolean = futureBuilder.requiresLogin
+    private val showProgress: Boolean = futureBuilder.showProgress
+    private val deleteIfCacheIsTooOld: Boolean = futureBuilder.isDeletingCacheIfTooOld
 
-    private val url: String = builder.url
+    private val url: String = futureBuilder.url
     private val fullUrl: String = if (repolizer.baseUrl.substring(repolizer.baseUrl.length) != "/") {
-        "${repolizer.baseUrl}/${builder.url}"
+        "${repolizer.baseUrl}/${futureBuilder.url}"
     } else {
-        "${repolizer.baseUrl}${builder.url}"
+        "${repolizer.baseUrl}${futureBuilder.url}"
     }
 
     private val requestType: RequestType = RequestType.GET
-    private val progressData: ProgressData = builder.progressData ?: object : ProgressData() {}
-    private val bodyType: TypeToken<*> = builder.typeToken
+    private val progressData: ProgressData = futureBuilder.progressData ?: object : ProgressData() {}
+    private val bodyType: TypeToken<*> = futureBuilder.typeToken
             ?: throw IllegalStateException("Internal error: Body type is null.")
 
-    private val headerMap: Map<String, String> = builder.headerMap
-    private val queryMap: Map<String, String> = builder.queryMap
+    private val headerMap: Map<String, String> = futureBuilder.headerMap
+    private val queryMap: Map<String, String> = futureBuilder.queryMap
 
     private lateinit var fetchSecurityLayer: FetchSecurityLayer
     private lateinit var cacheState: CacheState
@@ -142,7 +142,7 @@ class NetworkGetResource<Entity> constructor(repolizer: Repolizer, builder: Netw
                                 objectResponse = withBody(it)
                             }
                         } catch (e: Exception) {
-                            Log.e(NetworkRefreshResource::class.java.name, e.message)
+                            Log.e(NetworkRefreshFuture::class.java.name, e.message)
                             e.printStackTrace()
                         }
 

@@ -1,7 +1,4 @@
-include ':example', ':annotation', ':processor', ':core', ':adapter-base'
-
-project(":adapter-base").projectDir = file("../repolizer-adapter/base")
-project(":adapter-base").name = "repolizer-adapter-base"
+include ':example', ':annotation', ':processor', ':core'
 
 project(":annotation").name = "repolizer-annotation"
 project(":core").name = "repolizer-core"

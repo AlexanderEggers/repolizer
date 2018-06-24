@@ -6,6 +6,7 @@ import repolizer.ProcessorUtil.Companion.getGeneratedDatabaseDaoName
 import repolizer.ProcessorUtil.Companion.getGeneratedDatabaseName
 import repolizer.ProcessorUtil.Companion.getGeneratedRepositoryName
 import repolizer.ProcessorUtil.Companion.getPackageName
+import repolizer.annotation.parameter.*
 import repolizer.annotation.repository.*
 import repolizer.annotation.repository.parameter.*
 import repolizer.database.DatabaseMapHolder

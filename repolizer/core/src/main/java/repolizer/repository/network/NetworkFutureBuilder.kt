@@ -5,7 +5,7 @@ import repolizer.Repolizer
 import repolizer.repository.progress.ProgressData
 import repolizer.repository.request.RequestType
 
-class NetworkBuilder<Entity> {
+class NetworkFutureBuilder<Entity> {
 
     var requestType: RequestType? = null
 
@@ -46,15 +46,15 @@ class NetworkBuilder<Entity> {
         queryMap[key] = value
     }
 
-    fun buildGet(repolizer: Repolizer): NetworkGetResource<Entity> {
-        return NetworkGetResource(repolizer, this)
+    fun buildGet(repolizer: Repolizer): NetworkGetFuture<Entity> {
+        return NetworkGetFuture(repolizer, this)
     }
 
-    fun buildRefresh(repolizer: Repolizer): NetworkRefreshResource<Entity> {
-        return NetworkRefreshResource(repolizer, this)
+    fun buildRefresh(repolizer: Repolizer): NetworkRefreshFuture<Entity> {
+        return NetworkRefreshFuture(repolizer, this)
     }
 
-    fun buildCud(repolizer: Repolizer): NetworkCudResource<Entity> {
-        return NetworkCudResource(repolizer, this)
+    fun buildCud(repolizer: Repolizer): NetworkCudFuture<Entity> {
+        return NetworkCudFuture(repolizer, this)
     }
 }

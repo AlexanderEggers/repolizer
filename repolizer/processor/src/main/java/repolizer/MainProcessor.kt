@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService
 import repolizer.annotation.database.Database
 import repolizer.annotation.database.Migration
 import repolizer.annotation.database.TypeConverter
+import repolizer.annotation.parameter.*
 import repolizer.annotation.repository.*
 import repolizer.annotation.repository.parameter.*
 import repolizer.database.DatabaseMainProcessor

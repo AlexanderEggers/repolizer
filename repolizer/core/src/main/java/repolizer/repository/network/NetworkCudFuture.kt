@@ -15,7 +15,7 @@ import repolizer.repository.login.LoginManager
 import repolizer.repository.request.RequestType
 import repolizer.repository.util.Utils.Companion.prepareUrl
 
-class NetworkCudResource<Entity> constructor(repolizer: Repolizer, builder: NetworkBuilder<Entity>) {
+class NetworkCudFuture<Entity> constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder<Entity>) {
 
     private val result = MediatorLiveData<String>()
 
@@ -25,21 +25,21 @@ class NetworkCudResource<Entity> constructor(repolizer: Repolizer, builder: Netw
     private val loginManager: LoginManager? = repolizer.loginManager
     private val responseService: ResponseService? = repolizer.responseService
     private val appExecutor: AppExecutor = AppExecutor
-    private val cudLayer: NetworkCudLayer<Entity> = builder.networkLayer as? NetworkCudLayer<Entity>
+    private val cudLayer: NetworkCudLayer<Entity> = futureBuilder.networkLayer as? NetworkCudLayer<Entity>
             ?: throw IllegalStateException("Internal error: Network layer is null.")
 
-    private val requiresLogin: Boolean = builder.requiresLogin
-    private val showProgress: Boolean = builder.showProgress
+    private val requiresLogin: Boolean = futureBuilder.requiresLogin
+    private val showProgress: Boolean = futureBuilder.showProgress
 
-    private val url: String = builder.url
-    private val raw: Entity? = builder.raw
+    private val url: String = futureBuilder.url
+    private val raw: Entity? = futureBuilder.raw
 
-    private val requestType: RequestType = builder.requestType
+    private val requestType: RequestType = futureBuilder.requestType
             ?: throw IllegalStateException("Internal error: Request type is null.")
-    private val progressData: ProgressData = builder.progressData ?: object: ProgressData() {}
+    private val progressData: ProgressData = futureBuilder.progressData ?: object: ProgressData() {}
 
-    private val headerMap: Map<String, String> = builder.headerMap
-    private val queryMap: Map<String, String> = builder.queryMap
+    private val headerMap: Map<String, String> = futureBuilder.headerMap
+    private val queryMap: Map<String, String> = futureBuilder.queryMap
 
     init {
         progressData.requestType = requestType

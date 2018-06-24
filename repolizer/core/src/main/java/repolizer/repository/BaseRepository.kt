@@ -3,8 +3,8 @@ package repolizer.repository
 import android.arch.lifecycle.LiveData
 import android.content.Context
 import repolizer.Repolizer
-import repolizer.repository.database.DatabaseBuilder
-import repolizer.repository.network.NetworkBuilder
+import repolizer.repository.persistent.PersistentFutureBuilder
+import repolizer.repository.network.NetworkFutureBuilder
 import repolizer.repository.network.FetchSecurityLayer
 import java.io.Serializable
 import java.util.concurrent.atomic.AtomicBoolean
@@ -13,22 +13,22 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
 
     private val fetchingData = AtomicBoolean(false)
 
-    protected fun executeRefresh(builder: NetworkBuilder<*>): LiveData<Boolean> {
-        return builder.buildRefresh(repolizer)
+    protected fun executeRefresh(futureBuilder: NetworkFutureBuilder<*>): LiveData<Boolean> {
+        return futureBuilder.buildRefresh(repolizer)
                 .execute(this)
     }
 
-    protected fun <T> executeGet(builder: NetworkBuilder<T>, allowFetch: Boolean): LiveData<T> {
-        return builder.buildGet(repolizer)
+    protected fun <T> executeGet(futureBuilder: NetworkFutureBuilder<T>, allowFetch: Boolean): LiveData<T> {
+        return futureBuilder.buildGet(repolizer)
                 .execute(this, allowFetch)
     }
 
-    protected fun executeCud(builder: NetworkBuilder<Serializable>): LiveData<String> {
-        return builder.buildCud(repolizer)
+    protected fun executeCud(futureBuilder: NetworkFutureBuilder<Serializable>): LiveData<String> {
+        return futureBuilder.buildCud(repolizer)
                 .execute()
     }
 
-    protected fun executeDB(builder: DatabaseBuilder): LiveData<Boolean> {
+    protected fun executeDB(builder: PersistentFutureBuilder): LiveData<Boolean> {
         return builder.build()
                 .execute()
     }
