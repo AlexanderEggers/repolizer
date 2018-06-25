@@ -1,6 +1,10 @@
 package repolizer
 
 import com.google.gson.Gson
+import repolizer.adapter.ImageAdapter
+import repolizer.adapter.NetworkAdapter
+import repolizer.adapter.PersistentAdapter
+import repolizer.adapter.WrapperAdapter
 import repolizer.repository.login.LoginManager
 import repolizer.repository.progress.ProgressController
 import repolizer.repository.provider.GlobalRepositoryProvider
@@ -34,6 +38,16 @@ class Repolizer private constructor(builder: Builder) {
     }
 
     class Builder {
+        var wrapperAdapters: ArrayList<WrapperAdapter<*>> = ArrayList()
+            private set
+
+        var imageAdapter: ImageAdapter<*>? = null
+            private set
+        var networkAdapter: NetworkAdapter? = null
+            private set
+        var persistentAdapter: PersistentAdapter<*>? = null
+            private set
+
         var requestProvider: RequestProvider? = null
             private set
 
@@ -48,6 +62,26 @@ class Repolizer private constructor(builder: Builder) {
             private set
         var responseService: ResponseService? = null
             private set
+
+        fun addWrapperAdapter(wrapperAdapter: WrapperAdapter<*>): Builder {
+            wrapperAdapters.add(wrapperAdapter)
+            return this@Builder
+        }
+
+        fun setImageAdapter(imageAdapter: ImageAdapter<*>): Builder {
+            this@Builder.imageAdapter = imageAdapter
+            return this@Builder
+        }
+
+        fun setNetworkAdapter(networkAdapter: NetworkAdapter): Builder {
+            this@Builder.networkAdapter = networkAdapter
+            return this@Builder
+        }
+
+        fun setPersistentAdapter(persistentAdapter: PersistentAdapter<*>): Builder {
+            this@Builder.persistentAdapter = persistentAdapter
+            return this@Builder
+        }
 
         fun setBaseUrl(baseUrl: String): Builder {
             this@Builder.baseUrl = baseUrl
