@@ -1,10 +1,12 @@
 package repolizer.repository.persistent
 
-class PersistentFutureBuilder {
+import repolizer.repository.future.FutureBuilder
+
+open class PersistentFutureBuilder: FutureBuilder() {
 
     var persistentLayer: PersistentLayer? = null
 
-    fun build(): PersistentFuture {
-        return PersistentFuture(this)
+    fun buildCache(): PersistentCacheFuture {
+        return PersistentCacheFuture(this)
     }
 }

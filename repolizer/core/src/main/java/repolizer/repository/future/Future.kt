@@ -1,8 +1,6 @@
 package repolizer.repository.future
 
-abstract class Future<E, O> {
+abstract class Future<B> {
 
-    abstract fun get(): E
-
-    abstract fun execute(): O
+    abstract fun execute(): B?
 }

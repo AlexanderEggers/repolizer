@@ -4,7 +4,8 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import repolizer.repository.util.AppExecutor
 
-class PersistentFuture internal constructor(builder: PersistentFutureBuilder) {
+class PersistentCacheFuture
+constructor(builder: PersistentFutureBuilder) {
 
     private val result = MutableLiveData<Boolean>()
 
@@ -12,7 +13,7 @@ class PersistentFuture internal constructor(builder: PersistentFutureBuilder) {
     private val persistentLayer: PersistentLayer = builder.persistentLayer
             ?: throw IllegalStateException("Internal error: Layer is null.")
 
-    fun execute(): LiveData<Boolean> {
+    private fun execute(): LiveData<Boolean> {
         appExecutor.workerThread.execute {
             persistentLayer.updateDB()
             result.postValue(true)

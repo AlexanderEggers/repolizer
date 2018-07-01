@@ -3,7 +3,7 @@ package repolizer
 import com.google.gson.Gson
 import repolizer.adapter.ImageAdapter
 import repolizer.adapter.NetworkAdapter
-import repolizer.adapter.PersistentAdapter
+import repolizer.adapter.StorageAdapter
 import repolizer.adapter.WrapperAdapter
 import repolizer.repository.login.LoginManager
 import repolizer.repository.progress.ProgressController
@@ -45,7 +45,7 @@ class Repolizer private constructor(builder: Builder) {
             private set
         var networkAdapter: NetworkAdapter? = null
             private set
-        var persistentAdapter: PersistentAdapter<*>? = null
+        var storageAdapter: StorageAdapter<*>? = null
             private set
 
         var requestProvider: RequestProvider? = null
@@ -78,8 +78,8 @@ class Repolizer private constructor(builder: Builder) {
             return this@Builder
         }
 
-        fun setPersistentAdapter(persistentAdapter: PersistentAdapter<*>): Builder {
-            this@Builder.persistentAdapter = persistentAdapter
+        fun setPersistentAdapter(storageAdapter: StorageAdapter<*>): Builder {
+            this@Builder.storageAdapter = storageAdapter
             return this@Builder
         }
 

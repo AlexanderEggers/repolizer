@@ -9,50 +9,40 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
-import repolizer.database.cache.CacheState
+import repolizer.persistent.CacheState
 import repolizer.repository.api.NetworkController
+import repolizer.repository.login.LoginManager
 import repolizer.repository.progress.ProgressController
 import repolizer.repository.progress.ProgressData
+import repolizer.repository.request.RequestType
 import repolizer.repository.response.NetworkResponse
 import repolizer.repository.response.ResponseService
 import repolizer.repository.util.AppExecutor
-import repolizer.repository.login.LoginManager
-import repolizer.repository.request.RequestType
 import repolizer.repository.util.Utils.Companion.makeUrlId
 import repolizer.repository.util.Utils.Companion.prepareUrl
+import retrofit2.Call
 
-class NetworkGetFuture<Entity> constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder<Entity>) {
+class NetworkGetFuture<Entity>
+constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder<Entity>): NetworkFuture<Entity>(repolizer, futureBuilder) {
 
-    private val result = MediatorLiveData<Entity>()
-
-    private val context: Context = repolizer.appContext
-    private val gson: Gson = repolizer.gson
-    private val controller: NetworkController = repolizer.networkController
-    private val progressController: ProgressController? = repolizer.progressController
-    private val loginManager: LoginManager? = repolizer.loginManager
-    private val responseService: ResponseService? = repolizer.responseService
-    private val appExecutor: AppExecutor = AppExecutor
-    private val getLayer: NetworkGetLayer<Entity> = futureBuilder.networkLayer as? NetworkGetLayer<Entity>
-            ?: throw IllegalStateException("Internal error: Network layer is null.")
-
-    private val requiresLogin: Boolean = futureBuilder.requiresLogin
-    private val showProgress: Boolean = futureBuilder.showProgress
-    private val deleteIfCacheIsTooOld: Boolean = futureBuilder.isDeletingCacheIfTooOld
-
-    private val url: String = futureBuilder.url
-    private val fullUrl: String = if (repolizer.baseUrl.substring(repolizer.baseUrl.length) != "/") {
+    val headerMap: Map<String, String> = futureBuilder.headerMap
+    val queryMap: Map<String, String> = futureBuilder.queryMap
+    val fullUrl: String = if (repolizer.baseUrl.substring(repolizer.baseUrl.length) != "/") {
         "${repolizer.baseUrl}/${futureBuilder.url}"
     } else {
         "${repolizer.baseUrl}${futureBuilder.url}"
     }
 
-    private val requestType: RequestType = RequestType.GET
-    private val progressData: ProgressData = futureBuilder.progressData ?: object : ProgressData() {}
+    private val gson: Gson = repolizer.gson
+    private val responseService: ResponseService? = repolizer.responseService
+    private val getLayer: NetworkGetLayer<Entity> = futureBuilder.networkLayer as? NetworkGetLayer<Entity>
+            ?: throw IllegalStateException("Internal error: Network layer is null.")
+
+    private val deleteIfCacheIsTooOld: Boolean = futureBuilder.isDeletingCacheIfTooOld
+    private var allowFetch: Boolean = false
+
     private val bodyType: TypeToken<*> = futureBuilder.typeToken
             ?: throw IllegalStateException("Internal error: Body type is null.")
-
-    private val headerMap: Map<String, String> = futureBuilder.headerMap
-    private val queryMap: Map<String, String> = futureBuilder.queryMap
 
     private lateinit var fetchSecurityLayer: FetchSecurityLayer
     private lateinit var cacheState: CacheState
@@ -61,72 +51,33 @@ class NetworkGetFuture<Entity> constructor(repolizer: Repolizer, futureBuilder: 
         progressData.requestType = requestType
     }
 
-    @MainThread
-    fun execute(fetchSecurityLayer: FetchSecurityLayer, allowFetch: Boolean): LiveData<Entity> {
-        this.fetchSecurityLayer = fetchSecurityLayer
+    override fun onDetermineExecutionType(): ExecutionType {
+        val cacheData: Entity? = loadCache() //TODO
+        val cacheState = CacheState.NO_CACHE //TODO
+        val needsFetch = cacheState == CacheState.NEEDS_SOFT_REFRESH ||
+                cacheState == CacheState.NEEDS_HARD_REFRESH || cacheState == CacheState.NO_CACHE
 
-        val testSource = loadCache()
-        result.addSource(testSource) { data ->
-            result.removeSource(testSource)
-
-            val needsFetchByTime = getLayer.needsFetchByTime(makeUrlId(fullUrl))
-            result.addSource(needsFetchByTime) { currentCacheState ->
-                currentCacheState?.run {
-                    result.removeSource(needsFetchByTime)
-
-                    cacheState = this@run
-                    val needsFetch = cacheState == CacheState.NEEDS_SOFT_REFRESH ||
-                            this@run == CacheState.NEEDS_HARD_REFRESH || this@run == CacheState.NO_CACHE
-
-                    if ((data == null || needsFetch) && allowFetch) {
-                        if (fetchSecurityLayer.allowFetch()) {
-                            fetchFromNetwork()
-                        } else {
-                            establishConnection()
-                        }
-                    } else {
-                        fetchSecurityLayer.onFetchFinished()
-                        establishConnection()
-                    }
-                }
+        return if ((cacheData == null || needsFetch) && allowFetch) {
+            if (fetchSecurityLayer.allowFetch()) {
+                ExecutionType.DOWNLOAD_DATA
+            } else {
+                ExecutionType.USE_CACHE
             }
-        }
-
-        return result
-    }
-
-    @MainThread
-    private fun fetchFromNetwork() {
-        val networkResponse = controller.get(headerMap, prepareUrl(url), queryMap)
-        if (showProgress) progressController?.internalShow(url, progressData)
-
-        if (requiresLogin) {
-            checkLogin(networkResponse)
         } else {
-            executeCall(networkResponse)
+            ExecutionType.USE_CACHE
         }
     }
 
-    private fun checkLogin(networkResponse: LiveData<NetworkResponse<String>>) {
-        loginManager?.let {
-            result.addSource(it.isCurrentLoginValid()) { isLoginValid ->
-                isLoginValid?.run {
-                    if (this@run) {
-                        executeCall(networkResponse)
-                    } else {
-                        appExecutor.mainThread.execute {
-                            it.onLoginInvalid(context)
-                        }
-                    }
-                }
-            }
-        }
-                ?: throw IllegalStateException("Checking the login requires a LoginManager. " +
-                        "Use the setter of the Repolizer class to set your custom " +
-                        "implementation.")
+    override fun onExecute(executionType: ExecutionType): Entity? {
+
     }
 
-    private fun executeCall(apiResponse: LiveData<NetworkResponse<String>>) {
+    override fun onFinished() {
+        super.onFinished()
+        fetchSecurityLayer.onFetchFinished()
+    }
+
+    private fun onExecuteCall() {
         result.addSource(apiResponse) { response ->
             response?.run {
                 result.removeSource(apiResponse)
@@ -147,16 +98,16 @@ class NetworkGetFuture<Entity> constructor(repolizer: Repolizer, futureBuilder: 
                         }
 
                         objectResponse?.body?.let {
-                            responseService?.handleSuccess(requestType,this@run)
+                            responseService?.handleSuccess(requestType, this@run)
                             getLayer.updateDB(it)
                             getLayer.updateFetchTime(makeUrlId(fullUrl))
                             establishConnection()
                         } ?: run {
-                            responseService?.handleGesonError(requestType,this)
+                            responseService?.handleGesonError(requestType, this)
                             handleCacheIfTooOld()
                         }
                     } else {
-                        responseService?.handleRequestError(requestType,this@run)
+                        responseService?.handleRequestError(requestType, this@run)
                         handleCacheIfTooOld()
                     }
 

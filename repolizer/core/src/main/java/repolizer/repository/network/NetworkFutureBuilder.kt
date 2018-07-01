@@ -2,10 +2,11 @@ package repolizer.repository.network
 
 import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
+import repolizer.repository.persistent.PersistentFutureBuilder
 import repolizer.repository.progress.ProgressData
 import repolizer.repository.request.RequestType
 
-class NetworkFutureBuilder<Entity> {
+open class NetworkFutureBuilder<Entity>: PersistentFutureBuilder() {
 
     var requestType: RequestType? = null
 

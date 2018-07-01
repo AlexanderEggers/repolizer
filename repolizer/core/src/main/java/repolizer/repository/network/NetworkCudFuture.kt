@@ -36,7 +36,7 @@ class NetworkCudFuture<Entity> constructor(repolizer: Repolizer, futureBuilder: 
 
     private val requestType: RequestType = futureBuilder.requestType
             ?: throw IllegalStateException("Internal error: Request type is null.")
-    private val progressData: ProgressData = futureBuilder.progressData ?: object: ProgressData() {}
+    private val progressData: ProgressData = futureBuilder.progressData ?: ProgressData()
 
     private val headerMap: Map<String, String> = futureBuilder.headerMap
     private val queryMap: Map<String, String> = futureBuilder.queryMap

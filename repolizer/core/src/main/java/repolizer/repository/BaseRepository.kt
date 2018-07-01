@@ -29,7 +29,7 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
     }
 
     protected fun executeDB(builder: PersistentFutureBuilder): LiveData<Boolean> {
-        return builder.build()
+        return builder.buildCache()
                 .execute()
     }
 
