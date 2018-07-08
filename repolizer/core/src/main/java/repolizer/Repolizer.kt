@@ -5,6 +5,7 @@ import repolizer.adapter.ImageAdapter
 import repolizer.adapter.NetworkAdapter
 import repolizer.adapter.StorageAdapter
 import repolizer.adapter.WrapperAdapter
+import repolizer.adapter.factory.AdapterFactory
 import repolizer.repository.login.LoginManager
 import repolizer.repository.progress.ProgressController
 import repolizer.repository.provider.GlobalRepositoryProvider
@@ -22,11 +23,16 @@ class Repolizer private constructor(builder: Builder) {
     val loginManager: LoginManager? = builder.loginManager
     val responseService: ResponseService? = builder.responseService
 
+    val wrapperAdapters: ArrayList<AdapterFactory<WrapperAdapter<*>>> = builder.wrapperAdapters
+    val imageAdapters: ArrayList<AdapterFactory<ImageAdapter<*>>> = builder.imageAdapters
+    val networkAdapters: ArrayList<AdapterFactory<NetworkAdapter>> = builder.networkAdapters
+    val storageAdapters: ArrayList<AdapterFactory<StorageAdapter<*>>> = builder.storageAdapters
+
     @Suppress("UNCHECKED_CAST")
-    fun <T> getRepository(repositoryClass: Class<*>): T {
+    fun <T> getRepository(repositoryClass: Class<T>): T {
         return GlobalRepositoryProvider.getRepository(this, repositoryClass) as? T
                 ?: throw IllegalStateException("Internal error: Repository is null. Make sure " +
-                        "that you used the correct class for the function Repolizer.create(Class<*>).")
+                        "that you used the correct class for the function Repolizer.getRepository(...).")
     }
 
     companion object {
@@ -38,15 +44,10 @@ class Repolizer private constructor(builder: Builder) {
     }
 
     class Builder {
-        var wrapperAdapters: ArrayList<WrapperAdapter<*>> = ArrayList()
-            private set
-
-        var imageAdapter: ImageAdapter<*>? = null
-            private set
-        var networkAdapter: NetworkAdapter? = null
-            private set
-        var storageAdapter: StorageAdapter<*>? = null
-            private set
+        val wrapperAdapters: ArrayList<AdapterFactory<WrapperAdapter<*>>> = ArrayList() //TODO Add default wrapper for Future
+        val imageAdapters: ArrayList<AdapterFactory<ImageAdapter<*>>> = ArrayList()
+        val networkAdapters: ArrayList<AdapterFactory<NetworkAdapter>> = ArrayList()
+        val storageAdapters: ArrayList<AdapterFactory<StorageAdapter<*>>> = ArrayList()
 
         var requestProvider: RequestProvider? = null
             private set
@@ -63,23 +64,23 @@ class Repolizer private constructor(builder: Builder) {
         var responseService: ResponseService? = null
             private set
 
-        fun addWrapperAdapter(wrapperAdapter: WrapperAdapter<*>): Builder {
+        fun addWrapperAdapter(wrapperAdapter: AdapterFactory<WrapperAdapter<*>>): Builder {
             wrapperAdapters.add(wrapperAdapter)
             return this@Builder
         }
 
-        fun setImageAdapter(imageAdapter: ImageAdapter<*>): Builder {
-            this@Builder.imageAdapter = imageAdapter
+        fun addImageAdapter(imageAdapter: AdapterFactory<ImageAdapter<*>>): Builder {
+            imageAdapters.add(imageAdapter)
             return this@Builder
         }
 
-        fun setNetworkAdapter(networkAdapter: NetworkAdapter): Builder {
-            this@Builder.networkAdapter = networkAdapter
+        fun addNetworkAdapter(networkAdapter: AdapterFactory<NetworkAdapter>): Builder {
+            networkAdapters.add(networkAdapter)
             return this@Builder
         }
 
-        fun setPersistentAdapter(storageAdapter: StorageAdapter<*>): Builder {
-            this@Builder.storageAdapter = storageAdapter
+        fun addPersistentAdapter(storageAdapter: AdapterFactory<StorageAdapter<*>>): Builder {
+            storageAdapters.add(storageAdapter)
             return this@Builder
         }
 

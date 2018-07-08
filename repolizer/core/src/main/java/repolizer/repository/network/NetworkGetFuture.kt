@@ -47,10 +47,6 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder<Entity>): 
     private lateinit var fetchSecurityLayer: FetchSecurityLayer
     private lateinit var cacheState: CacheState
 
-    init {
-        progressData.requestType = requestType
-    }
-
     override fun onDetermineExecutionType(): ExecutionType {
         val cacheData: Entity? = loadCache() //TODO
         val cacheState = CacheState.NO_CACHE //TODO

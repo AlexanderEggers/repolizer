@@ -18,7 +18,7 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
                 .execute(this)
     }
 
-    protected fun <T> executeGet(futureBuilder: NetworkFutureBuilder<T>, allowFetch: Boolean): LiveData<T> {
+    protected fun <T> executeGet(futureBuilder: NetworkFutureBuilder<T>, allowFetch: Boolean): T {
         return futureBuilder.buildGet(repolizer)
                 .execute(this, allowFetch)
     }

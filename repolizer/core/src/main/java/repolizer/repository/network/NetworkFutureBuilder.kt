@@ -12,7 +12,7 @@ open class NetworkFutureBuilder<Entity>: PersistentFutureBuilder() {
 
     var url: String = ""
 
-    var raw: Entity? = null
+    var raw: Any? = null
         set(value) {
             if (field != null) {
                 throw IllegalStateException("Only ONE raw body can be set. Make sure that you don't " +
