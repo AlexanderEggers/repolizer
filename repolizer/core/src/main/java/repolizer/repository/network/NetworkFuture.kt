@@ -1,23 +1,34 @@
 package repolizer.repository.network
 
 import repolizer.Repolizer
+import repolizer.repository.future.Future
 import repolizer.repository.login.LoginManager
 import repolizer.repository.progress.ProgressController
 import repolizer.repository.progress.ProgressData
 import repolizer.repository.request.RequestType
-import repolizer.repository.util.AppExecutor
 
 abstract class NetworkFuture<B>
-constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder<B>) {
+constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder<B>): Future<B>() {
 
     val requestType: RequestType = futureBuilder.requestType
             ?: throw IllegalStateException("Request type is null.")
 
+    val headerMap: Map<String, String> = futureBuilder.headerMap
+    val queryMap: Map<String, String> = futureBuilder.queryMap
+
+    val fullUrl: String by lazy {
+        repolizer.baseUrl?.let { baseUrl ->
+            if (baseUrl.substring(baseUrl.length) != "/") {
+                "$baseUrl/${futureBuilder.url}"
+            } else {
+                "$baseUrl${futureBuilder.url}"
+            }
+        } ?: futureBuilder.url
+    }
+
     protected val progressController: ProgressController? = repolizer.progressController
     protected val loginManager: LoginManager? = repolizer.loginManager
-    protected val appExecutor: AppExecutor = AppExecutor
 
-    protected val url: String = futureBuilder.url
     protected val requiresLogin: Boolean = futureBuilder.requiresLogin
     protected val showProgress: Boolean = futureBuilder.showProgress
 
@@ -33,7 +44,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder<B>) {
         val executionType = onDetermineExecutionType()
         val newBody =  when (executionType) {
             ExecutionType.DOWNLOAD_DATA -> {
-                if (showProgress) progressController?.internalShow(url, progressData)
+                if (showProgress) progressController?.internalShow(fullUrl, progressData)
 
                 if (requiresLogin) {
                     val checkSuccessful = checkLogin()
@@ -50,31 +61,13 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder<B>) {
         return newBody
     }
 
-    protected abstract fun onExecute(executionType: ExecutionType): B?
-
-    protected abstract fun onDetermineExecutionType(): ExecutionType
-
-    protected open fun onCreate() {
-
-    }
-
-    protected open fun onStart() {
-
-    }
-
-    protected open fun onFinished() {
-
-    }
-
     private fun checkLogin(): Boolean {
         loginManager?.let {
             val isLoginValid = it.isCurrentLoginValid()
             return if (isLoginValid) {
                 true
             } else {
-                appExecutor.mainThread.execute {
-                    it.onLoginInvalid()
-                }
+                it.onLoginInvalid()
                 false
             }
         }

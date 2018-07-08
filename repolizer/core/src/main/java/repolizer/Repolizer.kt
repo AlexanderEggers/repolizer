@@ -14,8 +14,7 @@ import repolizer.repository.response.ResponseService
 
 class Repolizer private constructor(builder: Builder) {
 
-    val baseUrl: String = builder.baseUrl
-            ?: throw IllegalStateException("Internal error: Base url required.")
+    val baseUrl: String? = builder.baseUrl
     val gson: Gson = builder.gson
 
     val requestProvider: RequestProvider? = builder.requestProvider
@@ -23,7 +22,7 @@ class Repolizer private constructor(builder: Builder) {
     val loginManager: LoginManager? = builder.loginManager
     val responseService: ResponseService? = builder.responseService
 
-    val wrapperAdapters: ArrayList<AdapterFactory<WrapperAdapter<*>>> = builder.wrapperAdapters
+    val wrapperAdapters: ArrayList<AdapterFactory<WrapperAdapter<*, *>>> = builder.wrapperAdapters
     val imageAdapters: ArrayList<AdapterFactory<ImageAdapter<*>>> = builder.imageAdapters
     val networkAdapters: ArrayList<AdapterFactory<NetworkAdapter>> = builder.networkAdapters
     val storageAdapters: ArrayList<AdapterFactory<StorageAdapter<*>>> = builder.storageAdapters
@@ -44,7 +43,7 @@ class Repolizer private constructor(builder: Builder) {
     }
 
     class Builder {
-        val wrapperAdapters: ArrayList<AdapterFactory<WrapperAdapter<*>>> = ArrayList() //TODO Add default wrapper for Future
+        val wrapperAdapters: ArrayList<AdapterFactory<WrapperAdapter<*, *>>> = ArrayList() //TODO Add default wrapper for Future
         val imageAdapters: ArrayList<AdapterFactory<ImageAdapter<*>>> = ArrayList()
         val networkAdapters: ArrayList<AdapterFactory<NetworkAdapter>> = ArrayList()
         val storageAdapters: ArrayList<AdapterFactory<StorageAdapter<*>>> = ArrayList()
@@ -64,7 +63,7 @@ class Repolizer private constructor(builder: Builder) {
         var responseService: ResponseService? = null
             private set
 
-        fun addWrapperAdapter(wrapperAdapter: AdapterFactory<WrapperAdapter<*>>): Builder {
+        fun addWrapperAdapter(wrapperAdapter: AdapterFactory<WrapperAdapter<*, *>>): Builder {
             wrapperAdapters.add(wrapperAdapter)
             return this@Builder
         }

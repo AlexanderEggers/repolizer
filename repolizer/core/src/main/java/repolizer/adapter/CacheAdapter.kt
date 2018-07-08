@@ -1,12 +1,13 @@
 package repolizer.adapter
 
+import repolizer.persistent.CacheItem
 import repolizer.persistent.CacheState
-import repolizer.repository.network.NetworkGetFuture
-import repolizer.repository.persistent.PersistentCacheFuture
 
 interface CacheAdapter {
 
-    fun execute(cacheFuture: PersistentCacheFuture)
+    fun save(repositoryClass: Class<*>, url: String, vararg data: Array<CacheItem>)
 
-    fun get(networkFuture: NetworkGetFuture<*>): CacheState
+    fun get(repositoryClass: Class<*>, url: String): CacheState
+
+    fun delete(repositoryClass: Class<*>, url: String)
 }

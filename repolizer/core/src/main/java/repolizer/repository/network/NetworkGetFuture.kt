@@ -22,25 +22,14 @@ import repolizer.repository.util.Utils.Companion.makeUrlId
 import repolizer.repository.util.Utils.Companion.prepareUrl
 import retrofit2.Call
 
-class NetworkGetFuture<Entity>
-constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder<Entity>): NetworkFuture<Entity>(repolizer, futureBuilder) {
+class NetworkGetFuture<E>
+constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder<E>): NetworkFuture<E>(repolizer, futureBuilder) {
 
-    val headerMap: Map<String, String> = futureBuilder.headerMap
-    val queryMap: Map<String, String> = futureBuilder.queryMap
-    val fullUrl: String = if (repolizer.baseUrl.substring(repolizer.baseUrl.length) != "/") {
-        "${repolizer.baseUrl}/${futureBuilder.url}"
-    } else {
-        "${repolizer.baseUrl}${futureBuilder.url}"
-    }
-
-    private val gson: Gson = repolizer.gson
     private val responseService: ResponseService? = repolizer.responseService
-    private val getLayer: NetworkGetLayer<Entity> = futureBuilder.networkLayer as? NetworkGetLayer<Entity>
-            ?: throw IllegalStateException("Internal error: Network layer is null.")
-
     private val deleteIfCacheIsTooOld: Boolean = futureBuilder.isDeletingCacheIfTooOld
     private var allowFetch: Boolean = false
 
+    private val gson: Gson = repolizer.gson
     private val bodyType: TypeToken<*> = futureBuilder.typeToken
             ?: throw IllegalStateException("Internal error: Body type is null.")
 
@@ -48,7 +37,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder<Entity>): 
     private lateinit var cacheState: CacheState
 
     override fun onDetermineExecutionType(): ExecutionType {
-        val cacheData: Entity? = loadCache() //TODO
+        val cacheData: E? = loadCache() //TODO
         val cacheState = CacheState.NO_CACHE //TODO
         val needsFetch = cacheState == CacheState.NEEDS_SOFT_REFRESH ||
                 cacheState == CacheState.NEEDS_HARD_REFRESH || cacheState == CacheState.NO_CACHE
@@ -64,7 +53,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder<Entity>): 
         }
     }
 
-    override fun onExecute(executionType: ExecutionType): Entity? {
+    override fun onExecute(executionType: ExecutionType): E? {
 
     }
 
@@ -85,7 +74,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder<Entity>): 
                         var objectResponse: NetworkResponse<Entity>? = null
 
                         try {
-                            gson.fromJson<Entity>(body, bodyType.type)?.let {
+                            gson.fromJson<E>(body, bodyType.type)?.let {
                                 objectResponse = withBody(it)
                             }
                         } catch (e: Exception) {
@@ -129,7 +118,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder<Entity>): 
     }
 
     @MainThread
-    private fun loadCache(): LiveData<Entity> {
+    private fun loadCache(): LiveData<E> {
         return getLayer.getData()
     }
 }
