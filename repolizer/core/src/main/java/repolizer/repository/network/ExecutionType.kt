@@ -1,6 +1,6 @@
 package repolizer.repository.network
 
 enum class ExecutionType {
-    DOWNLOAD_DATA,
+    USE_NETWORK,
     USE_CACHE
 }
