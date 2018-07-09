@@ -1,9 +1,7 @@
 package repolizer.repository.request
 
-import retrofit2.Call
-
-interface RequestProvider {
-    fun addRequest(url: String, call: Call<String>)
-    fun removeRequest(url: String, call: Call<String>)
+interface RequestProvider<C> {
+    fun addRequest(url: String, call: C)
+    fun removeRequest(url: String, call: C)
     fun cancelAllRequests()
 }

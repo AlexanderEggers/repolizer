@@ -5,7 +5,7 @@ import repolizer.persistent.CacheState
 
 interface CacheAdapter {
 
-    fun save(repositoryClass: Class<*>, url: String, vararg data: Array<CacheItem>)
+    fun save(repositoryClass: Class<*>, data: CacheItem)
 
     fun get(repositoryClass: Class<*>, url: String): CacheState
 

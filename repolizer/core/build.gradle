@@ -51,17 +51,10 @@ tasks.withType(Javadoc).all {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "com.google.code.gson:gson:$gson_version"
 
     api project(":repolizer-annotation")
     //api "org.repolizer:repolizer-annotation:$repolizer_library_version"
-
-    api "android.arch.persistence.room:runtime:$room_version"
-    api "android.arch.lifecycle:livedata:$livedata_version"
-
-    api "com.squareup.okhttp3:okhttp:$okhttp_version"
-    api "com.squareup.retrofit2:retrofit:$retrofit2_version"
-    api "com.squareup.retrofit2:converter-scalars:$retrofit2_version"
-    api "com.google.code.gson:gson:$gson_version"
 }
 
 apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'

@@ -1,10 +1,15 @@
 package repolizer.repository.future
 
+import repolizer.adapter.WrapperAdapter
 import repolizer.repository.network.ExecutionType
 
-abstract class Future<B> {
+abstract class Future<Body> {
 
-    protected abstract fun onExecute(executionType: ExecutionType): B?
+    abstract fun <Wrapper> create(): WrapperAdapter<Body, Wrapper>
+
+    abstract fun execute(): Body?
+
+    protected abstract fun onExecute(executionType: ExecutionType): Body?
 
     protected abstract fun onDetermineExecutionType(): ExecutionType
 
