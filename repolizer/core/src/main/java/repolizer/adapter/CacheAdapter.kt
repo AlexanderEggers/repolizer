@@ -7,7 +7,7 @@ interface CacheAdapter {
 
     fun save(repositoryClass: Class<*>, data: CacheItem)
 
-    fun get(repositoryClass: Class<*>, url: String): CacheState
+    fun get(repositoryClass: Class<*>, url: String, freshTime: Long, maxTime: Long): CacheState
 
     fun delete(repositoryClass: Class<*>, url: String)
 }
