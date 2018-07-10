@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 0.3.1 *(2018-07-10)*
+----------------------------
+- **NEW:** Added support for network queries that include non-unique queries ids, like https://myurl.com/myapi?id=1&id=2
+- **BUGFIX:** Fixed annotation processor bug for the NetworkGetMethod that was wrongly initialising the CacheItem when the method url is empty.
+
+
 Version 0.3.0 *(2018-06-12)*
 ----------------------------
 
