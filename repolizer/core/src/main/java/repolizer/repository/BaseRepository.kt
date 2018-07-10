@@ -1,36 +1,29 @@
 package repolizer.repository
 
-import android.arch.lifecycle.LiveData
-import android.content.Context
 import repolizer.Repolizer
-import repolizer.repository.persistent.PersistentFutureBuilder
-import repolizer.repository.network.NetworkFutureBuilder
 import repolizer.repository.network.FetchSecurityLayer
-import java.io.Serializable
+import repolizer.repository.network.NetworkFutureBuilder
+import repolizer.repository.persistent.PersistentFutureBuilder
 import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class BaseRepository constructor(private val repolizer: Repolizer) : FetchSecurityLayer {
 
     private val fetchingData = AtomicBoolean(false)
 
-    protected fun executeRefresh(futureBuilder: NetworkFutureBuilder<*>): LiveData<Boolean> {
-        return futureBuilder.buildRefresh(repolizer)
-                .execute(this)
+    protected fun <T> executeRefresh(futureBuilder: NetworkFutureBuilder): T {
+        return futureBuilder.buildRefresh(repolizer).create()
     }
 
-    protected fun <T> executeGet(futureBuilder: NetworkFutureBuilder<T>, allowFetch: Boolean): T {
-        return futureBuilder.buildGet(repolizer)
-                .execute(this, allowFetch)
+    protected fun <T> executeGet(futureBuilder: NetworkFutureBuilder): T {
+        return futureBuilder.buildGet(repolizer, String::class).create()
     }
 
-    protected fun executeCud(futureBuilder: NetworkFutureBuilder<Serializable>): LiveData<String> {
-        return futureBuilder.buildCud(repolizer)
-                .execute()
+    protected fun <T> executeCud(futureBuilder: NetworkFutureBuilder): T {
+        return futureBuilder.buildCud(repolizer).create()
     }
 
-    protected fun executeDB(builder: PersistentFutureBuilder): LiveData<Boolean> {
-        return builder.buildCache()
-                .execute()
+    protected fun <T> executeDB(builder: PersistentFutureBuilder): T {
+        return builder.buildCache(repolizer).create()
     }
 
     override fun allowFetch(): Boolean {
@@ -39,9 +32,5 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
 
     override fun onFetchFinished() {
         fetchingData.set(false)
-    }
-
-    fun getAppContext(): Context {
-        return repolizer.appContext
     }
 }

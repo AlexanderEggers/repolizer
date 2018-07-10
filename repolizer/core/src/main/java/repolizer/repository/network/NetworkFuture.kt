@@ -5,16 +5,17 @@ import repolizer.Repolizer
 import repolizer.adapter.CacheAdapter
 import repolizer.adapter.NetworkAdapter
 import repolizer.adapter.StorageAdapter
-import repolizer.adapter.WrapperAdapter
 import repolizer.repository.future.Future
 import repolizer.repository.login.LoginManager
 import repolizer.repository.progress.ProgressController
 import repolizer.repository.progress.ProgressData
 import repolizer.repository.request.RequestType
 import repolizer.adapter.util.AdapterUtil
+import repolizer.repository.request.RequestProvider
+import repolizer.repository.response.ResponseService
 
 abstract class NetworkFuture<Body>
-constructor(private val repolizer: Repolizer, futureBuilder: NetworkFutureBuilder<Body>): Future<Body>() {
+constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuilder): Future<Body>() {
 
     val requestType: RequestType = futureBuilder.requestType
             ?: throw IllegalStateException("Request type is null.")
@@ -32,18 +33,23 @@ constructor(private val repolizer: Repolizer, futureBuilder: NetworkFutureBuilde
         } ?: futureBuilder.url
     }
 
-    private val bodyType: TypeToken<*> = futureBuilder.typeToken
-            ?: throw IllegalStateException("Internal error: Body type is null.")
+    protected val repositoryClass: Class<*> = futureBuilder.repositoryClass
+            ?: throw IllegalStateException("Repository class type is null.")
+
+    protected val bodyType: TypeToken<*> = futureBuilder.typeToken
+            ?: throw IllegalStateException("Body type is null.")
 
     protected val networkAdapter: NetworkAdapter = AdapterUtil.getAdapter(repolizer.networkAdapters,
-            bodyType.type, String::class.java, repolizer) as NetworkAdapter
+            bodyType.type, repositoryClass, repolizer) as NetworkAdapter
     protected val storageAdapter: StorageAdapter<Body> = AdapterUtil.getAdapter(repolizer.storageAdapters,
-                    bodyType.type, String::class.java, repolizer) as StorageAdapter<Body>
+                    bodyType.type, repositoryClass, repolizer) as StorageAdapter<Body>
     protected val cacheAdapter: CacheAdapter = AdapterUtil.getAdapter(repolizer.cacheAdapters,
-            bodyType.type, String::class.java, repolizer) as CacheAdapter
+            bodyType.type, repositoryClass, repolizer) as CacheAdapter
 
     protected val progressController: ProgressController? = repolizer.progressController
     protected val loginManager: LoginManager? = repolizer.loginManager
+    protected val responseService: ResponseService? = repolizer.responseService
+    protected val requestProvider: RequestProvider<*>? = repolizer.requestProvider
 
     protected val requiresLogin: Boolean = futureBuilder.requiresLogin
     protected val showProgress: Boolean = futureBuilder.showProgress
@@ -52,18 +58,6 @@ constructor(private val repolizer: Repolizer, futureBuilder: NetworkFutureBuilde
         val lazyProgressData = futureBuilder.progressData ?: ProgressData()
         lazyProgressData.requestType = requestType
         lazyProgressData
-    }
-
-    override fun <Wrapper> create(): Wrapper {
-        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, bodyType.type,
-                String::class.java, repolizer) as WrapperAdapter<Wrapper>
-
-        return if(wrapperAdapter.canHaveStorageConnection() && storageAdapter.canHaveActiveConnection()) {
-            storageAdapter.establishConnection(String::class.java, fullUrl)
-                    ?: throw IllegalStateException("If you want to use an active storage connection, " +
-                            "you need to implement the establishConnection() function inside your " +
-                            "StorageAdapter.")
-        } else wrapperAdapter.execute(this)
     }
 
     override fun execute(): Body? {
@@ -82,7 +76,7 @@ constructor(private val repolizer: Repolizer, futureBuilder: NetworkFutureBuilde
                     onExecute(executionType)
                 }
             }
-            ExecutionType.USE_CACHE -> onExecute(executionType)
+            ExecutionType.USE_STORAGE -> onExecute(executionType)
         }
 
         onFinished()
@@ -102,5 +96,10 @@ constructor(private val repolizer: Repolizer, futureBuilder: NetworkFutureBuilde
                 ?: throw IllegalStateException("Checking the login requires a LoginManager. " +
                         "Use the setter of the Repolizer class to set your custom " +
                         "implementation.")
+    }
+
+    override fun onFinished() {
+        super.onFinished()
+        progressController?.internalClose(fullUrl)
     }
 }

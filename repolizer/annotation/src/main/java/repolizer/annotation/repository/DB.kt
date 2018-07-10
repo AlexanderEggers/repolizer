@@ -7,5 +7,4 @@ import repolizer.annotation.repository.util.OnConflictStrategy
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class DB(val databaseOperation: DatabaseOperation,
-                    val sql: String = "",
-                    val onConflictStrategy: OnConflictStrategy = OnConflictStrategy.REPLACE)
+                    val sql: String = "")

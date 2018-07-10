@@ -1,12 +1,12 @@
 package repolizer.adapter
 
-import repolizer.repository.network.NetworkFuture
+import repolizer.repository.future.Future
 
 abstract class WrapperAdapter<W> {
 
-    abstract fun <B> execute(future: NetworkFuture<B>): W
+    abstract fun <B> execute(future: Future<B>): W
 
-    fun canHaveStorageConnection(): Boolean {
+    open fun canHaveStorageConnection(): Boolean {
         return false
     }
 }

@@ -1,11 +1,10 @@
 package repolizer.repository.future
 
-import repolizer.adapter.WrapperAdapter
 import repolizer.repository.network.ExecutionType
 
 abstract class Future<Body> {
 
-    abstract fun <Wrapper> create(): WrapperAdapter<Body, Wrapper>
+    abstract fun <Wrapper> create(): Wrapper
 
     abstract fun execute(): Body?
 

@@ -1,23 +1,31 @@
 package repolizer.repository.persistent
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
-import repolizer.repository.util.AppExecutor
+import repolizer.Repolizer
+import repolizer.adapter.WrapperAdapter
+import repolizer.adapter.util.AdapterUtil
+import repolizer.annotation.repository.util.CacheOperation
+import repolizer.persistent.CacheItem
+import repolizer.repository.network.ExecutionType
 
 class PersistentCacheFuture
-constructor(builder: PersistentFutureBuilder) {
+constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder): PersistentFuture<Boolean>(repolizer, futureBuilder) {
 
-    private val result = MutableLiveData<Boolean>()
+    private val cacheOperation: CacheOperation = futureBuilder.cacheOperation
+            ?: throw IllegalStateException("CacheOperation is null.")
+    private val cacheItem: CacheItem = futureBuilder.cacheItem
+            ?: throw IllegalStateException("CacheItem is null.")
 
-    private val appExecutor: AppExecutor = AppExecutor
-    private val persistentLayer: PersistentLayer = builder.persistentLayer
-            ?: throw IllegalStateException("Internal error: Layer is null.")
+    override fun <Wrapper> create(): Wrapper {
+        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, bodyType.type,
+                repositoryClass, repolizer) as WrapperAdapter<Wrapper>
+        return wrapperAdapter.execute(this)
+    }
 
-    private fun execute(): LiveData<Boolean> {
-        appExecutor.workerThread.execute {
-            persistentLayer.updateDB()
-            result.postValue(true)
+    override fun onExecute(executionType: ExecutionType): Boolean? {
+        when(cacheOperation) {
+            CacheOperation.INSERT -> cacheAdapter.save(repositoryClass, cacheItem)
+            CacheOperation.DELETE -> cacheAdapter.delete(repositoryClass, fullUrl)
         }
-        return result
+        return true
     }
 }

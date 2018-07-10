@@ -2,15 +2,13 @@ package repolizer.repository.network
 
 import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
-import repolizer.repository.persistent.PersistentFutureBuilder
+import repolizer.repository.future.FutureBuilder
 import repolizer.repository.progress.ProgressData
 import repolizer.repository.request.RequestType
 
-open class NetworkFutureBuilder<Entity>: PersistentFutureBuilder() {
+open class NetworkFutureBuilder : FutureBuilder() {
 
     var requestType: RequestType? = null
-
-    var url: String = ""
 
     var raw: Any? = null
         set(value) {
@@ -30,32 +28,35 @@ open class NetworkFutureBuilder<Entity>: PersistentFutureBuilder() {
 
     var typeToken: TypeToken<*>? = null
 
+    var freshCacheTime: Long = Long.MAX_VALUE
+    var maxCacheTime: Long = Long.MAX_VALUE
+
+    var fetchSecurityLayer: FetchSecurityLayer? = null
+    var allowFetch: Boolean = false
     var requiresLogin: Boolean = false
     var showProgress: Boolean = false
     var isDeletingCacheIfTooOld: Boolean = false
 
-    var networkLayer: NetworkLayer<Entity>? = null
-
     val headerMap: HashMap<String, String> = HashMap()
     val queryMap: HashMap<String, String> = HashMap()
 
-    fun addHeader(key: String, value: String) {
+    open fun addHeader(key: String, value: String) {
         headerMap[key] = value
     }
 
-    fun addQuery(key: String, value: String) {
+    open fun addQuery(key: String, value: String) {
         queryMap[key] = value
     }
 
-    fun buildGet(repolizer: Repolizer): NetworkGetFuture<Entity> {
+    open fun <Body> buildGet(repolizer: Repolizer, returnType: Body): NetworkGetFuture<Body> {
         return NetworkGetFuture(repolizer, this)
     }
 
-    fun buildRefresh(repolizer: Repolizer): NetworkRefreshFuture<Entity> {
+    open fun buildRefresh(repolizer: Repolizer): NetworkRefreshFuture {
         return NetworkRefreshFuture(repolizer, this)
     }
 
-    fun buildCud(repolizer: Repolizer): NetworkCudFuture<Entity> {
+    open fun buildCud(repolizer: Repolizer): NetworkCudFuture {
         return NetworkCudFuture(repolizer, this)
     }
 }

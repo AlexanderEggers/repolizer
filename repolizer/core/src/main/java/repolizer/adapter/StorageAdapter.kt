@@ -2,17 +2,19 @@ package repolizer.adapter
 
 abstract class StorageAdapter<T> {
 
-    abstract fun save(repositoryClass: Class<*>, url: String, data: String)
+    abstract fun insert(repositoryClass: Class<*>, url: String, data: Any, clazz: Class<*>): Boolean
 
-    abstract fun get(repositoryClass: Class<*>, url: String): T
+    abstract fun update(repositoryClass: Class<*>, url: String, sql: String, data: Any, clazz: Class<*>)
 
-    abstract fun delete(repositoryClass: Class<*>, url: String, deleteAll: Boolean)
+    abstract fun get(repositoryClass: Class<*>, url: String, sql: String): T
 
-    fun canHaveActiveConnection(): Boolean {
+    abstract fun delete(repositoryClass: Class<*>, url: String, sql: String)
+
+    open fun canHaveActiveConnection(): Boolean {
         return false
     }
 
-    fun <Wrapper> establishConnection(repositoryClass: Class<*>, url: String): Wrapper? {
+    open fun <Wrapper> establishConnection(repositoryClass: Class<*>, url: String): Wrapper? {
         //Do nothing by default
         return null
     }

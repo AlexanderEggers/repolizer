@@ -2,6 +2,7 @@ package repolizer
 
 import repolizer.adapter.*
 import repolizer.adapter.factory.AdapterFactory
+import repolizer.adapter.future.FutureWrapperAdapterFactory
 import repolizer.repository.login.LoginManager
 import repolizer.repository.progress.ProgressController
 import repolizer.repository.provider.GlobalRepositoryProvider
@@ -17,7 +18,7 @@ class Repolizer private constructor(builder: Builder) {
     val loginManager: LoginManager? = builder.loginManager
     val responseService: ResponseService? = builder.responseService
 
-    val wrapperAdapters: ArrayList<AdapterFactory<WrapperAdapter<*, *>>> = builder.wrapperAdapters
+    val wrapperAdapters: ArrayList<AdapterFactory<WrapperAdapter<*>>> = builder.wrapperAdapters
     val networkAdapters: ArrayList<AdapterFactory<NetworkAdapter>> = builder.networkAdapters
     val storageAdapters: ArrayList<AdapterFactory<StorageAdapter<*>>> = builder.storageAdapters
     val cacheAdapters: ArrayList<AdapterFactory<CacheAdapter>> = builder.cacheAdapters
@@ -38,7 +39,11 @@ class Repolizer private constructor(builder: Builder) {
     }
 
     class Builder {
-        val wrapperAdapters: ArrayList<AdapterFactory<WrapperAdapter<*, *>>> = ArrayList() //TODO Add default wrapper for Future
+        val wrapperAdapters: ArrayList<AdapterFactory<WrapperAdapter<*>>> by lazy {
+            ArrayList<AdapterFactory<WrapperAdapter<*>>>().apply {
+                add(FutureWrapperAdapterFactory())
+            }
+        } //TODO Add default wrapper for Future
         val networkAdapters: ArrayList<AdapterFactory<NetworkAdapter>> = ArrayList()
         val storageAdapters: ArrayList<AdapterFactory<StorageAdapter<*>>> = ArrayList()
         val cacheAdapters: ArrayList<AdapterFactory<CacheAdapter>> = ArrayList()
@@ -56,7 +61,7 @@ class Repolizer private constructor(builder: Builder) {
         var responseService: ResponseService? = null
             private set
 
-        fun addWrapperAdapter(wrapperAdapter: AdapterFactory<WrapperAdapter<*, *>>): Builder {
+        fun addWrapperAdapter(wrapperAdapter: AdapterFactory<WrapperAdapter<*>>): Builder {
             wrapperAdapters.add(wrapperAdapter)
             return this@Builder
         }
