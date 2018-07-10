@@ -49,7 +49,7 @@ class NetworkRefreshResource<Entity> constructor(repolizer: Repolizer, builder: 
             ?: throw IllegalStateException("Internal error: Body type is null.")
 
     private val headerMap: Map<String, String> = builder.headerMap
-    private val queryMap: Map<String, String> = builder.queryMap
+    private val queryMap: QueryHashMap = builder.queryMap
 
     private lateinit var fetchSecurityLayer: FetchSecurityLayer
 
@@ -82,7 +82,7 @@ class NetworkRefreshResource<Entity> constructor(repolizer: Repolizer, builder: 
 
     private fun checkLogin(networkResponse: LiveData<NetworkResponse<String>>) {
         loginManager?.let {
-            result.addSource(it.isCurrentLoginValid(), { isLoginValid ->
+            result.addSource(it.isCurrentLoginValid()) { isLoginValid ->
                 isLoginValid?.run {
                     if (this@run) {
                         executeCall(networkResponse)
@@ -92,7 +92,7 @@ class NetworkRefreshResource<Entity> constructor(repolizer: Repolizer, builder: 
                         }
                     }
                 }
-            })
+            }
         }
                 ?: throw IllegalStateException("Checking the login requires a LoginManager. " +
                         "Use the setter of the Repolizer class to set your custom " +

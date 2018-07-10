@@ -18,6 +18,7 @@ import repolizer.repository.response.ResponseService
 import repolizer.repository.util.AppExecutor
 import repolizer.repository.login.LoginManager
 import repolizer.repository.request.RequestType
+import repolizer.repository.util.QueryHashMap
 import repolizer.repository.util.Utils.Companion.makeUrlId
 import repolizer.repository.util.Utils.Companion.prepareUrl
 
@@ -52,7 +53,7 @@ class NetworkGetResource<Entity> constructor(repolizer: Repolizer, builder: Netw
             ?: throw IllegalStateException("Internal error: Body type is null.")
 
     private val headerMap: Map<String, String> = builder.headerMap
-    private val queryMap: Map<String, String> = builder.queryMap
+    private val queryMap: QueryHashMap = builder.queryMap
 
     private lateinit var fetchSecurityLayer: FetchSecurityLayer
     private lateinit var cacheState: CacheState
@@ -70,7 +71,7 @@ class NetworkGetResource<Entity> constructor(repolizer: Repolizer, builder: Netw
             result.removeSource(testSource)
 
             val needsFetchByTime = getLayer.needsFetchByTime(makeUrlId(fullUrl))
-            result.addSource(needsFetchByTime, { currentCacheState ->
+            result.addSource(needsFetchByTime) { currentCacheState ->
                 currentCacheState?.run {
                     result.removeSource(needsFetchByTime)
 
@@ -89,7 +90,7 @@ class NetworkGetResource<Entity> constructor(repolizer: Repolizer, builder: Netw
                         establishConnection()
                     }
                 }
-            })
+            }
         }
 
         return result
@@ -109,7 +110,7 @@ class NetworkGetResource<Entity> constructor(repolizer: Repolizer, builder: Netw
 
     private fun checkLogin(networkResponse: LiveData<NetworkResponse<String>>) {
         loginManager?.let {
-            result.addSource(it.isCurrentLoginValid(), { isLoginValid ->
+            result.addSource(it.isCurrentLoginValid()) { isLoginValid ->
                 isLoginValid?.run {
                     if (this@run) {
                         executeCall(networkResponse)
@@ -119,7 +120,7 @@ class NetworkGetResource<Entity> constructor(repolizer: Repolizer, builder: Netw
                         }
                     }
                 }
-            })
+            }
         }
                 ?: throw IllegalStateException("Checking the login requires a LoginManager. " +
                         "Use the setter of the Repolizer class to set your custom " +
@@ -175,10 +176,10 @@ class NetworkGetResource<Entity> constructor(repolizer: Repolizer, builder: Netw
 
     @MainThread
     private fun establishConnection() {
-        appExecutor.mainThread.execute({
+        appExecutor.mainThread.execute {
             val resultSource = loadCache()
             result.addSource(resultSource) { data -> data?.let { result.value = it } }
-        })
+        }
     }
 
     @MainThread

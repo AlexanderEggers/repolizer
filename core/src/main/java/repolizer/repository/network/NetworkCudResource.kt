@@ -13,6 +13,7 @@ import repolizer.repository.response.ResponseService
 import repolizer.repository.util.AppExecutor
 import repolizer.repository.login.LoginManager
 import repolizer.repository.request.RequestType
+import repolizer.repository.util.QueryHashMap
 import repolizer.repository.util.Utils.Companion.prepareUrl
 
 class NetworkCudResource<Entity> constructor(repolizer: Repolizer, builder: NetworkBuilder<Entity>) {
@@ -39,7 +40,7 @@ class NetworkCudResource<Entity> constructor(repolizer: Repolizer, builder: Netw
     private val progressData: ProgressData = builder.progressData ?: object: ProgressData() {}
 
     private val headerMap: Map<String, String> = builder.headerMap
-    private val queryMap: Map<String, String> = builder.queryMap
+    private val queryMap: QueryHashMap = builder.queryMap
 
     init {
         progressData.requestType = requestType
@@ -63,7 +64,7 @@ class NetworkCudResource<Entity> constructor(repolizer: Repolizer, builder: Netw
 
     private fun checkLogin(networkResponse: LiveData<NetworkResponse<String>>) {
         loginManager?.let {
-            result.addSource(it.isCurrentLoginValid(), { isLoginValid ->
+            result.addSource(it.isCurrentLoginValid()) { isLoginValid ->
                 isLoginValid?.run {
                     if (this@run) {
                         executeCall(networkResponse)
@@ -73,7 +74,7 @@ class NetworkCudResource<Entity> constructor(repolizer: Repolizer, builder: Netw
                         }
                     }
                 }
-            })
+            }
         }
                 ?: throw IllegalStateException("Checking the login requires a LoginManager. " +
                         "Use the setter of the Repolizer class to set your custom " +

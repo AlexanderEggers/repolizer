@@ -4,6 +4,8 @@ import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
 import repolizer.repository.progress.ProgressData
 import repolizer.repository.request.RequestType
+import repolizer.repository.util.QueryHashMap
+import java.util.ArrayList
 
 class NetworkBuilder<Entity> {
 
@@ -36,14 +38,17 @@ class NetworkBuilder<Entity> {
     var networkLayer: NetworkLayer<Entity>? = null
 
     val headerMap: HashMap<String, String> = HashMap()
-    val queryMap: HashMap<String, String> = HashMap()
+    val queryMap: QueryHashMap = QueryHashMap()
 
     fun addHeader(key: String, value: String) {
         headerMap[key] = value
     }
 
+    @Suppress("unchecked_cast")
     fun addQuery(key: String, value: String) {
-        queryMap[key] = value
+        val list = queryMap[key] as? ArrayList<String> ?: ArrayList()
+        list.add(value)
+        queryMap[key] = list
     }
 
     fun buildGet(repolizer: Repolizer): NetworkGetResource<Entity> {
