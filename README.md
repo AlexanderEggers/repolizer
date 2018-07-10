@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-  def repolizer_version = "0.3.0"
+  def repolizer_version = "0.3.1"
 
   //includes all library artifacts and required classes (this artifact is required if you want to use the processor)
   implementation "org.repolizer:repolizer-core:$repolizer_version"
@@ -28,8 +28,8 @@ dependencies {
   
   kapt "org.repolizer:repolizer-processor:$repolizer_version"
   
-  //the library requires you to use add the Room compiler dependency to your project (that will change with the next release)
-  def room_version = "1.1.1-rc1"
+  //the library requires you to use add the Room compiler dependency to your project (that will change with the next major release)
+  def room_version = "1.1.1"
   kapt "android.arch.persistence.room:compiler:$room_version"
 }
 ```
@@ -45,7 +45,7 @@ apiKey= MY_API_KEY
 
 Status
 ------
-Version 1.0.0 is currently under development in the master branch. The latest version 0.3.0 can be found in the 0.3.0 branch.
+Version 1.0.0 is currently under development in the master branch. The latest version 0.3.1 can be found in the 0.3.x branch.
 
 Comments/bugs/questions/pull requests are always welcome!
 
