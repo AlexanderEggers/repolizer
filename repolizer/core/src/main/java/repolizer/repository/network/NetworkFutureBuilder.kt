@@ -41,15 +41,15 @@ open class NetworkFutureBuilder : FutureBuilder() {
     val headerMap: HashMap<String, String> = HashMap()
     val queryMap: QueryHashMap = QueryHashMap()
 
-    @Suppress("unchecked_cast")
     open fun addHeader(key: String, value: String) {
+        headerMap[key] = value
+    }
+
+    @Suppress("unchecked_cast")
+    open fun addQuery(key: String, value: String) {
         val list = queryMap[key] as? ArrayList<String> ?: ArrayList()
         list.add(value)
         queryMap[key] = list
-    }
-
-    open fun addQuery(key: String, value: String) {
-        queryMap[key] = value
     }
 
     open fun <Body> buildGet(repolizer: Repolizer, returnType: Body): NetworkGetFuture<Body> {

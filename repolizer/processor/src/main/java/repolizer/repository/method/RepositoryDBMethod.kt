@@ -1,8 +1,8 @@
 package repolizer.repository.method
 
 import com.squareup.javapoet.*
-import repolizer.annotation.repository.DB
-import repolizer.annotation.repository.util.DatabaseOperation
+import repolizer.annotation.repository.STORAGE
+import repolizer.annotation.repository.util.StorageOperation
 import repolizer.repository.RepositoryMapHolder
 import javax.annotation.processing.Messager
 import javax.lang.model.element.Element
@@ -29,7 +29,7 @@ class RepositoryDBMethod {
         return ArrayList<MethodSpec>().apply {
             addAll(RepositoryMapHolder.dbAnnotationMap[element.simpleName.toString()]
                     ?.map { methodElement ->
-                        //Collects all DB annotation related parameters from the source method. Those
+                        //Collects all STORAGE annotation related parameters from the source method. Those
                         //values will be used to create the DAO method and to assign the correct values
                         //to the database via the DatabaseResource/DatabaseLayer
                         val daoParamList = getDaoParamList(element, methodElement, messager)
@@ -64,7 +64,7 @@ class RepositoryDBMethod {
                                 }
                                 methodElement.returnType.kind == TypeKind.VOID -> addStatement("super.executeDB(builder)")
                                 else -> messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
-                                        "@DB annotation are only accepting LiveData<Boolean> or void as a return " +
+                                        "@STORAGE annotation are only accepting LiveData<Boolean> or void as a return " +
                                         "type. Error for ${element.simpleName}.${methodElement.simpleName}")
                             }
                         }.build()
@@ -86,28 +86,28 @@ class RepositoryDBMethod {
     }
 
     private fun getDaoMethodAnnotation(messager: Messager, element: Element, methodElement: Element): AnnotationSpec {
-        val sql = element.getAnnotation(DB::class.java).sql
-        val databaseOperation = methodElement.getAnnotation(DB::class.java).databaseOperation
-        val onConflictStrategyName = methodElement.getAnnotation(DB::class.java).onConflictStrategy.name
+        val sql = element.getAnnotation(STORAGE::class.java).sql
+        val databaseOperation = methodElement.getAnnotation(STORAGE::class.java).storageOperation
+        val onConflictStrategyName = methodElement.getAnnotation(STORAGE::class.java).onConflictStrategy.name
 
         return (if (sql.isEmpty()) {
             when (databaseOperation) {
-                DatabaseOperation.INSERT -> {
+                StorageOperation.INSERT -> {
                     AnnotationSpec.builder(annotationRoomInsert).apply {
                         addMember("onConflict", "$classOnConflictStrategy.$onConflictStrategyName")
                     }.build()
                 }
-                DatabaseOperation.UPDATE -> {
+                StorageOperation.UPDATE -> {
                     AnnotationSpec.builder(annotationRoomUpdate).apply {
                         addMember("onConflict", "$classOnConflictStrategy.$onConflictStrategyName")
                     }.build()
                 }
-                DatabaseOperation.DELETE -> {
+                StorageOperation.DELETE -> {
                     AnnotationSpec.builder(annotationRoomDelete).build()
                 }
-                DatabaseOperation.QUERY -> {
+                StorageOperation.QUERY -> {
                     messager.printMessage(Diagnostic.Kind.ERROR, "If you want to use the " +
-                            "DatabaseOperation.QUERY, you need to define the sql value as well." +
+                            "StorageOperation.QUERY, you need to define the sql value as well." +
                             "Error for ${element.simpleName}.${methodElement.simpleName}")
 
                     AnnotationSpec.builder(annotationRoomQuery).apply {
@@ -139,7 +139,7 @@ class RepositoryDBMethod {
 
     private fun getDaoParamList(element: Element, methodElement: Element, messager: Messager): ArrayList<VariableElement> {
         return ArrayList<VariableElement>().apply {
-            val objectExpected = methodElement.getAnnotation(DB::class.java).databaseOperation.objectExpected
+            val objectExpected = methodElement.getAnnotation(STORAGE::class.java).storageOperation.objectExpected
             if (objectExpected) {
                 addAll(RepositoryMapHolder.databaseBodyAnnotationMap["${element.simpleName}" +
                         ".${methodElement.simpleName}"] ?: ArrayList())
@@ -147,7 +147,7 @@ class RepositoryDBMethod {
                 if (isEmpty()) {
                     messager.printMessage(Diagnostic.Kind.ERROR, "The method " +
                             "${methodElement.simpleName} needs to have at least one parameter " +
-                            "which is using the @DatabaseBody annotation. Error for " +
+                            "which is using the @StorageBody annotation. Error for " +
                             "${element.simpleName}.${methodElement.simpleName}")
                 }
             } else {

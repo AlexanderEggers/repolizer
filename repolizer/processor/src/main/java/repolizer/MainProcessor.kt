@@ -43,11 +43,11 @@ class MainProcessor : AbstractProcessor() {
                 Repository::class.java.name,
 
                 //Repository method annotations
-                REFRESH::class.java.name, GET::class.java.name, DB::class.java.name,
+                REFRESH::class.java.name, GET::class.java.name, STORAGE::class.java.name,
                 CUD::class.java.name, CACHE::class.java.name,
 
                 //Repository parameter annotations
-                DatabaseBody::class.java.name, Header::class.java.name,
+                StorageBody::class.java.name, Header::class.java.name,
                 RepositoryParameter::class.java.name, RequestBody::class.java.name,
                 SqlParameter::class.java.name, UrlParameter::class.java.name,
                 UrlQuery::class.java.name, Progress::class.java.name)

@@ -148,7 +148,7 @@ class RepositoryMainProcessor {
         RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv,
                 CUD::class.java, RepositoryMapHolder.cudAnnotationMap)
         RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv,
-                DB::class.java, RepositoryMapHolder.dbAnnotationMap)
+                STORAGE::class.java, RepositoryMapHolder.dbAnnotationMap)
         RepositoryProcessorUtil.initMethodAnnotations(mainProcessor, roundEnv,
                 CACHE::class.java, RepositoryMapHolder.cacheAnnotationMap)
 
@@ -160,7 +160,7 @@ class RepositoryMainProcessor {
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
                 RequestBody::class.java, RepositoryMapHolder.requestBodyAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
-                DatabaseBody::class.java, RepositoryMapHolder.databaseBodyAnnotationMap)
+                StorageBody::class.java, RepositoryMapHolder.databaseBodyAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
                 SqlParameter::class.java, RepositoryMapHolder.sqlParameterAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,

@@ -37,7 +37,7 @@ class RepositoryGetMethod {
     fun build(messager: Messager, element: Element, entity: ClassName, daoClassBuilder: TypeSpec.Builder): List<MethodSpec> {
         return ArrayList<MethodSpec>().apply {
             addAll(RepositoryMapHolder.getAnnotationMap[element.simpleName.toString()]?.map { methodElement ->
-                //Collects all DB annotation related parameters from the source method. Those
+                //Collects all STORAGE annotation related parameters from the source method. Those
                 //values will be used to create the DAO method and to assign the correct values
                 //to the database via the DatabaseResource/DatabaseLayer
                 val daoParamList = getDaoParamList(element, methodElement, messager)

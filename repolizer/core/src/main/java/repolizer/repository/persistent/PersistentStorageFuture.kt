@@ -3,20 +3,20 @@ package repolizer.repository.persistent
 import repolizer.Repolizer
 import repolizer.adapter.WrapperAdapter
 import repolizer.adapter.util.AdapterUtil
-import repolizer.annotation.repository.util.DatabaseOperation
+import repolizer.annotation.repository.util.StorageOperation
 import repolizer.repository.network.ExecutionType
 
-class PersistentDatabaseFuture
+class PersistentStorageFuture
 constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder): PersistentFuture<Boolean>(repolizer, futureBuilder) {
 
-    private val databaseOperation: DatabaseOperation = futureBuilder.databaseOperation
-            ?: throw IllegalStateException("DatabaseOperation is null.")
+    private val storageOperation: StorageOperation = futureBuilder.storageOperation
+            ?: throw IllegalStateException("StorageOperation is null.")
 
     private val deleteSql = futureBuilder.deleteSql
     private val updateSql = futureBuilder.updateSql
 
-    private val databaseItem: Any? = futureBuilder.databaseItem
-    private val databaseItemClass: Class<*>? = futureBuilder.databaseItemClass
+    private val databaseItem: Any? = futureBuilder.storageItem
+    private val databaseItemClass: Class<*>? = futureBuilder.storageItemClass
 
     override fun <Wrapper> create(): Wrapper {
         val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, bodyType.type,
@@ -25,16 +25,16 @@ constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder): Persi
     }
 
     override fun onExecute(executionType: ExecutionType): Boolean? {
-        when(databaseOperation) {
-            DatabaseOperation.INSERT -> {
+        when(storageOperation) {
+            StorageOperation.INSERT -> {
                 if(databaseItem == null || databaseItemClass == null) throw IllegalStateException("Database item/class is null.")
                 storageAdapter.insert(repositoryClass, fullUrl, databaseItem, databaseItemClass)
             }
-            DatabaseOperation.UPDATE -> {
+            StorageOperation.UPDATE -> {
                 if(databaseItem == null || databaseItemClass == null) throw IllegalStateException("Database item/class is null.")
                 storageAdapter.update(repositoryClass, fullUrl, updateSql, databaseItem, databaseItemClass)
             }
-            DatabaseOperation.DELETE -> storageAdapter.delete(repositoryClass, fullUrl, deleteSql)
+            StorageOperation.DELETE -> storageAdapter.delete(repositoryClass, fullUrl, deleteSql)
         }
         return true
     }

@@ -3,32 +3,38 @@ package repolizer.repository.persistent
 import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
 import repolizer.annotation.repository.util.CacheOperation
-import repolizer.annotation.repository.util.DatabaseOperation
+import repolizer.annotation.repository.util.StorageOperation
 import repolizer.persistent.CacheItem
 import repolizer.repository.future.FutureBuilder
 
 open class PersistentFutureBuilder: FutureBuilder() {
 
     var cacheOperation: CacheOperation? = null
-    var databaseOperation: DatabaseOperation? = null
+    var storageOperation: StorageOperation? = null
 
     var typeToken: TypeToken<*>? = null
 
     var cacheItem: CacheItem? = null
-
-    var databaseItem: Any? = null
         set(value) {
             if (field != null) {
-                throw IllegalStateException("Only ONE database item can be set. Make sure that " +
-                        "you don't use more than one @DatabaseBody parameter for this method.")
+                throw IllegalStateException("Only ONE cache item can be set. Make sure that " +
+                        "you don't use more than one CacheItem parameter for this method.")
             } else field = value
         }
 
-    var databaseItemClass: Class<*>? = null
+    var storageItem: Any? = null
         set(value) {
             if (field != null) {
                 throw IllegalStateException("Only ONE database item can be set. Make sure that " +
-                        "you don't use more than one @DatabaseBody parameter for this method.")
+                        "you don't use more than one @StorageBody parameter for this method.")
+            } else field = value
+        }
+
+    var storageItemClass: Class<*>? = null
+        set(value) {
+            if (field != null) {
+                throw IllegalStateException("Only ONE storage item can be set. Make sure that " +
+                        "you don't use more than one @StorageBody parameter for this method.")
             } else field = value
         }
 
@@ -36,7 +42,7 @@ open class PersistentFutureBuilder: FutureBuilder() {
         return PersistentCacheFuture(repolizer, this)
     }
 
-    open fun buildDatabase(repolizer: Repolizer): PersistentDatabaseFuture {
-        return PersistentDatabaseFuture(repolizer, this)
+    open fun buildDatabase(repolizer: Repolizer): PersistentStorageFuture {
+        return PersistentStorageFuture(repolizer, this)
     }
 }
