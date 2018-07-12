@@ -32,7 +32,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
                 cacheAdapter.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
                 true
             } else {
-                responseService?.handleDatabaseError(requestType, response)
+                responseService?.handleStorageError(requestType, response)
                 false
             }
         } else {

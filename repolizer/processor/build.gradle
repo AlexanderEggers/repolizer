@@ -31,18 +31,14 @@ ext {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "com.squareup:javapoet:$javapoet_version"
 
     implementation project(":repolizer-annotation")
     //implementation "org.repolizer:repolizer-annotation:$repolizer_library_version"
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "com.squareup:javapoet:$javapoet_version"
-
     implementation "com.google.auto.service:auto-service:$autoservice_version"
     kapt "com.google.auto.service:auto-service:$autoservice_version"
-
-    implementation "android.arch.persistence.room:compiler:$room_version"
-    implementation "android.arch.lifecycle:compiler:$livedata_version"
 }
 
 apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'

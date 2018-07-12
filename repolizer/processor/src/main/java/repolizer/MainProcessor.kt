@@ -49,7 +49,7 @@ class MainProcessor : AbstractProcessor() {
                 //Repository parameter annotations
                 StorageBody::class.java.name, Header::class.java.name,
                 RepositoryParameter::class.java.name, RequestBody::class.java.name,
-                SqlParameter::class.java.name, UrlParameter::class.java.name,
+                StorageParameter::class.java.name, UrlParameter::class.java.name,
                 UrlQuery::class.java.name, Progress::class.java.name)
     }
 

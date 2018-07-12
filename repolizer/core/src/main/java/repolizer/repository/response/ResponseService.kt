@@ -4,6 +4,6 @@ import repolizer.repository.request.RequestType
 
 interface ResponseService {
     fun handleSuccess(requestType: RequestType, response: NetworkResponse<String>)
-    fun handleDatabaseError(requestType: RequestType, response: NetworkResponse<String>)
+    fun handleStorageError(requestType: RequestType, response: NetworkResponse<String>)
     fun handleRequestError(requestType: RequestType, response: NetworkResponse<String>)
 }

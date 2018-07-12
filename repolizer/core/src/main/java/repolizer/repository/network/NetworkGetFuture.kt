@@ -76,7 +76,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
                 cacheAdapter.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
                 storageAdapter.get(repositoryClass, fullUrl, querySql)
             } else {
-                responseService?.handleDatabaseError(requestType, response)
+                responseService?.handleStorageError(requestType, response)
                 null
             }
         } else {
