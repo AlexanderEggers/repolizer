@@ -6,11 +6,8 @@ import repolizer.ProcessorUtil.Companion.getGeneratedDatabaseDaoName
 import repolizer.ProcessorUtil.Companion.getGeneratedDatabaseName
 import repolizer.ProcessorUtil.Companion.getGeneratedRepositoryName
 import repolizer.ProcessorUtil.Companion.getPackageName
-import repolizer.annotation.parameter.*
 import repolizer.annotation.repository.*
 import repolizer.annotation.repository.parameter.*
-import repolizer.database.DatabaseMapHolder
-import repolizer.database.DatabaseProcessorUtil
 import repolizer.repository.method.*
 import javax.annotation.processing.Messager
 import javax.annotation.processing.RoundEnvironment
@@ -69,9 +66,6 @@ class RepositoryMainProcessor {
                     getGeneratedDatabaseDaoName(objectDatabase.simpleName.toString(), objectEntity.simpleName.toString()))
             val daoName = getGeneratedDatabaseDaoName(objectDatabase.simpleName.toString(),
                     objectEntity.simpleName.toString())
-
-            //Saves database and dao class name inside database map holder for the database processor
-            addDatabaseClassNamesToHolderMap(mainProcessor, objectDatabase, daoName, classEntity)
 
             //Initialising dao file builder which is needed for the repository to save it's data
             val daoBuilder = getDaoFileBuilder(daoName)
@@ -143,15 +137,6 @@ class RepositoryMainProcessor {
             addModifiers(Modifier.PUBLIC)
             addAnnotation(classAnnotationDao)
         }
-    }
-
-    private fun addDatabaseClassNamesToHolderMap(mainProcessor: MainProcessor, objectDatabase: Element,
-                                                 daoName: String, classEntity: ClassName) {
-        DatabaseProcessorUtil.addClassNameToDatabaseHolderMap(DatabaseMapHolder.daoMap,
-                objectDatabase.simpleName.toString(),
-                ClassName.get(getPackageName(mainProcessor, objectDatabase), daoName))
-        DatabaseProcessorUtil.addClassNameToDatabaseHolderMap(DatabaseMapHolder.entityMap,
-                objectDatabase.simpleName.toString(), classEntity)
     }
 
     private fun initAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment) {

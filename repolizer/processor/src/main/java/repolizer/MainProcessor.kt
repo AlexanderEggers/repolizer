@@ -1,13 +1,8 @@
 package repolizer
 
 import com.google.auto.service.AutoService
-import repolizer.annotation.database.Database
-import repolizer.annotation.database.Migration
-import repolizer.annotation.database.TypeConverter
-import repolizer.annotation.parameter.*
 import repolizer.annotation.repository.*
 import repolizer.annotation.repository.parameter.*
-import repolizer.database.DatabaseMainProcessor
 import repolizer.repository.RepositoryMainProcessor
 import java.io.IOException
 import javax.annotation.processing.*
@@ -36,19 +31,14 @@ class MainProcessor : AbstractProcessor() {
     override fun process(set: MutableSet<out TypeElement>, roundEnv: RoundEnvironment): Boolean {
         try {
             RepositoryMainProcessor().process(this, roundEnv)
-            DatabaseMainProcessor().process(this, roundEnv)
         } catch (e: IOException) {
             e.printStackTrace()
         }
-
         return true
     }
 
     override fun getSupportedAnnotationTypes(): MutableSet<String> {
         return mutableSetOf(
-                //Database annotations
-                Database::class.java.name, Migration::class.java.name, TypeConverter::class.java.name,
-
                 //General repository annotations
                 Repository::class.java.name,
 

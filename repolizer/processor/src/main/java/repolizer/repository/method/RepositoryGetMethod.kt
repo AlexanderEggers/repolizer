@@ -330,14 +330,6 @@ class RepositoryGetMethod {
         return ArrayList<VariableElement>().apply {
             addAll(RepositoryMapHolder.sqlParameterAnnotationMap["${element.simpleName}" +
                     ".${methodElement.simpleName}"] ?: ArrayList())
-
-            if (isEmpty()) {
-                messager.printMessage(Diagnostic.Kind.NOTE, "The method " +
-                        "${methodElement.simpleName} has no parameter and will always " +
-                        "execute the same sql string. If that is your intention, you can " +
-                        "ignore this note. Info for " +
-                        "${element.simpleName}.${methodElement.simpleName}")
-            }
         }
     }
 }
