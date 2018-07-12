@@ -5,6 +5,7 @@ import repolizer.Repolizer
 import repolizer.repository.future.FutureBuilder
 import repolizer.repository.progress.ProgressData
 import repolizer.repository.request.RequestType
+import repolizer.repository.util.QueryHashMap
 
 open class NetworkFutureBuilder : FutureBuilder() {
 
@@ -38,10 +39,13 @@ open class NetworkFutureBuilder : FutureBuilder() {
     var isDeletingCacheIfTooOld: Boolean = false
 
     val headerMap: HashMap<String, String> = HashMap()
-    val queryMap: HashMap<String, String> = HashMap()
+    val queryMap: QueryHashMap = QueryHashMap()
 
+    @Suppress("unchecked_cast")
     open fun addHeader(key: String, value: String) {
-        headerMap[key] = value
+        val list = queryMap[key] as? ArrayList<String> ?: ArrayList()
+        list.add(value)
+        queryMap[key] = list
     }
 
     open fun addQuery(key: String, value: String) {

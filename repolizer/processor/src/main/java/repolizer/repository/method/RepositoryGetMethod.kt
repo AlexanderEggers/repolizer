@@ -266,7 +266,7 @@ class RepositoryGetMethod {
                     addAnnotation(Override::class.java)
                     addModifiers(Modifier.PUBLIC)
                     addParameter(String::class.java, "fullUrlId")
-                    addStatement("$classMutableLiveData livedata = new ${ParameterizedTypeName.get(classMutableLiveData, classCacheState)}")
+                    addStatement("$classMutableLiveData livedata = new ${ParameterizedTypeName.get(classMutableLiveData, classCacheState)}()")
                     addStatement("livedata.setValue($classCacheState.NEEDS_NO_REFRESH)")
                     addStatement("return livedata")
                     returns(ParameterizedTypeName.get(classLiveData, classCacheState))

@@ -13,6 +13,7 @@ import repolizer.repository.request.RequestType
 import repolizer.adapter.util.AdapterUtil
 import repolizer.repository.request.RequestProvider
 import repolizer.repository.response.ResponseService
+import repolizer.repository.util.QueryHashMap
 
 abstract class NetworkFuture<Body>
 constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuilder): Future<Body>() {
@@ -21,7 +22,7 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
             ?: throw IllegalStateException("Request type is null.")
 
     val headerMap: Map<String, String> = futureBuilder.headerMap
-    val queryMap: Map<String, String> = futureBuilder.queryMap
+    val queryMap: QueryHashMap = futureBuilder.queryMap
 
     val fullUrl: String by lazy {
         repolizer.baseUrl?.let { baseUrl ->
