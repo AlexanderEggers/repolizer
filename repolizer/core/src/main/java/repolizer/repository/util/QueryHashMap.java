@@ -25,16 +25,14 @@ public class QueryHashMap extends HashMap<String, Object> {
             if (entryValue == null) {
                 throw new IllegalArgumentException(
                         "Query map contained null value for key '" + entryKey + "'.");
-            }
-            else if(entryValue instanceof List) {
-                for(Object arrayValue:(List)entryValue)	 {
+            } else if (entryValue instanceof List) {
+                for (Object arrayValue : (List) entryValue) {
                     if (arrayValue != null) { // Skip null values
                         Entry<String, Object> newEntry = new AbstractMap.SimpleEntry<>(entryKey, arrayValue);
                         newSet.add(newEntry);
                     }
                 }
-            }
-            else {
+            } else {
                 Entry<String, Object> newEntry = new AbstractMap.SimpleEntry<>(entryKey, entryValue);
                 newSet.add(newEntry);
             }
