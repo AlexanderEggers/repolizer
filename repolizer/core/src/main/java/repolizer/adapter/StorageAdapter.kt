@@ -2,7 +2,7 @@ package repolizer.adapter
 
 abstract class StorageAdapter<T> {
 
-    abstract fun insert(repositoryClass: Class<*>, url: String, data: Any, clazz: Class<*>): Boolean
+    abstract fun insert(repositoryClass: Class<*>, url: String, sql: String, data: Any, clazz: Class<*>): Boolean
 
     abstract fun update(repositoryClass: Class<*>, url: String, sql: String, data: Any, clazz: Class<*>)
 

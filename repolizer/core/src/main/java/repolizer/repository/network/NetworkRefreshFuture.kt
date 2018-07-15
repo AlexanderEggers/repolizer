@@ -9,8 +9,11 @@ import repolizer.repository.response.NetworkResponse
 class NetworkRefreshFuture
 constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : NetworkFuture<Boolean>(repolizer, futureBuilder) {
 
-    private var fetchSecurityLayer: FetchSecurityLayer = futureBuilder.fetchSecurityLayer
+    private val fetchSecurityLayer: FetchSecurityLayer = futureBuilder.fetchSecurityLayer
             ?: throw IllegalStateException("FetchSecurityLayer is null.")
+    private val allowMultipleRequestsAtSameTime: Boolean = futureBuilder.allowMultipleRequestsAtSameTime
+
+    private val insertSql: String = futureBuilder.insertSql
 
     override fun <Wrapper> create(): Wrapper {
         val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, bodyType.type,
@@ -19,14 +22,23 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
     }
 
     override fun onDetermineExecutionType(): ExecutionType {
-        return ExecutionType.USE_NETWORK
+        return if (allowMultipleRequestsAtSameTime || fetchSecurityLayer.allowFetch()) {
+            ExecutionType.USE_NETWORK
+        } else ExecutionType.DO_NOTHING
     }
 
     override fun onExecute(executionType: ExecutionType): Boolean? {
+        return when (executionType) {
+            ExecutionType.USE_NETWORK -> fetchFromNetwork()
+            else -> null
+        }
+    }
+
+    private fun fetchFromNetwork(): Boolean? {
         val response: NetworkResponse<String> = networkAdapter.execute(this, requestProvider)
 
         return if (response.isSuccessful() && response.body != null) {
-            val saveSuccessful = storageAdapter.insert(repositoryClass, fullUrl, response.body, String::class.java)
+            val saveSuccessful = storageAdapter.insert(repositoryClass, fullUrl, insertSql, response.body, String::class.java)
             if(saveSuccessful) {
                 responseService?.handleSuccess(requestType, response)
                 cacheAdapter.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))

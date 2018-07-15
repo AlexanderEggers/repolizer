@@ -12,10 +12,12 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
 
     private val deleteIfCacheIsTooOld: Boolean = futureBuilder.isDeletingCacheIfTooOld
     private var allowFetch: Boolean = futureBuilder.allowFetch
+    private val allowMultipleRequestsAtSameTime: Boolean = futureBuilder.allowMultipleRequestsAtSameTime
 
     private val freshCacheTime = futureBuilder.freshCacheTime
     private val maxCacheTime = futureBuilder.maxCacheTime
 
+    private val insertSql: String = futureBuilder.insertSql
     private val querySql: String = futureBuilder.querySql
     private val deleteSql: String = futureBuilder.deleteSql
 
@@ -44,7 +46,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
                 cacheState == CacheState.NEEDS_HARD_REFRESH || cacheState == CacheState.NO_CACHE
 
         return if ((cacheData == null || needsFetch) && allowFetch) {
-            if (fetchSecurityLayer.allowFetch()) {
+            if (allowMultipleRequestsAtSameTime || fetchSecurityLayer.allowFetch()) {
                 ExecutionType.USE_NETWORK
             } else {
                 ExecutionType.USE_STORAGE
@@ -58,6 +60,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
         return when (executionType) {
             ExecutionType.USE_NETWORK -> fetchFromNetwork()
             ExecutionType.USE_STORAGE -> fetchCacheData()
+            ExecutionType.DO_NOTHING -> null
         }
     }
 
@@ -70,7 +73,8 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
         val response: NetworkResponse<String> = networkAdapter.execute(this, requestProvider)
 
         return if (response.isSuccessful() && response.body != null) {
-            val saveSuccessful = storageAdapter.insert(repositoryClass, fullUrl, response.body, String::class.java)
+            val saveSuccessful = storageAdapter.insert(repositoryClass, fullUrl, insertSql,
+                    response.body, String::class.java)
             if(saveSuccessful) {
                 responseService?.handleSuccess(requestType, response)
                 cacheAdapter.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))

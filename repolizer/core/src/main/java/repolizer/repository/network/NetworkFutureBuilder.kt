@@ -33,10 +33,12 @@ open class NetworkFutureBuilder : FutureBuilder() {
     var maxCacheTime: Long = Long.MAX_VALUE
 
     var fetchSecurityLayer: FetchSecurityLayer? = null
-    var allowFetch: Boolean = false
     var requiresLogin: Boolean = false
     var showProgress: Boolean = false
+
+    var allowFetch: Boolean = false
     var isDeletingCacheIfTooOld: Boolean = false
+    var allowMultipleRequestsAtSameTime: Boolean = false
 
     val headerMap: HashMap<String, String> = HashMap()
     val queryMap: QueryHashMap = QueryHashMap()

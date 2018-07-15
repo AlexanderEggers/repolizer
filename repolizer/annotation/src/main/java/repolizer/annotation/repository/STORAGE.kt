@@ -5,5 +5,5 @@ import repolizer.annotation.repository.util.StorageOperation
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
-annotation class STORAGE(val storageOperation: StorageOperation,
+annotation class STORAGE(val operation: StorageOperation,
                          val sql: String = "")

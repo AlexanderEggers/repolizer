@@ -12,8 +12,9 @@ constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder): Persi
     private val storageOperation: StorageOperation = futureBuilder.storageOperation
             ?: throw IllegalStateException("StorageOperation is null.")
 
-    private val deleteSql = futureBuilder.deleteSql
+    private val insertSql = futureBuilder.insertSql
     private val updateSql = futureBuilder.updateSql
+    private val deleteSql = futureBuilder.deleteSql
 
     private val databaseItem: Any? = futureBuilder.storageItem
     private val databaseItemClass: Class<*>? = futureBuilder.storageItemClass
@@ -28,7 +29,7 @@ constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder): Persi
         when(storageOperation) {
             StorageOperation.INSERT -> {
                 if(databaseItem == null || databaseItemClass == null) throw IllegalStateException("Database item/class is null.")
-                storageAdapter.insert(repositoryClass, fullUrl, databaseItem, databaseItemClass)
+                storageAdapter.insert(repositoryClass, fullUrl, insertSql, databaseItem, databaseItemClass)
             }
             StorageOperation.UPDATE -> {
                 if(databaseItem == null || databaseItemClass == null) throw IllegalStateException("Database item/class is null.")

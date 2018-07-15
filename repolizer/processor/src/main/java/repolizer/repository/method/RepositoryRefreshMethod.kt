@@ -1,40 +1,25 @@
 package repolizer.repository.method
 
-import com.squareup.javapoet.*
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
-import com.squareup.javapoet.TypeSpec
 import repolizer.annotation.repository.REFRESH
 import repolizer.annotation.repository.parameter.Header
 import repolizer.annotation.repository.parameter.UrlQuery
 import repolizer.repository.RepositoryMapHolder
-import javax.annotation.processing.Messager
 import javax.lang.model.element.Element
+import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
-import javax.tools.Diagnostic
+import javax.lang.model.element.VariableElement
 
 class RepositoryRefreshMethod {
 
-    private val classNetworkBuilder = ClassName.get("repolizer.repository.network", "NetworkBuilder")
-    private val classNetworkLayer = ClassName.get("repolizer.repository.network", "NetworkRefreshLayer")
-    private val classCacheItem = ClassName.get("repolizer.database.cache", "CacheItem")
-
+    private val classNetworkBuilder = ClassName.get("repolizer.repository.network", "NetworkFutureBuilder")
     private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
-    private val classList = ClassName.get(List::class.java)
 
-    private val classAnnotationRoomInsert = ClassName.get("android.arch.persistence.room", "Insert")
-    private val classOnConflictStrategy = ClassName.get("android.arch.persistence.room", "OnConflictStrategy")
-
-    private val classLiveData = ClassName.get("android.arch.lifecycle", "LiveData")
-    private val liveDataOfBoolean = ParameterizedTypeName.get(classLiveData, ClassName.get(java.lang.Boolean::class.java))
-
-    fun build(messager: Messager, element: Element, entity: ClassName, daoClassBuilder: TypeSpec.Builder): List<MethodSpec> {
-
+    fun build(element: Element): List<MethodSpec> {
         return ArrayList<MethodSpec>().apply {
             addAll(RepositoryMapHolder.refreshAnnotationMap[element.simpleName.toString()]?.map { methodElement ->
-                //Creates DAO method which will be used to communicate between this repository
-                //and the database
-                daoClassBuilder.addMethod(createDaoMethod(methodElement, entity))
-
                 MethodSpec.methodBuilder(methodElement.simpleName.toString()).apply {
                     addModifiers(Modifier.PUBLIC)
                     addAnnotation(Override::class.java)
@@ -55,37 +40,18 @@ class RepositoryRefreshMethod {
                     addStatement("String url = \"$url\"")
                     addCode(buildUrl(annotationMapKey))
 
+                    val sql = methodElement.getAnnotation(REFRESH::class.java).sql
+                    addStatement("String sql = \"$sql\"")
+                    addCode(buildSql(annotationMapKey))
+
                     //Generates the code which will be used for the NetworkBuilder to
                     //initialise it's values
-                    addCode(getBuilderCode(annotationMapKey, methodElement, entity))
+                    addCode(getBuilderCode(annotationMapKey, element, methodElement))
 
-                    //Determine the return value and if it's correct used by the user
-                    val returnValue = ClassName.get(methodElement.returnType)
-                    if (returnValue == liveDataOfBoolean) {
-                        addStatement("return super.executeRefresh(builder)")
-                    } else {
-                        messager.printMessage(Diagnostic.Kind.ERROR, "Methods which are using the " +
-                                "@REFRESH annotation are only accepting LiveData<Boolean> as a return type." +
-                                "Error for ${element.simpleName}.${methodElement.simpleName}")
-                    }
+                    addStatement("return super.executeRefresh(builder)")
                 }.build()
             } ?: ArrayList())
         }
-    }
-
-    private fun createDaoMethod(methodElement: Element, entity: ClassName): MethodSpec {
-        return MethodSpec.methodBuilder("insertFor_${methodElement.simpleName}").apply {
-            addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-
-            val onConflictStrategy = methodElement.getAnnotation(REFRESH::class.java).onConflictStrategy
-            addAnnotation(AnnotationSpec.builder(classAnnotationRoomInsert).apply {
-                addMember("onConflict", "$classOnConflictStrategy.$onConflictStrategy")
-            }.build())
-
-            val classArrayWithEntity = ArrayTypeName.of(entity)
-            addParameter(classArrayWithEntity, "elements")
-            varargs()
-        }.build()
     }
 
     private fun buildUrl(annotationMapKey: String): String {
@@ -95,34 +61,38 @@ class RepositoryRefreshMethod {
             } ?: ArrayList())
 
             val queries = RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]
-            if (queries?.isNotEmpty() == true) add(getFullUrlQueryPart(annotationMapKey))
+            if (queries?.isNotEmpty() == true) add(getFullUrlQueryPart(queries))
         }.joinToString(separator = "\n", postfix = "\n\n")
     }
 
-    private fun getFullUrlQueryPart(annotationMapKey: String): String {
-        return ArrayList<String>().apply {
-            RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]?.map { urlQuery ->
-                add("url += " + "\"${urlQuery.getAnnotation(UrlQuery::class.java).key}=\" + ${urlQuery.simpleName};")
-            } ?: ArrayList()
-        }.joinToString(prefix = "url += \"?\";", separator = "\nurl += \"&\";\n")
+    private fun getFullUrlQueryPart(queries: ArrayList<VariableElement>): String {
+        return (queries.map { urlQuery ->
+            "url += " + "\"${urlQuery.getAnnotation(UrlQuery::class.java).key}=\" + ${urlQuery.simpleName};"
+        }).joinToString(prefix = "url += \"?\";", separator = "\nurl += \"&\";\n")
     }
 
-    private fun getBuilderCode(annotationMapKey: String, methodElement: Element, entity: ClassName): String {
+    private fun buildSql(annotationMapKey: String): String {
+        return (RepositoryMapHolder.sqlParameterAnnotationMap[annotationMapKey]?.map {
+            "sql = sql.replace(\":${it.simpleName}\", \"$it\");"
+        } ?: ArrayList()).joinToString(separator = "\n", postfix = "\n\n")
+    }
 
+    private fun getBuilderCode(annotationMapKey: String, classElement: Element,
+                               methodElement: ExecutableElement): String {
         return ArrayList<String>().apply {
             val annotation = methodElement.getAnnotation(REFRESH::class.java)
 
-            val getAsList = annotation.getAsList
-            val classGenericTypeForMethod = if (getAsList) ParameterizedTypeName.get(classList, entity) else entity
-            val classWithTypeToken = ParameterizedTypeName.get(classTypeToken, classGenericTypeForMethod)
-            val classWithNetworkBuilder = ParameterizedTypeName.get(classNetworkBuilder, classGenericTypeForMethod)
+            add("$classNetworkBuilder builder = new $classNetworkBuilder();")
 
-            add("$classWithNetworkBuilder builder = new $classNetworkBuilder();")
-
+            val classWithTypeToken = ParameterizedTypeName.get(classTypeToken, ClassName.get(methodElement.returnType))
             add("builder.setTypeToken(new $classWithTypeToken() {});")
+
+            add("builder.setRepositoryClass(${ClassName.get(classElement.asType())}.class)")
             add("builder.setUrl(url);")
             add("builder.setRequiresLogin(${annotation.requiresLogin});")
             add("builder.setShowProgress(${annotation.showProgress});")
+            add("builder.setFetchSecurityLayer(this);")
+            add("builder.setInsertSql(sql);")
 
             RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {
                 add("builder.addHeader(" +
@@ -138,36 +108,6 @@ class RepositoryRefreshMethod {
                 add("builder.setProgressParams(${it.simpleName});")
             }
 
-            val networkGetLayerClass = createNetworkGetLayerAnonymousClass(classGenericTypeForMethod,
-                    methodElement.simpleName.toString(), entity, getAsList)
-            add("builder.setNetworkLayer($networkGetLayerClass);")
         }.joinToString(separator = "\n", postfix = "\n")
-    }
-
-    private fun createNetworkGetLayerAnonymousClass(classGenericTypeForMethod: TypeName, methodName: String,
-                                                    entity: ClassName, getAsList: Boolean): TypeSpec {
-        val daoInsertStatement = if (getAsList) {
-            val classArrayWithEntity = ArrayTypeName.of(entity)
-            "$classArrayWithEntity insertValue = value.toArray(new $entity[value.size()])"
-        } else {
-            "$entity insertValue = value"
-        }
-
-        return TypeSpec.anonymousClassBuilder("").apply {
-            addSuperinterface(ParameterizedTypeName.get(classNetworkLayer, classGenericTypeForMethod))
-            addMethod(MethodSpec.methodBuilder("updateDB").apply {
-                addAnnotation(Override::class.java)
-                addModifiers(Modifier.PUBLIC)
-                addParameter(classGenericTypeForMethod, "value")
-                addStatement(daoInsertStatement)
-                addStatement("dataDao.insertFor_$methodName(insertValue)")
-            }.build())
-            addMethod(MethodSpec.methodBuilder("updateFetchTime").apply {
-                addAnnotation(Override::class.java)
-                addModifiers(Modifier.PUBLIC)
-                addParameter(String::class.java, "fullUrlId")
-                addStatement("cacheDao.insert(new $classCacheItem(fullUrlId, System.currentTimeMillis()))")
-            }.build())
-        }.build()
     }
 }

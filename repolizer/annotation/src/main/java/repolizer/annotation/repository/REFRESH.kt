@@ -4,5 +4,6 @@ package repolizer.annotation.repository
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class REFRESH(val url: String,
+                         val sql: String = "",
                          val requiresLogin: Boolean = false,
                          val showProgress: Boolean = false)

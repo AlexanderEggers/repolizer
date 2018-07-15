@@ -78,6 +78,7 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
                 }
             }
             ExecutionType.USE_STORAGE -> onExecute(executionType)
+            ExecutionType.DO_NOTHING -> null
         }
 
         onFinished()

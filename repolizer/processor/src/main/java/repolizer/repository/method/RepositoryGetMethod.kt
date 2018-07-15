@@ -213,12 +213,14 @@ class RepositoryGetMethod {
         return ArrayList<String>().apply {
             var allowFetchParamName: String? = null
             var deleteIfCacheIsTooOldParamName: String? = null
+            var allowMultipleRequestsSameTimeParamName: String? = null
 
             RepositoryMapHolder.repositoryParameterAnnotationMap[annotationMapKey]?.forEach { variable ->
                 val type = variable.getAnnotation(RepositoryParameter::class.java).type
                 when (type) {
                     ParameterType.ALLOW_FETCH -> allowFetchParamName = variable.simpleName.toString()
                     ParameterType.DELETE_IF_CACHE_TOO_OLD -> deleteIfCacheIsTooOldParamName = variable.simpleName.toString()
+                    ParameterType.ALLOW_MULTIPLE_REQUESTS_SAME_TIME -> allowMultipleRequestsSameTimeParamName = variable.simpleName.toString()
                 }
             }
 
@@ -234,6 +236,13 @@ class RepositoryGetMethod {
             } else {
                 val allowFetchByDefault = element.getAnnotation(Repository::class.java).allowFetchByDefault
                 add("return super.executeGet(builder, $allowFetchByDefault);")
+            }
+
+            if (allowMultipleRequestsSameTimeParamName != null) {
+                add("builder.setDeletingCacheIfTooOld($allowMultipleRequestsSameTimeParamName);")
+            } else {
+                val deleteIfCacheIsTooOldByDefault = element.getAnnotation(Repository::class.java).allowMultipleRequestsAtSameTime
+                add("builder.setDeletingCacheIfTooOld($deleteIfCacheIsTooOldByDefault);")
             }
         }.joinToString(separator = "\n", postfix = "\n")
     }

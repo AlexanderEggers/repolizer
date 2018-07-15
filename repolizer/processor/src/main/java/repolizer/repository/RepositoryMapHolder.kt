@@ -11,7 +11,7 @@ object RepositoryMapHolder {
     val getAnnotationMap: HashMap<String, ArrayList<ExecutableElement>> = HashMap()
     val refreshAnnotationMap: HashMap<String, ArrayList<ExecutableElement>> = HashMap()
 
-    val databaseBodyAnnotationMap: HashMap<String, ArrayList<VariableElement>> = HashMap()
+    val storageBodyAnnotationMap: HashMap<String, ArrayList<VariableElement>> = HashMap()
     val repositoryParameterAnnotationMap: HashMap<String, ArrayList<VariableElement>> = HashMap()
     val headerAnnotationMap: HashMap<String, ArrayList<VariableElement>> = HashMap()
     val requestBodyAnnotationMap: HashMap<String, ArrayList<VariableElement>> = HashMap()

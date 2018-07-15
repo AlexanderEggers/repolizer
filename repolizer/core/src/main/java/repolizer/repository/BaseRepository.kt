@@ -22,7 +22,7 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
         return futureBuilder.buildCud(repolizer).create()
     }
 
-    protected fun <T> executeDB(builder: PersistentFutureBuilder): T {
+    protected fun <T> executeStorage(builder: PersistentFutureBuilder): T {
         return builder.buildCache(repolizer).create()
     }
 

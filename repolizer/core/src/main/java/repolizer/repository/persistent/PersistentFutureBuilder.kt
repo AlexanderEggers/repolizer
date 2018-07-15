@@ -42,7 +42,7 @@ open class PersistentFutureBuilder: FutureBuilder() {
         return PersistentCacheFuture(repolizer, this)
     }
 
-    open fun buildDatabase(repolizer: Repolizer): PersistentStorageFuture {
+    open fun buildStorage(repolizer: Repolizer): PersistentStorageFuture {
         return PersistentStorageFuture(repolizer, this)
     }
 }
