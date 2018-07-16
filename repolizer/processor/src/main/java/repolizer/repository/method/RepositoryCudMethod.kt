@@ -8,6 +8,7 @@ import repolizer.annotation.repository.parameter.UrlQuery
 import repolizer.repository.RepositoryMapHolder
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
+import javax.lang.model.element.VariableElement
 
 class RepositoryCudMethod {
 
@@ -50,9 +51,20 @@ class RepositoryCudMethod {
     }
 
     private fun buildUrl(annotationMapKey: String): String {
-        return (RepositoryMapHolder.urlParameterAnnotationMap[annotationMapKey]?.map {
-            "url = url.replace(\":${it.simpleName}\", \"$it\");"
-        } ?: ArrayList()).joinToString(separator = "\n", postfix = "\n\n")
+        return ArrayList<String>().apply {
+            addAll(RepositoryMapHolder.urlParameterAnnotationMap[annotationMapKey]?.map {
+                "url = url.replace(\":${it.simpleName}\", \"$it\");"
+            } ?: ArrayList())
+
+            val queries = RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]
+            if (queries?.isNotEmpty() == true) add(getFullUrlQueryPart(queries))
+        }.joinToString(separator = "\n", postfix = "\n\n")
+    }
+
+    private fun getFullUrlQueryPart(queries: ArrayList<VariableElement>): String {
+        return (queries.map { urlQuery ->
+            "url += " + "\"${urlQuery.getAnnotation(UrlQuery::class.java).key}=\" + ${urlQuery.simpleName};"
+        }).joinToString(prefix = "url += \"?\";", separator = "\nurl += \"&\";\n")
     }
 
     private fun getBuilderCode(annotationMapKey: String, element: Element, annotation: CUD): String {
