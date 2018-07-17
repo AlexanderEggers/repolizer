@@ -14,6 +14,8 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
     private var allowFetch: Boolean = futureBuilder.allowFetch
     private val allowMultipleRequestsAtSameTime: Boolean = futureBuilder.allowMultipleRequestsAtSameTime
 
+    private val saveData: Boolean = futureBuilder.saveData
+
     private val freshCacheTime = futureBuilder.freshCacheTime
     private val maxCacheTime = futureBuilder.maxCacheTime
 
@@ -31,7 +33,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
                 repositoryClass, repolizer) as WrapperAdapter<Wrapper>
 
         return if(wrapperAdapter.canHaveStorageConnection() && storageAdapter.canHaveActiveConnection()) {
-            storageAdapter.establishConnection(repositoryClass, fullUrl)
+            storageAdapter.establishConnection(repositoryClass, fullUrl, querySql)
                     ?: throw IllegalStateException("If you want to use an active storage connection, " +
                             "you need to implement the establishConnection() function inside your " +
                             "StorageAdapter.")
@@ -73,15 +75,22 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
         val response: NetworkResponse<String> = networkAdapter.execute(this, requestProvider)
 
         return if (response.isSuccessful() && response.body != null) {
-            val saveSuccessful = storageAdapter.insert(repositoryClass, fullUrl, insertSql,
-                    response.body, String::class.java)
-            if(saveSuccessful) {
-                responseService?.handleSuccess(requestType, response)
-                cacheAdapter.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
-                storageAdapter.get(repositoryClass, fullUrl, querySql)
+            if(saveData) {
+                val saveSuccessful = storageAdapter.insert(repositoryClass, fullUrl, insertSql,
+                        response.body, String::class.java)
+                if(saveSuccessful) {
+                    responseService?.handleSuccess(requestType, response)
+                    cacheAdapter.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
+                    storageAdapter.get(repositoryClass, fullUrl, querySql)
+                } else {
+                    responseService?.handleStorageError(requestType, response)
+                    null
+                }
             } else {
-                responseService?.handleStorageError(requestType, response)
-                null
+                storageAdapter.convertData(repositoryClass, response.body, String::class.java)
+                        ?: throw IllegalStateException("Converted data is null. If you don't want to " +
+                                "save your fetched data inside the storage, you have to override " +
+                                "the function convertData() inside your custom StorageAdapter.")
             }
         } else {
             responseService?.handleRequestError(requestType, response)
