@@ -40,9 +40,9 @@ class RepositoryRefreshMethod {
                     addStatement("String url = \"$url\"")
                     addCode(buildUrl(annotationMapKey))
 
-                    val sql = methodElement.getAnnotation(REFRESH::class.java).sql
-                    addStatement("String sql = \"$sql\"")
-                    addCode(buildSql(annotationMapKey))
+                    val sql = methodElement.getAnnotation(REFRESH::class.java).insertSql
+                    addStatement("String insertSql = \"$sql\"")
+                    if(sql.isNotEmpty()) addCode(buildSql(annotationMapKey))
 
                     //Generates the code which will be used for the NetworkBuilder to
                     //initialise it's values
@@ -73,7 +73,7 @@ class RepositoryRefreshMethod {
 
     private fun buildSql(annotationMapKey: String): String {
         return (RepositoryMapHolder.sqlParameterAnnotationMap[annotationMapKey]?.map {
-            "sql = sql.replace(\":${it.simpleName}\", \"$it\");"
+            "insertSql = insertSql.replace(\":${it.simpleName}\", \"$it\");"
         } ?: ArrayList()).joinToString(separator = "\n", postfix = "\n\n")
     }
 
@@ -92,7 +92,7 @@ class RepositoryRefreshMethod {
             add("builder.setRequiresLogin(${annotation.requiresLogin});")
             add("builder.setShowProgress(${annotation.showProgress});")
             add("builder.setFetchSecurityLayer(this);")
-            add("builder.setInsertSql(sql);")
+            add("builder.setInsertSql(insertSql);")
 
             RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {
                 add("builder.addHeader(" +

@@ -27,9 +27,10 @@ class RepositoryStorageMethod {
                             }
 
                             val annotationMapKey = "${element.simpleName}.${methodElement.simpleName}"
+
                             val sql = methodElement.getAnnotation(STORAGE::class.java).sql
                             addStatement("String sql = \"$sql\"")
-                            addCode(buildSql(annotationMapKey))
+                            if(sql.isNotEmpty()) addCode(buildSql(annotationMapKey))
 
                             addStatement("$classDatabaseBuilder builder = new $classDatabaseBuilder()")
                             addStatement("builder.setRepositoryClass(${ClassName.get(element.asType())}.class)")

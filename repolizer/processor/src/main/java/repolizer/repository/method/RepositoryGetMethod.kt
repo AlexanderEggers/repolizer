@@ -1,21 +1,18 @@
 package repolizer.repository.method
 
-import com.squareup.javapoet.*
+import com.squareup.javapoet.ClassName
+import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
-import com.squareup.javapoet.TypeSpec
 import repolizer.annotation.repository.GET
-import repolizer.annotation.repository.REFRESH
 import repolizer.annotation.repository.Repository
 import repolizer.annotation.repository.parameter.Header
 import repolizer.annotation.repository.parameter.RepositoryParameter
 import repolizer.annotation.repository.parameter.UrlQuery
 import repolizer.annotation.repository.util.ParameterType
 import repolizer.repository.RepositoryMapHolder
-import javax.annotation.processing.Messager
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.VariableElement
-import javax.tools.Diagnostic
 
 class RepositoryGetMethod {
 
@@ -45,9 +42,20 @@ class RepositoryGetMethod {
                     addStatement("String url = \"$url\"")
                     addCode(buildUrl(annotationMapKey))
 
-                    val sql = methodElement.getAnnotation(GET::class.java).sql
-                    addStatement("String sql = \"$sql\"")
-                    addCode(buildSql(annotationMapKey))
+                    val insertSql = methodElement.getAnnotation(GET::class.java).insertSql
+                    addStatement("String insertSql = \"$insertSql\"")
+                    if(insertSql.isNotEmpty()) addCode(buildSql(annotationMapKey,
+                            "insertSql", insertSql))
+
+                    val querySql = methodElement.getAnnotation(GET::class.java).querySql
+                    addStatement("String querySql = \"$querySql\"")
+                    if(querySql.isNotEmpty()) addCode(buildSql(annotationMapKey,
+                            "querySql", querySql))
+
+                    val deleteSql = methodElement.getAnnotation(GET::class.java).deleteSql
+                    addStatement("String deleteSql = \"$deleteSql\"")
+                    if(deleteSql.isNotEmpty()) addCode(buildSql(annotationMapKey,
+                            "deleteSql", deleteSql))
 
                     //Generates the code which will be used for the NetworkBuilder to
                     //initialise it's values
@@ -79,10 +87,14 @@ class RepositoryGetMethod {
         }).joinToString(prefix = "url += \"?\";", separator = "\nurl += \"&\";\n")
     }
 
-    private fun buildSql(annotationMapKey: String): String {
-        return (RepositoryMapHolder.sqlParameterAnnotationMap[annotationMapKey]?.map {
-            "sql = sql.replace(\":${it.simpleName}\", \"$it\");"
-        } ?: ArrayList()).joinToString(separator = "\n", postfix = "\n\n")
+    private fun buildSql(annotationMapKey: String, sqlParamName: String, baseSql: String): String {
+        return ArrayList<String>().apply {
+            RepositoryMapHolder.sqlParameterAnnotationMap[annotationMapKey]?.forEach {
+                if(baseSql.contains(":${it.simpleName}")) {
+                    add("$sqlParamName = $sqlParamName.replace(\":${it.simpleName}\", \"$it\");")
+                }
+            }
+        }.joinToString(separator = "\n", postfix = "\n\n")
     }
 
     private fun getBuilderCode(annotationMapKey: String, methodElement: Element): String {
