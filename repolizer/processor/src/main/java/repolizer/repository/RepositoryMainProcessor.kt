@@ -75,7 +75,7 @@ class RepositoryMainProcessor {
     private fun getRepositoryMethods(messager: Messager, repositoryClassElement: Element): List<MethodSpec> {
         return ArrayList<MethodSpec>().apply {
             addAll(RepositoryRefreshMethod().build(repositoryClassElement))
-            addAll(RepositoryGetMethod().build(messager, repositoryClassElement))
+            addAll(RepositoryGetMethod().build(repositoryClassElement))
             addAll(RepositoryCudMethod().build(repositoryClassElement))
             addAll(RepositoryStorageMethod().build(repositoryClassElement))
             addAll(RepositoryCacheMethod().build(repositoryClassElement))

@@ -17,6 +17,8 @@ import javax.lang.model.element.VariableElement
 class RepositoryGetMethod {
 
     private val classNetworkBuilder = ClassName.get("repolizer.repository.network", "NetworkFutureBuilder")
+    private val classRequestType = ClassName.get("repolizer.repository.request", "RequestType")
+
     private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
 
     fun build(element: Element): List<MethodSpec> {
@@ -107,10 +109,19 @@ class RepositoryGetMethod {
 
             add("$classNetworkBuilder builder = new $classNetworkBuilder();")
 
+            add("builder.setRequestType($classRequestType.GET);")
             add("builder.setTypeToken(new $classWithTypeToken() {});")
             add("builder.setUrl(url);")
             add("builder.setRequiresLogin(${annotation.requiresLogin});")
             add("builder.setShowProgress(${annotation.showProgress});")
+            add("builder.setSaveData(${annotation.saveData});")
+
+            add("builder.setInsertSql(insertSql);")
+            add("builder.setQuerySql(querySql);")
+            add("builder.setDeleteSql(deleteSql);")
+
+            add("builder.setFreshCacheTime(${annotation.maxFreshTime});")
+            add("builder.setMaxCacheTime(${annotation.maxCacheTime});")
 
             RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {
                 add("builder.addHeader(" +
@@ -123,7 +134,7 @@ class RepositoryGetMethod {
             }
 
             RepositoryMapHolder.progressParamsAnnotationMap[annotationMapKey]?.forEach {
-                add("builder.setProgressParams(${it.simpleName});")
+                add("builder.setProgressData(${it.simpleName});")
             }
         }.joinToString(separator = "\n", postfix = "\n")
     }
@@ -158,10 +169,10 @@ class RepositoryGetMethod {
             }
 
             if (allowMultipleRequestsSameTimeParamName != null) {
-                add("builder.setDeletingCacheIfTooOld($allowMultipleRequestsSameTimeParamName);")
+                add("builder.setAllowMultipleRequestsAtSameTime($allowMultipleRequestsSameTimeParamName);")
             } else {
                 val deleteIfCacheIsTooOldByDefault = element.getAnnotation(Repository::class.java).allowMultipleRequestsAtSameTime
-                add("builder.setDeletingCacheIfTooOld($deleteIfCacheIsTooOldByDefault);")
+                add("builder.setAllowMultipleRequestsAtSameTime($deleteIfCacheIsTooOldByDefault);")
             }
         }.joinToString(separator = "\n", postfix = "\n")
     }

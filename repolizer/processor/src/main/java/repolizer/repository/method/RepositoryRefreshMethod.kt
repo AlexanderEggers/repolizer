@@ -15,6 +15,8 @@ import javax.lang.model.element.VariableElement
 class RepositoryRefreshMethod {
 
     private val classNetworkBuilder = ClassName.get("repolizer.repository.network", "NetworkFutureBuilder")
+    private val classRequestType = ClassName.get("repolizer.repository.request", "RequestType")
+
     private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
 
     fun build(element: Element): List<MethodSpec> {
@@ -87,6 +89,7 @@ class RepositoryRefreshMethod {
             val classWithTypeToken = ParameterizedTypeName.get(classTypeToken, ClassName.get(methodElement.returnType))
             add("builder.setTypeToken(new $classWithTypeToken() {});")
 
+            add("builder.setRequestType($classRequestType.GET);")
             add("builder.setRepositoryClass(${ClassName.get(classElement.asType())}.class)")
             add("builder.setUrl(url);")
             add("builder.setRequiresLogin(${annotation.requiresLogin});")
