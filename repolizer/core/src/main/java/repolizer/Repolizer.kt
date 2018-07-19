@@ -39,11 +39,7 @@ class Repolizer private constructor(builder: Builder) {
     }
 
     class Builder {
-        val wrapperAdapters: ArrayList<AdapterFactory<WrapperAdapter<*>>> by lazy {
-            ArrayList<AdapterFactory<WrapperAdapter<*>>>().apply {
-                add(FutureWrapperAdapterFactory())
-            }
-        } //TODO Add default wrapper for Future
+        val wrapperAdapters: ArrayList<AdapterFactory<WrapperAdapter<*>>> = ArrayList()
         val networkAdapters: ArrayList<AdapterFactory<NetworkAdapter>> = ArrayList()
         val storageAdapters: ArrayList<AdapterFactory<StorageAdapter<*>>> = ArrayList()
         val cacheAdapters: ArrayList<AdapterFactory<CacheAdapter>> = ArrayList()
@@ -107,7 +103,12 @@ class Repolizer private constructor(builder: Builder) {
         }
 
         fun build(): Repolizer {
+            addDefaultAdapterFactories()
             return Repolizer(this@Builder)
+        }
+
+        private fun addDefaultAdapterFactories() {
+            wrapperAdapters.add(FutureWrapperAdapterFactory())
         }
     }
 }
