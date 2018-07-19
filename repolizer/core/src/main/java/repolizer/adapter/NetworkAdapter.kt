@@ -4,7 +4,7 @@ import repolizer.repository.network.NetworkFuture
 import repolizer.repository.request.RequestProvider
 import repolizer.repository.response.NetworkResponse
 
-interface NetworkAdapter {
+abstract class NetworkAdapter {
 
-    fun execute(networkFuture: NetworkFuture<*>, requestProvider: RequestProvider<*>?): NetworkResponse<String>
+    abstract fun execute(networkFuture: NetworkFuture<*>, requestProvider: RequestProvider<*>?): NetworkResponse<String>
 }

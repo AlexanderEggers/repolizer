@@ -23,6 +23,7 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
 
     val headerMap: Map<String, String> = futureBuilder.headerMap
     val queryMap: QueryHashMap = futureBuilder.queryMap
+    val rawObject: Any? = futureBuilder.raw
 
     val fullUrl: String by lazy {
         repolizer.baseUrl?.let { baseUrl ->
