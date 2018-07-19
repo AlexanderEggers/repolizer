@@ -2,6 +2,7 @@ package repolizer.repository.method
 
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterizedTypeName
 import repolizer.annotation.repository.STORAGE
 import repolizer.annotation.repository.util.StorageOperation
 import repolizer.repository.RepositoryMapHolder
@@ -11,6 +12,8 @@ import javax.lang.model.element.Modifier
 class RepositoryStorageMethod {
 
     private val classDatabaseBuilder = ClassName.get("repolizer.repository.persistent", "PersistentFutureBuilder")
+
+    private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
 
     fun build(element: Element): List<MethodSpec> {
         return ArrayList<MethodSpec>().apply {
@@ -38,6 +41,10 @@ class RepositoryStorageMethod {
                             val operation = methodElement.getAnnotation(STORAGE::class.java).operation
                             addStatement("builder.setStorageOperation($operation)")
                             addStatement(getStorageSql(operation))
+
+                            val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
+                                    ClassName.get(methodElement.returnType))
+                            addStatement("builder.setTypeToken(new $classWithTypeToken() {})")
 
                             createStorageItemBuilderMethods(annotationMapKey).forEach {
                                 addStatement(it)

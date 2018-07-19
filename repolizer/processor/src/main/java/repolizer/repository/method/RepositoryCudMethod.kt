@@ -71,7 +71,7 @@ class RepositoryCudMethod {
         return ArrayList<String>().apply {
             add("$classNetworkBuilder builder = new $classNetworkBuilder();")
 
-            add("builder.setRepositoryClass(${ClassName.get(element.asType())}.class)")
+            add("builder.setRepositoryClass(${ClassName.get(element.asType())}.class);")
             add("builder.setRequestType($classRequestType.${annotation.cudType.name});")
             add("builder.setRequiresLogin(${annotation.requiresLogin});")
             add("builder.setShowProgress(${annotation.showProgress});")

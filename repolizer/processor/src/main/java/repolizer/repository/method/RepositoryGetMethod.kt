@@ -11,6 +11,7 @@ import repolizer.annotation.repository.parameter.UrlQuery
 import repolizer.annotation.repository.util.ParameterType
 import repolizer.repository.RepositoryMapHolder
 import javax.lang.model.element.Element
+import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.VariableElement
 
@@ -59,14 +60,18 @@ class RepositoryGetMethod {
                     if(deleteSql.isNotEmpty()) addCode(buildSql(annotationMapKey,
                             "deleteSql", deleteSql))
 
+                    addCode("\n")
+
                     //Generates the code which will be used for the NetworkBuilder to
                     //initialise it's values
-                    addCode(getBuilderCode(annotationMapKey, methodElement))
+                    addCode(getBuilderCode(annotationMapKey, element, methodElement))
 
                     //Generates the code which is defined the @RepositoryParameter annotation.
                     //Those values are used to tweak the behavior of the repository regarding certain
                     //cases (like cannot refresh data due to error and cache is too old).
                     addCode(getRepositoryCode(element, annotationMapKey))
+
+                    addStatement("return super.executeGet(builder)")
                 }.build()
             } ?: ArrayList())
         }
@@ -99,13 +104,14 @@ class RepositoryGetMethod {
         }.joinToString(separator = "\n", postfix = "\n\n")
     }
 
-    private fun getBuilderCode(annotationMapKey: String, methodElement: Element): String {
+    private fun getBuilderCode(annotationMapKey: String, classElement: Element,
+                               methodElement: ExecutableElement): String {
 
         return ArrayList<String>().apply {
             val annotation = methodElement.getAnnotation(GET::class.java)
 
             val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
-                    ClassName.get(methodElement.asType()))
+                    ClassName.get(methodElement.returnType))
 
             add("$classNetworkBuilder builder = new $classNetworkBuilder();")
 
@@ -115,13 +121,14 @@ class RepositoryGetMethod {
             add("builder.setRequiresLogin(${annotation.requiresLogin});")
             add("builder.setShowProgress(${annotation.showProgress});")
             add("builder.setSaveData(${annotation.saveData});")
+            add("builder.setRepositoryClass(${ClassName.get(classElement.asType())}.class);")
 
             add("builder.setInsertSql(insertSql);")
             add("builder.setQuerySql(querySql);")
             add("builder.setDeleteSql(deleteSql);")
 
-            add("builder.setFreshCacheTime(${annotation.maxFreshTime});")
-            add("builder.setMaxCacheTime(${annotation.maxCacheTime});")
+            add("builder.setFreshCacheTime(${annotation.maxFreshTime}L);")
+            add("builder.setMaxCacheTime(${annotation.maxCacheTime}L);")
 
             RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {
                 add("builder.addHeader(" +
@@ -162,10 +169,10 @@ class RepositoryGetMethod {
             }
 
             if (allowFetchParamName != null) {
-                add("return super.executeGet(builder, $allowFetchParamName);")
+                add("builder.setAllowFetch($allowFetchParamName);")
             } else {
                 val allowFetchByDefault = element.getAnnotation(Repository::class.java).allowFetchByDefault
-                add("return super.executeGet(builder, $allowFetchByDefault);")
+                add("builder.setAllowFetch($allowFetchByDefault);")
             }
 
             if (allowMultipleRequestsSameTimeParamName != null) {

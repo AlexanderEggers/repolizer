@@ -12,8 +12,6 @@ open class PersistentFutureBuilder: FutureBuilder() {
     var cacheOperation: CacheOperation? = null
     var storageOperation: StorageOperation? = null
 
-    var typeToken: TypeToken<*>? = null
-
     var cacheItem: CacheItem? = null
         set(value) {
             if (field != null) {

@@ -1,7 +1,10 @@
 package repolizer.repository.future
 
+import com.google.gson.reflect.TypeToken
+
 abstract class FutureBuilder {
     var repositoryClass: Class<*>? = null
+    var typeToken: TypeToken<*>? = null
 
     var url: String = ""
     var insertSql: String = ""

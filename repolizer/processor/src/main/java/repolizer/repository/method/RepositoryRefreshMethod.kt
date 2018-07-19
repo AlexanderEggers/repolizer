@@ -86,11 +86,12 @@ class RepositoryRefreshMethod {
 
             add("$classNetworkBuilder builder = new $classNetworkBuilder();")
 
-            val classWithTypeToken = ParameterizedTypeName.get(classTypeToken, ClassName.get(methodElement.returnType))
+            val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
+                    ClassName.get(methodElement.returnType))
             add("builder.setTypeToken(new $classWithTypeToken() {});")
 
             add("builder.setRequestType($classRequestType.GET);")
-            add("builder.setRepositoryClass(${ClassName.get(classElement.asType())}.class)")
+            add("builder.setRepositoryClass(${ClassName.get(classElement.asType())}.class);")
             add("builder.setUrl(url);")
             add("builder.setRequiresLogin(${annotation.requiresLogin});")
             add("builder.setShowProgress(${annotation.showProgress});")

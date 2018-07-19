@@ -2,6 +2,7 @@ package repolizer.repository.method
 
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterizedTypeName
 import repolizer.annotation.repository.CACHE
 import repolizer.repository.RepositoryMapHolder
 import javax.lang.model.element.Element
@@ -11,6 +12,8 @@ class RepositoryCacheMethod {
 
     private val classPersistentBuilder = ClassName.get("repolizer.repository.database", "PersistentFutureBuilder")
     private val classCacheItem = ClassName.get("repolizer.persistent", "CacheItem")
+
+    private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
 
     fun build(element: Element): List<MethodSpec> {
         return ArrayList<MethodSpec>().apply {
@@ -32,6 +35,10 @@ class RepositoryCacheMethod {
                             addStatement("$classPersistentBuilder builder = new $classPersistentBuilder()")
                             addStatement("builder.setCacheOperation($operation)")
                             addStatement("builder.setRepositoryClass(${ClassName.get(element.asType())}.class)")
+
+                            val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
+                                    ClassName.get(methodElement.returnType))
+                            addStatement("builder.setTypeToken(new $classWithTypeToken() {})")
 
                             createCacheItemBuilderMethods(annotationMapKey).forEach {
                                 addStatement(it)

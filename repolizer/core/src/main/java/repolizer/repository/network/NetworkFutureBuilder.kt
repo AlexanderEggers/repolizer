@@ -27,8 +27,6 @@ open class NetworkFutureBuilder : FutureBuilder() {
             } else field = value
         }
 
-    var typeToken: TypeToken<*>? = null
-
     var freshCacheTime: Long = Long.MAX_VALUE
     var maxCacheTime: Long = Long.MAX_VALUE
 
