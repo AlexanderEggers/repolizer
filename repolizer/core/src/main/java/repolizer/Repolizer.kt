@@ -14,7 +14,7 @@ class Repolizer private constructor(builder: Builder) {
     val baseUrl: String? = builder.baseUrl
 
     val requestProvider: RequestProvider<*>? = builder.requestProvider
-    val progressController: ProgressController? = builder.progressController
+    val progressController: ProgressController<*>? = builder.progressController
     val loginManager: LoginManager? = builder.loginManager
     val responseService: ResponseService? = builder.responseService
 
@@ -50,7 +50,7 @@ class Repolizer private constructor(builder: Builder) {
         var baseUrl: String? = null
             private set
 
-        var progressController: ProgressController? = null
+        var progressController: ProgressController<*>? = null
             private set
         var loginManager: LoginManager? = null
             private set
@@ -82,7 +82,7 @@ class Repolizer private constructor(builder: Builder) {
             return this@Builder
         }
 
-        fun setProgress(progressController: ProgressController): Builder {
+        fun setProgress(progressController: ProgressController<*>): Builder {
             this@Builder.progressController = progressController
             return this@Builder
         }

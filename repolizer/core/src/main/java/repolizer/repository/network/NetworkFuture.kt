@@ -47,7 +47,7 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
     protected val cacheAdapter: CacheAdapter = AdapterUtil.getAdapter(repolizer.cacheAdapters,
             bodyType.type, repositoryClass, repolizer) as CacheAdapter
 
-    protected val progressController: ProgressController? = repolizer.progressController
+    protected val progressController: ProgressController<*>? = repolizer.progressController
     protected val loginManager: LoginManager? = repolizer.loginManager
     protected val responseService: ResponseService? = repolizer.responseService
     protected val requestProvider: RequestProvider<*>? = repolizer.requestProvider

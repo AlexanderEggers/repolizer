@@ -4,7 +4,7 @@ import repolizer.repository.request.RequestProvider
 import java.util.*
 import kotlin.collections.HashMap
 
-abstract class ProgressController constructor(private val requestProvider: RequestProvider?) {
+abstract class ProgressController<C> constructor(private val requestProvider: RequestProvider<C>?) {
 
     private val sourceMap: HashMap<String, Int> = HashMap()
 
