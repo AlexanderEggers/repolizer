@@ -1,15 +1,12 @@
 include ':annotation', ':core', ':retrofit', ':livedata'
 
+project(":retrofit").name = "repolizer-retrofit"
+project(":livedata").name = "repolizer-livedata"
+
 project(":annotation").projectDir = file("../repolizer/annotation")
 project(":annotation").name = "repolizer-annotation"
 
 project(":core").projectDir = file("../repolizer/core")
 project(":core").name = "repolizer-core"
-
-project(":retrofit").projectDir = file("network/retrofit")
-project(":retrofit").name = "repolizer-retrofit"
-
-project(":livedata").projectDir = file("wrapper/livedata")
-project(":livedata").name = "repolizer-livedata"
 
 rootProject.name = "repolizer-adapter"

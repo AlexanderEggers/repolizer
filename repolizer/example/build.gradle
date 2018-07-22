@@ -41,5 +41,8 @@ dependencies {
     implementation project(":repolizer-core")
     kapt project(":repolizer-processor")
 
+    implementation project(":repolizer-livedata")
+    implementation project(":repolizer-retrofit")
+
     kapt "com.android.databinding:compiler:$android_studio_version"
 }
