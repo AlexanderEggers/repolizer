@@ -17,7 +17,6 @@ constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder): Persi
     private val deleteSql = futureBuilder.deleteSql
 
     private val databaseItem: Any? = futureBuilder.storageItem
-    private val databaseItemClass: Class<*>? = futureBuilder.storageItemClass
 
     override fun <Wrapper> create(): Wrapper {
         val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, bodyType.type,
@@ -28,12 +27,12 @@ constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder): Persi
     override fun onExecute(executionType: ExecutionType): Boolean? {
         when(storageOperation) {
             StorageOperation.INSERT -> {
-                if(databaseItem == null || databaseItemClass == null) throw IllegalStateException("Database item/class is null.")
-                storageAdapter.insert(repositoryClass, fullUrl, insertSql, databaseItem, databaseItemClass)
+                if(databaseItem == null) throw IllegalStateException("Database item is null.")
+                storageAdapter.insert(repositoryClass, fullUrl, insertSql, databaseItem, String::class.java)
             }
             StorageOperation.UPDATE -> {
-                if(databaseItem == null || databaseItemClass == null) throw IllegalStateException("Database item/class is null.")
-                storageAdapter.update(repositoryClass, fullUrl, updateSql, databaseItem, databaseItemClass)
+                if(databaseItem == null) throw IllegalStateException("Database item is null.")
+                storageAdapter.update(repositoryClass, fullUrl, updateSql, databaseItem, String::class.java)
             }
             StorageOperation.DELETE -> storageAdapter.delete(repositoryClass, fullUrl, deleteSql)
         }

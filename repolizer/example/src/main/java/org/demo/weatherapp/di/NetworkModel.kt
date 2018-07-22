@@ -7,6 +7,8 @@ import dagger.Provides
 import org.demo.weatherapp.R
 import org.demo.weatherapp.api.WeatherRepository
 import repolizer.Repolizer
+import repolizer.adapter.livedata.LiveDataWrapperFactory
+import repolizer.adapter.retrofit.RetrofitNetworkAdapterFactory
 import javax.inject.Singleton
 
 @ProvideModule
@@ -18,6 +20,8 @@ class NetworkModel {
     fun provideWeatherRepository(context: Context): WeatherRepository {
         return Repolizer.newBuilder()
                 .setBaseUrl(context.getString(R.string.server_base_url))
+                .addNetworkAdapter(RetrofitNetworkAdapterFactory(context.getString(R.string.server_base_url)))
+                .addWrapperAdapter(LiveDataWrapperFactory())
                 .build()
                 .getRepository(WeatherRepository::class.java)
     }

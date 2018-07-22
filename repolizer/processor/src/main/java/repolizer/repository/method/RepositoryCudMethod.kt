@@ -76,6 +76,7 @@ class RepositoryCudMethod {
             add("builder.setRequiresLogin(${annotation.requiresLogin});")
             add("builder.setShowProgress(${annotation.showProgress});")
             add("builder.setUrl(url);")
+            add("builder.setSaveData(false);")
 
             RepositoryMapHolder.requestBodyAnnotationMap[annotationMapKey]?.forEach {
                 add("builder.setRaw(${it.simpleName});")

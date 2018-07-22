@@ -28,14 +28,6 @@ open class PersistentFutureBuilder: FutureBuilder() {
             } else field = value
         }
 
-    var storageItemClass: Class<*>? = null
-        set(value) {
-            if (field != null) {
-                throw IllegalStateException("Only ONE storage item can be set. Make sure that " +
-                        "you don't use more than one @StorageBody parameter for this method.")
-            } else field = value
-        }
-
     open fun buildCache(repolizer: Repolizer): PersistentCacheFuture {
         return PersistentCacheFuture(repolizer, this)
     }

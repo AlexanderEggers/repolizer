@@ -38,10 +38,11 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
         val response: NetworkResponse<String> = networkAdapter.execute(this, requestProvider)
 
         return if (response.isSuccessful() && response.body != null) {
-            val saveSuccessful = storageAdapter.insert(repositoryClass, fullUrl, insertSql, response.body, String::class.java)
-            if(saveSuccessful) {
+            val saveSuccessful = storageAdapter?.insert(repositoryClass, fullUrl, insertSql,
+                    response.body, bodyType.rawType)
+            if(saveSuccessful == true) {
                 responseService?.handleSuccess(requestType, response)
-                cacheAdapter.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
+                cacheAdapter?.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
                 true
             } else {
                 responseService?.handleStorageError(requestType, response)

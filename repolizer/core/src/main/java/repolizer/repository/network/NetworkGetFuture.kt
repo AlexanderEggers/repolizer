@@ -14,8 +14,6 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
     private var allowFetch: Boolean = futureBuilder.allowFetch
     private val allowMultipleRequestsAtSameTime: Boolean = futureBuilder.allowMultipleRequestsAtSameTime
 
-    private val saveData: Boolean = futureBuilder.saveData
-
     private val freshCacheTime = futureBuilder.freshCacheTime
     private val maxCacheTime = futureBuilder.maxCacheTime
 
@@ -32,7 +30,8 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
         val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, bodyType.type,
                 repositoryClass, repolizer) as WrapperAdapter<Wrapper>
 
-        return if(wrapperAdapter.canHaveStorageConnection() && storageAdapter.canHaveActiveConnection()) {
+        return if(wrapperAdapter.canHaveStorageConnection()
+                && storageAdapter?.canHaveActiveConnection() == true) {
             storageAdapter.establishConnection(repositoryClass, fullUrl, querySql)
                     ?: throw IllegalStateException("If you want to use an active storage connection, " +
                             "you need to implement the establishConnection() function inside your " +
@@ -41,9 +40,10 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
     }
 
     override fun onDetermineExecutionType(): ExecutionType {
-        this.cacheState = cacheAdapter.get(repositoryClass, fullUrl, freshCacheTime, maxCacheTime)
+        this.cacheState = cacheAdapter?.get(repositoryClass, fullUrl, freshCacheTime, maxCacheTime)
+                ?: CacheState.NEEDS_NO_REFRESH
 
-        val cacheData = storageAdapter.get(repositoryClass, fullUrl, querySql)
+        val cacheData = storageAdapter?.get(repositoryClass, fullUrl, querySql)
         val needsFetch = cacheState == CacheState.NEEDS_SOFT_REFRESH ||
                 cacheState == CacheState.NEEDS_HARD_REFRESH || cacheState == CacheState.NO_CACHE
 
@@ -76,32 +76,29 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
 
         return if (response.isSuccessful() && response.body != null) {
             if(saveData) {
-                val saveSuccessful = storageAdapter.insert(repositoryClass, fullUrl, insertSql,
-                        response.body, String::class.java)
-                if(saveSuccessful) {
+                val saveSuccessful = storageAdapter?.insert(repositoryClass, fullUrl, insertSql,
+                        response.body, bodyType.rawType)
+                if(saveSuccessful == true) {
                     responseService?.handleSuccess(requestType, response)
-                    cacheAdapter.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
-                    storageAdapter.get(repositoryClass, fullUrl, querySql)
+                    cacheAdapter?.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
+                    storageAdapter?.get(repositoryClass, fullUrl, querySql)
                 } else {
                     responseService?.handleStorageError(requestType, response)
                     null
                 }
             } else {
-                storageAdapter.convertData(repositoryClass, response.body, String::class.java)
-                        ?: throw IllegalStateException("Converted data is null. If you don't want to " +
-                                "save your fetched data inside the storage, you have to override " +
-                                "the function convertData() inside your custom StorageAdapter.")
+                converterAdapter.convertStringToData(repositoryClass, response.body, bodyType.rawType) as? Body
             }
         } else {
             responseService?.handleRequestError(requestType, response)
             if (deleteIfCacheIsTooOld && cacheState == CacheState.NEEDS_HARD_REFRESH) {
-                storageAdapter.delete(repositoryClass, fullUrl, deleteSql)
+                storageAdapter?.delete(repositoryClass, fullUrl, deleteSql)
             }
             null
         }
     }
 
     private fun fetchCacheData(): Body? {
-        return storageAdapter.get(repositoryClass, fullUrl, querySql)
+        return storageAdapter?.get(repositoryClass, fullUrl, querySql)
     }
 }

@@ -3,6 +3,7 @@ package repolizer.repository.network
 import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
 import repolizer.adapter.CacheAdapter
+import repolizer.adapter.ConverterAdapter
 import repolizer.adapter.NetworkAdapter
 import repolizer.adapter.StorageAdapter
 import repolizer.repository.future.Future
@@ -43,10 +44,10 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
 
     protected val networkAdapter: NetworkAdapter = AdapterUtil.getAdapter(repolizer.networkAdapters,
             bodyType.type, repositoryClass, repolizer) as NetworkAdapter
-    protected val storageAdapter: StorageAdapter<Body> = AdapterUtil.getAdapter(repolizer.storageAdapters,
-                    bodyType.type, repositoryClass, repolizer) as StorageAdapter<Body>
-    protected val cacheAdapter: CacheAdapter = AdapterUtil.getAdapter(repolizer.cacheAdapters,
-            bodyType.type, repositoryClass, repolizer) as CacheAdapter
+    protected val converterAdapter: ConverterAdapter = AdapterUtil.getAdapter(repolizer.converterAdapters,
+            bodyType.type, repositoryClass, repolizer) as ConverterAdapter
+    protected val storageAdapter: StorageAdapter<Body>?
+    protected val cacheAdapter: CacheAdapter?
 
     protected val progressController: ProgressController<*>? = repolizer.progressController
     protected val loginManager: LoginManager? = repolizer.loginManager
@@ -55,11 +56,26 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
 
     protected val requiresLogin: Boolean = futureBuilder.requiresLogin
     protected val showProgress: Boolean = futureBuilder.showProgress
+    protected val saveData: Boolean = futureBuilder.saveData
 
     protected val progressData: ProgressData by lazy {
         val lazyProgressData = futureBuilder.progressData ?: ProgressData()
         lazyProgressData.requestType = requestType
         lazyProgressData
+    }
+
+    init {
+        if(saveData) {
+            storageAdapter = AdapterUtil.getAdapter(repolizer.storageAdapters,
+                    bodyType.type, repositoryClass, repolizer) as StorageAdapter<Body>
+
+            cacheAdapter = AdapterUtil.getAdapter(repolizer.cacheAdapters,
+                    bodyType.type, repositoryClass, repolizer) as CacheAdapter
+        } else {
+            storageAdapter = null
+
+            cacheAdapter = null
+        }
     }
 
     override fun execute(): Body? {

@@ -97,6 +97,7 @@ class RepositoryRefreshMethod {
             add("builder.setShowProgress(${annotation.showProgress});")
             add("builder.setFetchSecurityLayer(this);")
             add("builder.setInsertSql(insertSql);")
+            add("builder.setSaveData(true);")
 
             RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {
                 add("builder.addHeader(" +

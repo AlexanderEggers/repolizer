@@ -1,6 +1,5 @@
 package repolizer.adapter.retrofit
 
-import android.util.Log
 import repolizer.adapter.NetworkAdapter
 import repolizer.adapter.retrofit.api.NetworkController
 import repolizer.repository.network.NetworkFuture
@@ -11,6 +10,8 @@ import repolizer.repository.response.NetworkResponseStatus
 import retrofit2.Call
 import retrofit2.Response
 import java.io.IOException
+import java.util.logging.Level
+import java.util.logging.Logger
 
 class RetrofitNetworkAdapter(private val networkController: NetworkController): NetworkAdapter() {
 
@@ -31,7 +32,7 @@ class RetrofitNetworkAdapter(private val networkController: NetworkController): 
         val requestProviderCast: RequestProvider<Call<String>>? = try {
             requestProvider as? RequestProvider<Call<String>>
         } catch (e: ClassCastException) {
-            Log.e(RetrofitNetworkAdapter::class.java.name, e.message)
+            Logger.getGlobal().log(Level.SEVERE, e.message)
             null
         }
 
@@ -60,7 +61,7 @@ class RetrofitNetworkAdapter(private val networkController: NetworkController): 
         return try {
             response.errorBody()?.toString() ?: ""
         } catch (e: IOException) {
-            Log.e(RetrofitNetworkAdapter::class.java.name, e.message)
+            Logger.getGlobal().log(Level.SEVERE, e.message)
             e.printStackTrace()
             ""
         }

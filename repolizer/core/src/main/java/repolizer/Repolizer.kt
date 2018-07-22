@@ -3,6 +3,7 @@ package repolizer
 import repolizer.adapter.*
 import repolizer.adapter.factory.AdapterFactory
 import repolizer.adapter.future.FutureWrapperAdapterFactory
+import repolizer.adapter.gson.GsonConverterAdapterFactory
 import repolizer.repository.login.LoginManager
 import repolizer.repository.progress.ProgressController
 import repolizer.repository.provider.GlobalRepositoryProvider
@@ -18,10 +19,11 @@ class Repolizer private constructor(builder: Builder) {
     val loginManager: LoginManager? = builder.loginManager
     val responseService: ResponseService? = builder.responseService
 
-    val wrapperAdapters: ArrayList<AdapterFactory<WrapperAdapter<*>>> = builder.wrapperAdapters
-    val networkAdapters: ArrayList<AdapterFactory<NetworkAdapter>> = builder.networkAdapters
-    val storageAdapters: ArrayList<AdapterFactory<StorageAdapter<*>>> = builder.storageAdapters
-    val cacheAdapters: ArrayList<AdapterFactory<CacheAdapter>> = builder.cacheAdapters
+    val wrapperAdapters: ArrayList<AdapterFactory<out WrapperAdapter<*>>> = builder.wrapperAdapters
+    val networkAdapters: ArrayList<AdapterFactory<out NetworkAdapter>> = builder.networkAdapters
+    val storageAdapters: ArrayList<AdapterFactory<out StorageAdapter<*>>> = builder.storageAdapters
+    val cacheAdapters: ArrayList<AdapterFactory<out CacheAdapter>> = builder.cacheAdapters
+    val converterAdapters: ArrayList<AdapterFactory<out ConverterAdapter>> = builder.converterAdapters
 
     @Suppress("UNCHECKED_CAST")
     fun <T> getRepository(repositoryClass: Class<T>): T {
@@ -39,10 +41,11 @@ class Repolizer private constructor(builder: Builder) {
     }
 
     class Builder {
-        val wrapperAdapters: ArrayList<AdapterFactory<WrapperAdapter<*>>> = ArrayList()
-        val networkAdapters: ArrayList<AdapterFactory<NetworkAdapter>> = ArrayList()
-        val storageAdapters: ArrayList<AdapterFactory<StorageAdapter<*>>> = ArrayList()
-        val cacheAdapters: ArrayList<AdapterFactory<CacheAdapter>> = ArrayList()
+        val wrapperAdapters: ArrayList<AdapterFactory<out WrapperAdapter<*>>> = ArrayList()
+        val networkAdapters: ArrayList<AdapterFactory<out NetworkAdapter>> = ArrayList()
+        val storageAdapters: ArrayList<AdapterFactory<out StorageAdapter<*>>> = ArrayList()
+        val cacheAdapters: ArrayList<AdapterFactory<out CacheAdapter>> = ArrayList()
+        val converterAdapters: ArrayList<AdapterFactory<out ConverterAdapter>> = ArrayList()
 
         var requestProvider: RequestProvider<*>? = null
             private set
@@ -57,23 +60,28 @@ class Repolizer private constructor(builder: Builder) {
         var responseService: ResponseService? = null
             private set
 
-        fun addWrapperAdapter(wrapperAdapter: AdapterFactory<WrapperAdapter<*>>): Builder {
+        fun addWrapperAdapter(wrapperAdapter: AdapterFactory<out WrapperAdapter<*>>): Builder {
             wrapperAdapters.add(wrapperAdapter)
             return this@Builder
         }
 
-        fun addNetworkAdapter(networkAdapter: AdapterFactory<NetworkAdapter>): Builder {
+        fun addNetworkAdapter(networkAdapter: AdapterFactory<out NetworkAdapter>): Builder {
             networkAdapters.add(networkAdapter)
             return this@Builder
         }
 
-        fun addCacheAdapter(cacheAdapter: AdapterFactory<CacheAdapter>): Builder {
+        fun addCacheAdapter(cacheAdapter: AdapterFactory<out CacheAdapter>): Builder {
             cacheAdapters.add(cacheAdapter)
             return this@Builder
         }
 
-        fun addPersistentAdapter(storageAdapter: AdapterFactory<StorageAdapter<*>>): Builder {
+        fun addPersistentAdapter(storageAdapter: AdapterFactory<out StorageAdapter<*>>): Builder {
             storageAdapters.add(storageAdapter)
+            return this@Builder
+        }
+
+        fun addConveterAdapter(converterAdapter: AdapterFactory<out ConverterAdapter>): Builder {
+            converterAdapters.add(converterAdapter)
             return this@Builder
         }
 
@@ -109,6 +117,7 @@ class Repolizer private constructor(builder: Builder) {
 
         private fun addDefaultAdapterFactories() {
             wrapperAdapters.add(FutureWrapperAdapterFactory())
+            converterAdapters.add(GsonConverterAdapterFactory())
         }
     }
 }
