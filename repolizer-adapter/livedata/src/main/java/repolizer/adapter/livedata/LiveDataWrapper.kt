@@ -1,6 +1,7 @@
 package repolizer.adapter.livedata
 
 import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MediatorLiveData
 import repolizer.adapter.WrapperAdapter
 import repolizer.adapter.util.AppExecutor
 import repolizer.repository.future.Future
@@ -11,7 +12,7 @@ class LiveDataWrapper: WrapperAdapter<LiveData<*>>() {
     private val appExecutor = AppExecutor
 
     override fun <B> execute(future: Future<B>): LiveData<B> {
-        return object : LiveData<B>() {
+        return object : MediatorLiveData<B>() {
             var started = AtomicBoolean(false)
 
             override fun onActive() {

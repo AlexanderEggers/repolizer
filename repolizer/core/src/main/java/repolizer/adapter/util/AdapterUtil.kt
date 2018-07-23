@@ -11,7 +11,7 @@ class AdapterUtil {
         fun <T: AdapterFactory<*>> getAdapter(list: List<T>, returnType: Type, repositoryClass: Class<*>, repolizer: Repolizer): Any {
             var adapter: Any? = null
 
-            for (i in 0..list.size) {
+            for (i in 0 until list.size) {
                 if(adapter == null) {
                     adapter = list[i].get(returnType, repositoryClass, repolizer)
                 } else break

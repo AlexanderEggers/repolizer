@@ -62,6 +62,12 @@ class RepositoryGetMethod {
 
                     addCode("\n")
 
+                    val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
+                            ClassName.get(methodElement.returnType))
+                    addStatement("$classTypeToken returnType = new $classWithTypeToken() {}")
+
+                    addCode("\n")
+
                     //Generates the code which will be used for the NetworkBuilder to
                     //initialise it's values
                     addCode(getBuilderCode(annotationMapKey, element, methodElement))
@@ -71,7 +77,7 @@ class RepositoryGetMethod {
                     //cases (like cannot refresh data due to error and cache is too old).
                     addCode(getRepositoryCode(element, annotationMapKey))
 
-                    addStatement("return super.executeGet(builder)")
+                    addStatement("return super.executeGet(builder, returnType.getType())")
                 }.build()
             } ?: ArrayList())
         }
@@ -110,18 +116,18 @@ class RepositoryGetMethod {
         return ArrayList<String>().apply {
             val annotation = methodElement.getAnnotation(GET::class.java)
 
-            val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
-                    ClassName.get(methodElement.returnType))
+
 
             add("$classNetworkBuilder builder = new $classNetworkBuilder();")
 
             add("builder.setRequestType($classRequestType.GET);")
-            add("builder.setTypeToken(new $classWithTypeToken() {});")
+            add("builder.setTypeToken(returnType);")
             add("builder.setUrl(url);")
             add("builder.setRequiresLogin(${annotation.requiresLogin});")
             add("builder.setShowProgress(${annotation.showProgress});")
             add("builder.setSaveData(${annotation.saveData});")
             add("builder.setRepositoryClass(${ClassName.get(classElement.asType())}.class);")
+            add("builder.setFetchSecurityLayer(this);")
 
             add("builder.setInsertSql(insertSql);")
             add("builder.setQuerySql(querySql);")
