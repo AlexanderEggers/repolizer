@@ -58,7 +58,7 @@ class RepositoryRefreshMethod {
                     //initialise it's values
                     addCode(getBuilderCode(annotationMapKey, element, methodElement))
 
-                    addStatement("return super.executeRefresh(builder, returnType)")
+                    addStatement("return super.executeRefresh(builder, returnType.getType())")
                 }.build()
             } ?: ArrayList())
         }

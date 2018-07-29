@@ -3,6 +3,7 @@ package repolizer.adapter.retrofit.api
 import com.google.gson.Gson
 import okhttp3.MediaType
 import okhttp3.RequestBody
+import repolizer.adapter.retrofit.util.Utils
 import repolizer.repository.util.QueryHashMap
 import retrofit2.Call
 
@@ -17,9 +18,9 @@ constructor(networkInterface: NetworkInterface, gson: Gson) : NetworkController(
         return if (rawObject != null) {
             val json = super.gson.toJson(rawObject)
             val requestBody = RequestBody.create(MediaType.parse("application/json"), json)
-            return super.networkInterface.post(headerMap, url, queryMap, requestBody)
+            return super.networkInterface.post(headerMap, Utils.prepareUrl(url), queryMap, requestBody)
         } else {
-            super.networkInterface.post(headerMap, url, queryMap, null)
+            super.networkInterface.post(headerMap, Utils.prepareUrl(url), queryMap, null)
         }
     }
 
@@ -27,9 +28,9 @@ constructor(networkInterface: NetworkInterface, gson: Gson) : NetworkController(
         return if (rawObject != null) {
             val json = super.gson.toJson(rawObject)
             val requestBody = RequestBody.create(MediaType.parse("application/json"), json)
-            return super.networkInterface.put(headerMap, url, queryMap, requestBody)
+            return super.networkInterface.put(headerMap, Utils.prepareUrl(url), queryMap, requestBody)
         } else {
-            super.networkInterface.put(headerMap, url, queryMap, null)
+            super.networkInterface.put(headerMap, Utils.prepareUrl(url), queryMap, null)
         }
     }
 
@@ -37,9 +38,9 @@ constructor(networkInterface: NetworkInterface, gson: Gson) : NetworkController(
         return if (rawObject != null) {
             val json = super.gson.toJson(rawObject)
             val requestBody = RequestBody.create(MediaType.parse("application/json"), json)
-            super.networkInterface.delete(headerMap, url, queryMap, requestBody)
+            super.networkInterface.delete(headerMap, Utils.prepareUrl(url), queryMap, requestBody)
         } else {
-            super.networkInterface.delete(headerMap, url, queryMap)
+            super.networkInterface.delete(headerMap, Utils.prepareUrl(url), queryMap)
         }
     }
 }
