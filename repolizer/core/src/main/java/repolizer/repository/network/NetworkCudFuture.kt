@@ -11,7 +11,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
     val rawBody: Any? = futureBuilder.raw
 
     override fun <Wrapper> create(): Wrapper {
-        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, bodyType.type,
+        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, wrapperType.type,
                 repositoryClass, repolizer) as WrapperAdapter<Wrapper>
         return wrapperAdapter.execute(this)
     }

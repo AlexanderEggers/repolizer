@@ -24,15 +24,15 @@ constructor(protected val repolizer: Repolizer, futureBuilder: PersistentFutureB
 
     protected val repositoryClass: Class<*> = futureBuilder.repositoryClass
             ?: throw IllegalStateException("Repository class type is null.")
-    protected val bodyType: TypeToken<*> = futureBuilder.typeToken
-            ?: throw IllegalStateException("Body type is null.")
+    protected val wrapperType: TypeToken<*> = futureBuilder.typeToken
+            ?: throw IllegalStateException("Wrapper type is null.")
 
     protected val storageAdapter: StorageAdapter<Body> = AdapterUtil.getAdapter(repolizer.storageAdapters,
-            bodyType.type, repositoryClass, repolizer) as StorageAdapter<Body>
+            wrapperType.type, repositoryClass, repolizer) as StorageAdapter<Body>
     protected val cacheAdapter: CacheAdapter = AdapterUtil.getAdapter(repolizer.cacheAdapters,
-            bodyType.type, repositoryClass, repolizer) as CacheAdapter
+            wrapperType.type, repositoryClass, repolizer) as CacheAdapter
     protected val converterAdapter: ConverterAdapter = AdapterUtil.getAdapter(repolizer.converterAdapters,
-            bodyType.type, repositoryClass, repolizer) as ConverterAdapter
+            wrapperType.type, repositoryClass, repolizer) as ConverterAdapter
 
     override fun execute(): Body? {
         onStart()

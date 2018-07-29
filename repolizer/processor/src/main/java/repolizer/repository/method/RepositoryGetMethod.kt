@@ -47,17 +47,17 @@ class RepositoryGetMethod {
 
                     val insertSql = methodElement.getAnnotation(GET::class.java).insertSql
                     addStatement("String insertSql = \"$insertSql\"")
-                    if(insertSql.isNotEmpty()) addCode(buildSql(annotationMapKey,
+                    if (insertSql.isNotEmpty()) addCode(buildSql(annotationMapKey,
                             "insertSql", insertSql))
 
                     val querySql = methodElement.getAnnotation(GET::class.java).querySql
                     addStatement("String querySql = \"$querySql\"")
-                    if(querySql.isNotEmpty()) addCode(buildSql(annotationMapKey,
+                    if (querySql.isNotEmpty()) addCode(buildSql(annotationMapKey,
                             "querySql", querySql))
 
                     val deleteSql = methodElement.getAnnotation(GET::class.java).deleteSql
                     addStatement("String deleteSql = \"$deleteSql\"")
-                    if(deleteSql.isNotEmpty()) addCode(buildSql(annotationMapKey,
+                    if (deleteSql.isNotEmpty()) addCode(buildSql(annotationMapKey,
                             "deleteSql", deleteSql))
 
                     addCode("\n")
@@ -86,7 +86,7 @@ class RepositoryGetMethod {
     private fun buildUrl(annotationMapKey: String): String {
         return ArrayList<String>().apply {
             addAll(RepositoryMapHolder.urlParameterAnnotationMap[annotationMapKey]?.map {
-                "url = url.replace(\":${it.simpleName}\", \"$it\");"
+                "url = url.replace(\":${it.simpleName}\", ${it.simpleName});"
             } ?: ArrayList())
 
             val queries = RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]
@@ -103,7 +103,7 @@ class RepositoryGetMethod {
     private fun buildSql(annotationMapKey: String, sqlParamName: String, baseSql: String): String {
         return ArrayList<String>().apply {
             RepositoryMapHolder.sqlParameterAnnotationMap[annotationMapKey]?.forEach {
-                if(baseSql.contains(":${it.simpleName}")) {
+                if (baseSql.contains(":${it.simpleName}")) {
                     add("$sqlParamName = $sqlParamName.replace(\":${it.simpleName}\", \"$it\");")
                 }
             }

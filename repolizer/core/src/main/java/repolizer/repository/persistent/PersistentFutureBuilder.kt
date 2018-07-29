@@ -1,13 +1,12 @@
 package repolizer.repository.persistent
 
-import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
 import repolizer.annotation.repository.util.CacheOperation
 import repolizer.annotation.repository.util.StorageOperation
 import repolizer.persistent.CacheItem
 import repolizer.repository.future.FutureBuilder
 
-open class PersistentFutureBuilder: FutureBuilder() {
+open class PersistentFutureBuilder : FutureBuilder() {
 
     var cacheOperation: CacheOperation? = null
     var storageOperation: StorageOperation? = null

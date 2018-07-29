@@ -44,13 +44,21 @@ class RepositoryRefreshMethod {
 
                     val sql = methodElement.getAnnotation(REFRESH::class.java).insertSql
                     addStatement("String insertSql = \"$sql\"")
-                    if(sql.isNotEmpty()) addCode(buildSql(annotationMapKey))
+                    if (sql.isNotEmpty()) addCode(buildSql(annotationMapKey))
+
+                    addCode("\n")
+
+                    val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
+                            ClassName.get(methodElement.returnType))
+                    addStatement("$classTypeToken returnType = new $classWithTypeToken() {}")
+
+                    addCode("\n")
 
                     //Generates the code which will be used for the NetworkBuilder to
                     //initialise it's values
                     addCode(getBuilderCode(annotationMapKey, element, methodElement))
 
-                    addStatement("return super.executeRefresh(builder)")
+                    addStatement("return super.executeRefresh(builder, returnType)")
                 }.build()
             } ?: ArrayList())
         }
@@ -59,7 +67,7 @@ class RepositoryRefreshMethod {
     private fun buildUrl(annotationMapKey: String): String {
         return ArrayList<String>().apply {
             addAll(RepositoryMapHolder.urlParameterAnnotationMap[annotationMapKey]?.map {
-                "url = url.replace(\":${it.simpleName}\", \"$it\");"
+                "url = url.replace(\":${it.simpleName}\", ${it.simpleName});"
             } ?: ArrayList())
 
             val queries = RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]
@@ -86,9 +94,7 @@ class RepositoryRefreshMethod {
 
             add("$classNetworkBuilder builder = new $classNetworkBuilder();")
 
-            val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
-                    ClassName.get(methodElement.returnType))
-            add("builder.setTypeToken(new $classWithTypeToken() {});")
+            add("builder.setTypeToken(returnType);")
 
             add("builder.setRequestType($classRequestType.GET);")
             add("builder.setRepositoryClass(${ClassName.get(classElement.asType())}.class);")

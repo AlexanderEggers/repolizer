@@ -8,16 +8,16 @@ class AdapterUtil {
 
     companion object {
 
-        fun <T: AdapterFactory<*>> getAdapter(list: List<T>, returnType: Type, repositoryClass: Class<*>, repolizer: Repolizer): Any {
+        fun <T : AdapterFactory<*>> getAdapter(list: List<T>, returnType: Type, repositoryClass: Class<*>, repolizer: Repolizer): Any {
             var adapter: Any? = null
 
             for (i in 0 until list.size) {
-                if(adapter == null) {
+                if (adapter == null) {
                     adapter = list[i].get(returnType, repositoryClass, repolizer)
                 } else break
             }
 
-            if(adapter == null) {
+            if (adapter == null) {
                 throw IllegalArgumentException("Cannot find adapter.")
             } else {
                 return adapter

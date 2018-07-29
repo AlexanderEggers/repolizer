@@ -7,7 +7,7 @@ android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "org.demo.weatherapp"
-        minSdkVersion 21
+        minSdkVersion 14
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -40,10 +40,9 @@ dependencies {
     kapt "org.archknife:archknife-processor:$archknife_version"
 
     implementation project(":repolizer-core")
-    kapt project(":repolizer-processor")
-
     implementation project(":repolizer-livedata")
     implementation project(":repolizer-retrofit")
+    kapt project(":repolizer-processor")
 
     kapt "com.android.databinding:compiler:$android_studio_version"
 }

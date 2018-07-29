@@ -4,7 +4,7 @@ import repolizer.Repolizer
 import repolizer.repository.network.FetchSecurityLayer
 import repolizer.repository.network.NetworkFutureBuilder
 import repolizer.repository.persistent.PersistentFutureBuilder
-import java.lang.reflect.ParameterizedType
+import repolizer.repository.util.Utils.Companion.getBodyType
 import java.lang.reflect.Type
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -12,17 +12,15 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
 
     private val fetchingData = AtomicBoolean(false)
 
-    protected fun <T> executeRefresh(futureBuilder: NetworkFutureBuilder): T {
+    protected fun <T> executeRefresh(futureBuilder: NetworkFutureBuilder, returnType: Type): T {
+        val bodyType = getBodyType(returnType)
+        futureBuilder.bodyType = bodyType
         return futureBuilder.buildRefresh(repolizer).create()
     }
 
     protected fun <T> executeGet(futureBuilder: NetworkFutureBuilder, returnType: Type): T {
-        val bodyType = if(returnType is ParameterizedType) {
-            returnType.actualTypeArguments[0]
-        } else {
-            returnType
-        }
-
+        val bodyType = getBodyType(returnType)
+        futureBuilder.bodyType = bodyType
         return futureBuilder.buildGet(repolizer, bodyType).create()
     }
 

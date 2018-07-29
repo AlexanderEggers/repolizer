@@ -2,10 +2,10 @@ package repolizer.repository.network
 
 import repolizer.Repolizer
 import repolizer.adapter.WrapperAdapter
+import repolizer.adapter.util.AdapterUtil
 import repolizer.persistent.CacheItem
 import repolizer.persistent.CacheState
 import repolizer.repository.response.NetworkResponse
-import repolizer.adapter.util.AdapterUtil
 
 class NetworkGetFuture<Body>
 constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : NetworkFuture<Body>(repolizer, futureBuilder) {
@@ -27,10 +27,10 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
     private lateinit var cacheState: CacheState
 
     override fun <Wrapper> create(): Wrapper {
-        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, bodyType.type,
+        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, wrapperType.type,
                 repositoryClass, repolizer) as WrapperAdapter<Wrapper>
 
-        return if(wrapperAdapter.canHaveStorageConnection()
+        return if (wrapperAdapter.canHaveStorageConnection()
                 && storageAdapter?.canHaveActiveConnection() == true) {
             storageAdapter.establishConnection(repositoryClass, fullUrl, querySql)
                     ?: throw IllegalStateException("If you want to use an active storage connection, " +
@@ -75,10 +75,10 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
         val response: NetworkResponse<String> = networkAdapter.execute(this, requestProvider)
 
         return if (response.isSuccessful() && response.body != null) {
-            if(saveData) {
+            if (saveData) {
                 val saveSuccessful = storageAdapter?.insert(repositoryClass, fullUrl, insertSql,
-                        response.body, bodyType.rawType)
-                if(saveSuccessful == true) {
+                        response.body)
+                if (saveSuccessful == true) {
                     responseService?.handleSuccess(requestType, response)
                     cacheAdapter?.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
                     storageAdapter?.get(repositoryClass, fullUrl, querySql)
@@ -87,7 +87,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
                     null
                 }
             } else {
-                converterAdapter.convertStringToData(repositoryClass, response.body, bodyType.rawType) as? Body
+                converterAdapter.convertStringToData(repositoryClass, response.body, bodyType)
             }
         } else {
             responseService?.handleRequestError(requestType, response)

@@ -6,18 +6,18 @@ import repolizer.adapter.CacheAdapter
 import repolizer.adapter.ConverterAdapter
 import repolizer.adapter.NetworkAdapter
 import repolizer.adapter.StorageAdapter
+import repolizer.adapter.util.AdapterUtil
 import repolizer.repository.future.Future
 import repolizer.repository.login.LoginManager
 import repolizer.repository.progress.ProgressController
 import repolizer.repository.progress.ProgressData
-import repolizer.repository.request.RequestType
-import repolizer.adapter.util.AdapterUtil
 import repolizer.repository.request.RequestProvider
+import repolizer.repository.request.RequestType
 import repolizer.repository.response.ResponseService
 import repolizer.repository.util.QueryHashMap
 
 abstract class NetworkFuture<Body>
-constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuilder): Future<Body>() {
+constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Future<Body>() {
 
     val requestType: RequestType = futureBuilder.requestType
             ?: throw IllegalStateException("Request type is null.")
@@ -39,13 +39,15 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
     protected val repositoryClass: Class<*> = futureBuilder.repositoryClass
             ?: throw IllegalStateException("Repository class type is null.")
 
-    protected val bodyType: TypeToken<*> = futureBuilder.typeToken
+    protected val wrapperType: TypeToken<*> = futureBuilder.typeToken
+            ?: throw IllegalStateException("Wrapper type is null.")
+    protected val bodyType: Class<Body> = futureBuilder.bodyType as? Class<Body>
             ?: throw IllegalStateException("Body type is null.")
 
     protected val networkAdapter: NetworkAdapter = AdapterUtil.getAdapter(repolizer.networkAdapters,
-            bodyType.type, repositoryClass, repolizer) as NetworkAdapter
+            wrapperType.type, repositoryClass, repolizer) as NetworkAdapter
     protected val converterAdapter: ConverterAdapter = AdapterUtil.getAdapter(repolizer.converterAdapters,
-            bodyType.type, repositoryClass, repolizer) as ConverterAdapter
+            wrapperType.type, repositoryClass, repolizer) as ConverterAdapter
     protected val storageAdapter: StorageAdapter<Body>?
     protected val cacheAdapter: CacheAdapter?
 
@@ -65,12 +67,12 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
     }
 
     init {
-        if(saveData) {
+        if (saveData) {
             storageAdapter = AdapterUtil.getAdapter(repolizer.storageAdapters,
-                    bodyType.type, repositoryClass, repolizer) as StorageAdapter<Body>
+                    wrapperType.type, repositoryClass, repolizer) as StorageAdapter<Body>
 
             cacheAdapter = AdapterUtil.getAdapter(repolizer.cacheAdapters,
-                    bodyType.type, repositoryClass, repolizer) as CacheAdapter
+                    wrapperType.type, repositoryClass, repolizer) as CacheAdapter
         } else {
             storageAdapter = null
 
@@ -82,7 +84,7 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
         onStart()
 
         val executionType = onDetermineExecutionType()
-        val newBody =  when (executionType) {
+        val newBody = when (executionType) {
             ExecutionType.USE_NETWORK -> {
                 if (showProgress) progressController?.internalShow(fullUrl, progressData)
 

@@ -8,7 +8,7 @@ import repolizer.persistent.CacheItem
 import repolizer.repository.network.ExecutionType
 
 class PersistentCacheFuture
-constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder): PersistentFuture<Boolean>(repolizer, futureBuilder) {
+constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder) : PersistentFuture<Boolean>(repolizer, futureBuilder) {
 
     private val cacheOperation: CacheOperation = futureBuilder.cacheOperation
             ?: throw IllegalStateException("CacheOperation is null.")
@@ -16,13 +16,13 @@ constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder): Persi
             ?: throw IllegalStateException("CacheItem is null.")
 
     override fun <Wrapper> create(): Wrapper {
-        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, bodyType.type,
+        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, wrapperType.type,
                 repositoryClass, repolizer) as WrapperAdapter<Wrapper>
         return wrapperAdapter.execute(this)
     }
 
     override fun onExecute(executionType: ExecutionType): Boolean? {
-        when(cacheOperation) {
+        when (cacheOperation) {
             CacheOperation.INSERT -> cacheAdapter.save(repositoryClass, cacheItem)
             CacheOperation.DELETE -> cacheAdapter.delete(repositoryClass, fullUrl)
         }

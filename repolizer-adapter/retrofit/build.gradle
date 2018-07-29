@@ -3,11 +3,11 @@ apply plugin: 'kotlin'
 
 ext {
     bintrayRepo = 'android'
-    bintrayName = 'repolizer-core'
+    bintrayName = 'repolizer-retrofit'
 
     publishedGroupId = 'org.repolizer'
-    libraryName = 'repolizer-core'
-    artifact = 'repolizer-core'
+    libraryName = 'repolizer-retrofit'
+    artifact = 'repolizer-retrofit'
 
     libraryDescription = 'Android annotation processor to add a MVVM-based repository pattern to your App.'
 
@@ -32,7 +32,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-    api project(":repolizer-core")
+    implementation project(":repolizer-core")
 
     api "com.squareup.okhttp3:okhttp:$okhttp_version"
     api "com.squareup.retrofit2:retrofit:$retrofit2_version"

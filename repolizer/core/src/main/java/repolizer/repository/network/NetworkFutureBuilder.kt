@@ -5,7 +5,6 @@ import repolizer.repository.future.FutureBuilder
 import repolizer.repository.progress.ProgressData
 import repolizer.repository.request.RequestType
 import repolizer.repository.util.QueryHashMap
-import java.lang.reflect.Type
 
 open class NetworkFutureBuilder : FutureBuilder() {
 
@@ -53,7 +52,7 @@ open class NetworkFutureBuilder : FutureBuilder() {
         queryMap[key] = list
     }
 
-    open fun <Body> buildGet(repolizer: Repolizer, returnType: Body): NetworkGetFuture<Body> {
+    open fun <Body> buildGet(repolizer: Repolizer, returnType: Class<Body>): NetworkGetFuture<Body> {
         return NetworkGetFuture(repolizer, this)
     }
 

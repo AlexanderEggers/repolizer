@@ -16,7 +16,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
     private val insertSql: String = futureBuilder.insertSql
 
     override fun <Wrapper> create(): Wrapper {
-        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, bodyType.type,
+        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, wrapperType.type,
                 repositoryClass, repolizer) as WrapperAdapter<Wrapper>
         return wrapperAdapter.execute(this)
     }
@@ -39,18 +39,18 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
 
         return if (response.isSuccessful() && response.body != null) {
             val saveSuccessful = storageAdapter?.insert(repositoryClass, fullUrl, insertSql,
-                    response.body, bodyType.rawType)
-            if(saveSuccessful == true) {
+                    response.body)
+            if (saveSuccessful == true) {
                 responseService?.handleSuccess(requestType, response)
                 cacheAdapter?.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
                 true
             } else {
                 responseService?.handleStorageError(requestType, response)
-                false
+                null
             }
         } else {
             responseService?.handleRequestError(requestType, response)
-            false
+            null
         }
     }
 
