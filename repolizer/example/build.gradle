@@ -12,6 +12,12 @@ android {
         versionCode 1
         versionName "1.0"
 
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+
         Properties properties = new Properties()
         properties.load(project.rootProject.file("local.properties").newDataInputStream())
         String apiKey = properties.getProperty("apiKey", "")
@@ -38,6 +44,10 @@ dependencies {
 
     implementation "org.archknife:archknife-core:$archknife_version"
     kapt "org.archknife:archknife-processor:$archknife_version"
+
+    api "android.arch.persistence.room:runtime:$room_version"
+    kapt "android.arch.persistence.room:compiler:$room_version"
+    kapt "android.arch.lifecycle:compiler:$livedata_version"
 
     implementation project(":repolizer-core")
     implementation project(":repolizer-livedata")

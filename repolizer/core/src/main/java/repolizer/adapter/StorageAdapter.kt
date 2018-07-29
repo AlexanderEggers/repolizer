@@ -1,6 +1,12 @@
 package repolizer.adapter
 
-abstract class StorageAdapter<T>(val converterAdapter: ConverterAdapter) {
+abstract class StorageAdapter<T> {
+
+    lateinit var converterAdapter: ConverterAdapter
+
+    fun init(converterAdapter: ConverterAdapter) {
+        this.converterAdapter = converterAdapter
+    }
 
     abstract fun insert(repositoryClass: Class<*>, url: String,
                         sql: String, data: Any): Boolean
@@ -11,7 +17,7 @@ abstract class StorageAdapter<T>(val converterAdapter: ConverterAdapter) {
 
     abstract fun delete(repositoryClass: Class<*>, url: String, sql: String)
 
-    open fun canHaveActiveConnection(): Boolean {
+    open fun canHaveActiveConnections(): Boolean {
         return false
     }
 

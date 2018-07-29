@@ -1,10 +1,10 @@
 package repolizer.repository
 
 import repolizer.Repolizer
+import repolizer.adapter.util.AdapterUtil.Companion.getBodyType
 import repolizer.repository.network.FetchSecurityLayer
 import repolizer.repository.network.NetworkFutureBuilder
 import repolizer.repository.persistent.PersistentFutureBuilder
-import repolizer.repository.util.Utils.Companion.getBodyType
 import java.lang.reflect.Type
 import java.util.concurrent.atomic.AtomicBoolean
 

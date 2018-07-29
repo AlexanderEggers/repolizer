@@ -75,7 +75,7 @@ class Repolizer private constructor(builder: Builder) {
             return this@Builder
         }
 
-        fun addPersistentAdapter(storageAdapter: AdapterFactory<out StorageAdapter<*>>): Builder {
+        fun addStorageAdapter(storageAdapter: AdapterFactory<out StorageAdapter<*>>): Builder {
             storageAdapters.add(storageAdapter)
             return this@Builder
         }

@@ -2,6 +2,7 @@ package repolizer.adapter.livedata
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
+import repolizer.adapter.StorageAdapter
 import repolizer.adapter.WrapperAdapter
 import repolizer.adapter.util.AppExecutor
 import repolizer.repository.future.Future
@@ -24,6 +25,15 @@ class LiveDataWrapper: WrapperAdapter<LiveData<*>>() {
                 }
             }
         }
+    }
+
+    override fun <B> execute(future: Future<B>, storageAdapter: StorageAdapter<B>,
+                             repositoryClass: Class<*>, url: String, sql: String): LiveData<B>? {
+        appExecutor.workerThread.execute {
+            future.execute()
+        }
+
+        return storageAdapter.establishConnection(repositoryClass, url, sql)
     }
 
     override fun canHaveStorageConnection(): Boolean {

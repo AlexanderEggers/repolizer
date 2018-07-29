@@ -11,7 +11,7 @@ import repolizer.annotation.repository.parameter.UrlQuery
 @Repository
 interface WeatherRepository {
 
-    @GET(url = ":weather", maxFreshTime = AlarmManager.INTERVAL_HOUR, saveData = false)
+    @GET(url = ":weather", maxFreshTime = AlarmManager.INTERVAL_HOUR)
     fun getWeatherData(@UrlParameter weather: String,
                        @UrlQuery("APPID") apiKey: String,
                        @UrlQuery("q") cityCountry: String = "Melbourne,au",

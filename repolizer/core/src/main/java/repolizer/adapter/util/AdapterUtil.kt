@@ -2,6 +2,7 @@ package repolizer.adapter.util
 
 import repolizer.Repolizer
 import repolizer.adapter.factory.AdapterFactory
+import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
 class AdapterUtil {
@@ -21,6 +22,14 @@ class AdapterUtil {
                 throw IllegalArgumentException("Cannot find adapter.")
             } else {
                 return adapter
+            }
+        }
+
+        fun getBodyType(returnType: Type): Class<*> {
+            return if (returnType is ParameterizedType) {
+                returnType.actualTypeArguments[0] as Class<*>
+            } else {
+                returnType as Class<*>
             }
         }
     }

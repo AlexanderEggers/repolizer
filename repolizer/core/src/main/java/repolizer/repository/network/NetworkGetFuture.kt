@@ -24,18 +24,20 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
     private var fetchSecurityLayer: FetchSecurityLayer = futureBuilder.fetchSecurityLayer
             ?: throw IllegalStateException("FetchSecurityLayer is null.")
 
+    private var wrapperCanHaveActiveConnection: Boolean = false
     private lateinit var cacheState: CacheState
 
     override fun <Wrapper> create(): Wrapper {
         val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, wrapperType.type,
                 repositoryClass, repolizer) as WrapperAdapter<Wrapper>
+        wrapperCanHaveActiveConnection = wrapperAdapter.canHaveStorageConnection()
 
         return if (wrapperAdapter.canHaveStorageConnection()
-                && storageAdapter?.canHaveActiveConnection() == true) {
-            storageAdapter.establishConnection(repositoryClass, fullUrl, querySql)
+                && storageAdapter?.canHaveActiveConnections() == true) {
+            wrapperAdapter.execute(this, storageAdapter, repositoryClass, fullUrl, querySql)
                     ?: throw IllegalStateException("If you want to use an active storage connection, " +
-                            "you need to implement the establishConnection() function inside your " +
-                            "StorageAdapter.")
+                    "you need to implement the establishConnection() function inside your " +
+                    "StorageAdapter.")
         } else wrapperAdapter.execute(this)
     }
 
@@ -81,7 +83,11 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
                 if (saveSuccessful == true) {
                     responseService?.handleSuccess(requestType, response)
                     cacheAdapter?.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
-                    storageAdapter?.get(repositoryClass, fullUrl, querySql)
+
+                    if (!wrapperCanHaveActiveConnection
+                            || storageAdapter?.canHaveActiveConnections() == false) {
+                        storageAdapter?.get(repositoryClass, fullUrl, querySql)
+                    } else null
                 } else {
                     responseService?.handleStorageError(requestType, response)
                     null

@@ -8,6 +8,8 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.demo.weatherapp.R
 import org.demo.weatherapp.api.WeatherRepository
+import org.demo.weatherapp.cache.SharedPrefCacheAdapterFactory
+import org.demo.weatherapp.storage.AppDatabaseAdapterFactory
 import repolizer.Repolizer
 import repolizer.adapter.livedata.LiveDataWrapperFactory
 import repolizer.adapter.retrofit.RetrofitNetworkAdapterFactory
@@ -25,6 +27,8 @@ class NetworkModel {
                 .addNetworkAdapter(RetrofitNetworkAdapterFactory(context.getString(R.string.server_base_url),
                         httpClient = httpClient))
                 .addWrapperAdapter(LiveDataWrapperFactory())
+                .addStorageAdapter(AppDatabaseAdapterFactory(context))
+                .addCacheAdapter(SharedPrefCacheAdapterFactory(context))
                 .build()
                 .getRepository(WeatherRepository::class.java)
     }
