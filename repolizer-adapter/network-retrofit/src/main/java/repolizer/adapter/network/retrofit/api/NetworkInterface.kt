@@ -1,4 +1,4 @@
-package repolizer.adapter.retrofit.api
+package repolizer.adapter.network.retrofit.api
 
 import okhttp3.RequestBody
 import repolizer.repository.response.NetworkResponse

@@ -1,13 +1,13 @@
-apply plugin: 'java-library'
-apply plugin: 'kotlin'
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 ext {
     bintrayRepo = 'android'
-    bintrayName = 'repolizer-retrofit'
+    bintrayName = 'repolizer-livedata'
 
     publishedGroupId = 'org.repolizer'
-    libraryName = 'repolizer-retrofit'
-    artifact = 'repolizer-retrofit'
+    libraryName = 'repolizer-livedata'
+    artifact = 'repolizer-livedata'
 
     libraryDescription = 'Android annotation processor to add a MVVM-based repository pattern to your App.'
 
@@ -28,16 +28,31 @@ ext {
     allLicenses = ["Apache-2.0"]
 }
 
+android {
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
+
+    defaultConfig {
+        minSdkVersion 14
+        versionName "$repolizer_library_version"
+        consumerProguardFiles 'proguard-rules.pro'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+}
+
+tasks.withType(Javadoc).all {
+    enabled = false
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     implementation project(":repolizer-core")
-
-    api "com.squareup.okhttp3:okhttp:$okhttp_version"
-    api "com.squareup.retrofit2:retrofit:$retrofit2_version"
-    api "com.squareup.retrofit2:converter-scalars:$retrofit2_version"
-    api "com.google.code.gson:gson:$gson_version"
 }
 
 apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'

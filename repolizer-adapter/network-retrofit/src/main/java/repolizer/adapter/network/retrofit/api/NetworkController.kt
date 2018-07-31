@@ -1,7 +1,6 @@
-package repolizer.adapter.retrofit.api
+package repolizer.adapter.network.retrofit.api
 
 import com.google.gson.Gson
-import repolizer.repository.response.NetworkResponse
 import repolizer.repository.util.QueryHashMap
 import retrofit2.Call
 

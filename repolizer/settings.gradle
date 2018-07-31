@@ -1,4 +1,4 @@
-include ':example', ':annotation', ':processor', ':core', ':retrofit', ':livedata'
+include ':example', ':annotation', ':processor', ':core', ':retrofit', ':livedata', ':sharedprefs'
 
 project(":annotation").name = "repolizer-annotation"
 project(":core").name = "repolizer-core"
@@ -10,5 +10,8 @@ project(":retrofit").name = "repolizer-retrofit"
 
 project(":livedata").projectDir = file("../repolizer-adapter/wrapper-livedata")
 project(":livedata").name = "repolizer-livedata"
+
+project(":sharedprefs").projectDir = file("../repolizer-adapter/cache-sharedprefs")
+project(":sharedprefs").name = "repolizer-sharedprefs"
 
 rootProject.name = "repolizer-library"

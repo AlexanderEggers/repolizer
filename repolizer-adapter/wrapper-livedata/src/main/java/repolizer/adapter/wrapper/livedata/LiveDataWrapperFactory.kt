@@ -1,4 +1,4 @@
-package repolizer.adapter.livedata
+package repolizer.adapter.wrapper.livedata
 
 import android.arch.lifecycle.LiveData
 import repolizer.Repolizer

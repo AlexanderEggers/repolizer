@@ -1,9 +1,9 @@
-package repolizer.adapter.retrofit.api
+package repolizer.adapter.network.retrofit.api
 
 import com.google.gson.Gson
 import okhttp3.MediaType
 import okhttp3.RequestBody
-import repolizer.adapter.retrofit.util.Utils
+import repolizer.adapter.network.retrofit.util.Utils
 import repolizer.repository.util.QueryHashMap
 import retrofit2.Call
 

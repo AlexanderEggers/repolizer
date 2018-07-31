@@ -1,4 +1,4 @@
-package org.demo.weatherapp.cache
+package repolizer.adapter.cache.sharedprefs
 
 import android.content.Context
 import repolizer.adapter.CacheAdapter

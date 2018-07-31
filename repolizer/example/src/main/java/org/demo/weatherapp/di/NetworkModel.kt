@@ -8,11 +8,11 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.demo.weatherapp.R
 import org.demo.weatherapp.api.WeatherRepository
-import org.demo.weatherapp.cache.SharedPrefCacheAdapterFactory
 import org.demo.weatherapp.storage.AppDatabaseAdapterFactory
 import repolizer.Repolizer
-import repolizer.adapter.livedata.LiveDataWrapperFactory
-import repolizer.adapter.retrofit.RetrofitNetworkAdapterFactory
+import repolizer.adapter.cache.sharedprefs.SharedPrefCacheAdapterFactory
+import repolizer.adapter.wrapper.livedata.LiveDataWrapperFactory
+import repolizer.adapter.network.retrofit.RetrofitNetworkAdapterFactory
 import javax.inject.Singleton
 
 @ProvideModule

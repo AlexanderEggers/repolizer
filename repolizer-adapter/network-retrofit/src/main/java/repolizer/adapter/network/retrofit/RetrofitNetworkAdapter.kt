@@ -1,7 +1,7 @@
-package repolizer.adapter.retrofit
+package repolizer.adapter.network.retrofit
 
 import repolizer.adapter.NetworkAdapter
-import repolizer.adapter.retrofit.api.NetworkController
+import repolizer.adapter.network.retrofit.api.NetworkController
 import repolizer.repository.network.NetworkFuture
 import repolizer.repository.request.RequestProvider
 import repolizer.repository.request.RequestType

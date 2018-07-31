@@ -1,10 +1,10 @@
-package repolizer.adapter.livedata
+package repolizer.adapter.wrapper.livedata
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
 import repolizer.adapter.StorageAdapter
 import repolizer.adapter.WrapperAdapter
-import repolizer.adapter.util.AppExecutor
+import repolizer.adapter.wrapper.util.AppExecutor
 import repolizer.repository.future.Future
 import java.util.concurrent.atomic.AtomicBoolean
 

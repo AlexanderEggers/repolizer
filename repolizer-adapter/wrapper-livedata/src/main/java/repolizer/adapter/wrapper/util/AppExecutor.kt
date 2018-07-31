@@ -1,4 +1,4 @@
-package repolizer.adapter.util
+package repolizer.adapter.wrapper.util
 
 import android.os.Handler
 import android.os.Looper

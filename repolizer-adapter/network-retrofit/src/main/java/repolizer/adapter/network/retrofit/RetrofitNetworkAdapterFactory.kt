@@ -1,12 +1,12 @@
-package repolizer.adapter.retrofit
+package repolizer.adapter.network.retrofit
 
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import repolizer.Repolizer
 import repolizer.adapter.factory.AdapterFactory
-import repolizer.adapter.retrofit.api.DefaultNetworkController
-import repolizer.adapter.retrofit.api.NetworkController
-import repolizer.adapter.retrofit.api.NetworkInterface
+import repolizer.adapter.network.retrofit.api.DefaultNetworkController
+import repolizer.adapter.network.retrofit.api.NetworkController
+import repolizer.adapter.network.retrofit.api.NetworkInterface
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.lang.reflect.Type

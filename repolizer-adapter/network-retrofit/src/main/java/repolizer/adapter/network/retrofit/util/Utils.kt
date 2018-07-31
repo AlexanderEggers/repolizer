@@ -1,4 +1,4 @@
-package repolizer.adapter.retrofit.util
+package repolizer.adapter.network.retrofit.util
 
 class Utils {
 
