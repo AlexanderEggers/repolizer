@@ -10,6 +10,7 @@ import repolizer.repository.response.NetworkResponseStatus
 import retrofit2.Call
 import retrofit2.Response
 import java.io.IOException
+import java.lang.reflect.ParameterizedType
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -30,9 +31,18 @@ class RetrofitNetworkAdapter(private val networkController: NetworkController): 
         }
 
         val requestProviderCast: RequestProvider<Call<String>>? = try {
-            requestProvider as? RequestProvider<Call<String>>
+            val requestType = requestProvider?.getRequestType()
+            if(requestType == Call::class.java) {
+
+                @Suppress("UNCHECKED_CAST")
+                if(requestType is ParameterizedType
+                        && requestType.actualTypeArguments[0] == String::class.java) {
+                    requestProvider as? RequestProvider<Call<String>>
+                }
+            }
+            null
         } catch (e: ClassCastException) {
-            Logger.getGlobal().log(Level.SEVERE, e.message)
+            Logger.getLogger("repolizer").log(Level.SEVERE, e.message)
             null
         }
 
@@ -61,7 +71,7 @@ class RetrofitNetworkAdapter(private val networkController: NetworkController): 
         return try {
             response.errorBody()?.toString() ?: ""
         } catch (e: IOException) {
-            Logger.getGlobal().log(Level.SEVERE, e.message)
+            Logger.getLogger("repolizer").log(Level.SEVERE, e.message)
             e.printStackTrace()
             ""
         }

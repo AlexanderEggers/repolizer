@@ -13,17 +13,5 @@ class ProcessorUtil {
         fun getGeneratedRepositoryName(repositoryName: String): String {
             return "Generated_$repositoryName"
         }
-
-        fun getGeneratedDatabaseName(databaseName: String): String {
-            return "Generated_$databaseName"
-        }
-
-        fun getGeneratedDatabaseDaoName(databaseName: String, entityName: String): String {
-            return "Generated_${databaseName}_${entityName}_Dao"
-        }
-
-        fun getGeneratedDatabaseProviderName(databaseName: String): String {
-            return "Generated_${databaseName}_Provider"
-        }
     }
 }
