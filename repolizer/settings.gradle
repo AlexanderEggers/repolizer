@@ -5,10 +5,10 @@ project(":core").name = "repolizer-core"
 project(":example").name = "repolizer-example"
 project(":processor").name = "repolizer-processor"
 
-project(":retrofit").projectDir = file("../repolizer-adapter/retrofit")
+project(":retrofit").projectDir = file("../repolizer-adapter/network-retrofit")
 project(":retrofit").name = "repolizer-retrofit"
 
-project(":livedata").projectDir = file("../repolizer-adapter/livedata")
+project(":livedata").projectDir = file("../repolizer-adapter/wrapper-livedata")
 project(":livedata").name = "repolizer-livedata"
 
 rootProject.name = "repolizer-library"
