@@ -8,14 +8,14 @@ import repolizer.persistent.CacheState
 class SharedPrefCacheAdapter(private val context: Context): CacheAdapter() {
 
     override fun save(repositoryClass: Class<*>, data: CacheItem) {
-        val prefs = context.getSharedPreferences("org.demo.weatherapp", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences("org.repolizer.cache", Context.MODE_PRIVATE)
         val edit = prefs.edit()
         edit.putLong(data.url, data.cacheTime)
         edit.apply()
     }
 
     override fun get(repositoryClass: Class<*>, url: String, freshCacheTime: Long, maxCacheTime: Long): CacheState {
-        val prefs = context.getSharedPreferences("org.demo.weatherapp", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences("org.repolizer.cache", Context.MODE_PRIVATE)
 
         val lastUpdated = prefs.getLong(url, 0L)
         if(lastUpdated == 0L) return CacheState.NO_CACHE
@@ -30,7 +30,7 @@ class SharedPrefCacheAdapter(private val context: Context): CacheAdapter() {
     }
 
     override fun delete(repositoryClass: Class<*>, url: String) {
-        val prefs = context.getSharedPreferences("org.demo.weatherapp", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences("org.repolizer.cache", Context.MODE_PRIVATE)
         prefs.edit().remove(url).apply()
     }
 }
