@@ -7,6 +7,7 @@ import repolizer.persistent.CacheItem
 import repolizer.persistent.CacheState
 import repolizer.repository.response.NetworkResponse
 
+@Suppress("UNCHECKED_CAST")
 class NetworkGetFuture<Body>
 constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : NetworkFuture<Body>(repolizer, futureBuilder) {
 

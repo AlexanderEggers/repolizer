@@ -5,6 +5,7 @@ import repolizer.adapter.WrapperAdapter
 import repolizer.adapter.util.AdapterUtil
 import repolizer.repository.response.NetworkResponse
 
+@Suppress("UNCHECKED_CAST")
 class NetworkCudFuture
 constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : NetworkFuture<String>(repolizer, futureBuilder) {
 

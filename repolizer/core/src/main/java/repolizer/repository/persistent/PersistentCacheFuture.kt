@@ -7,6 +7,7 @@ import repolizer.annotation.repository.util.CacheOperation
 import repolizer.persistent.CacheItem
 import repolizer.repository.network.ExecutionType
 
+@Suppress("UNCHECKED_CAST")
 class PersistentCacheFuture
 constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder) : PersistentFuture<Boolean>(repolizer, futureBuilder) {
 

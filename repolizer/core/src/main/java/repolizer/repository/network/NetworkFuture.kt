@@ -16,6 +16,7 @@ import repolizer.repository.request.RequestType
 import repolizer.repository.response.ResponseService
 import repolizer.repository.util.QueryHashMap
 
+@Suppress("UNCHECKED_CAST")
 abstract class NetworkFuture<Body>
 constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Future<Body>() {
 

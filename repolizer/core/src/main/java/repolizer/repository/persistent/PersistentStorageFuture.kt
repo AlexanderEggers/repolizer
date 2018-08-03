@@ -6,6 +6,7 @@ import repolizer.adapter.util.AdapterUtil
 import repolizer.annotation.repository.util.StorageOperation
 import repolizer.repository.network.ExecutionType
 
+@Suppress("UNCHECKED_CAST")
 class PersistentStorageFuture
 constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder) : PersistentFuture<Boolean>(repolizer, futureBuilder) {
 

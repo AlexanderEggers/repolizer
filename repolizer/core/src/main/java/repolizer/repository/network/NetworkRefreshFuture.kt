@@ -6,6 +6,7 @@ import repolizer.adapter.util.AdapterUtil
 import repolizer.persistent.CacheItem
 import repolizer.repository.response.NetworkResponse
 
+@Suppress("UNCHECKED_CAST")
 class NetworkRefreshFuture
 constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : NetworkFuture<Boolean>(repolizer, futureBuilder) {
 

@@ -9,6 +9,7 @@ import repolizer.adapter.util.AdapterUtil
 import repolizer.repository.future.Future
 import repolizer.repository.network.ExecutionType
 
+@Suppress("UNCHECKED_CAST")
 abstract class PersistentFuture<Body>
 constructor(protected val repolizer: Repolizer, futureBuilder: PersistentFutureBuilder) : Future<Body>() {
 
