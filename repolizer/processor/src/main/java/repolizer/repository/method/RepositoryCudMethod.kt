@@ -53,7 +53,7 @@ class RepositoryCudMethod {
     private fun buildUrl(annotationMapKey: String): String {
         return ArrayList<String>().apply {
             addAll(RepositoryMapHolder.urlParameterAnnotationMap[annotationMapKey]?.map {
-                "url = url.replace(\":${it.simpleName}\", ${it.simpleName});"
+                "url = url.replace(\":${it.simpleName}\", ${it.simpleName} + \"\");"
             } ?: ArrayList())
 
             val queries = RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]
