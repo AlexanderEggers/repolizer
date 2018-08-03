@@ -31,11 +31,11 @@ constructor(baseUrl: String,
         networkController = networkInterface
                 ?.let { networkControllerClass.getConstructor(NetworkInterface::class.java, Gson::class.java) }
                 ?.newInstance(networkInterface, gson)
-                ?: throw IllegalStateException("Internal error: NetworkController is null. " +
-                "Usage of reflection to create an instance of your NetworkController failed.")
+                ?: throw IllegalStateException("NetworkController is null. Usage of reflection to " +
+                "create an instance of your NetworkController ($networkControllerClass.class) has failed.")
     }
 
-    override fun get(returnType: Type, repositoryClass: Class<*>, repolizer: Repolizer): RetrofitNetworkAdapter? {
+    override fun get(type: Type, repositoryClass: Class<*>, repolizer: Repolizer): RetrofitNetworkAdapter? {
         return RetrofitNetworkAdapter(networkController)
     }
 }

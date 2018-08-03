@@ -1,11 +1,13 @@
 package repolizer.adapter
 
+import repolizer.converter.Converter
+
 abstract class StorageAdapter<T> {
 
-    lateinit var converterAdapter: ConverterAdapter
+    lateinit var converter: Converter<T>
 
-    fun init(converterAdapter: ConverterAdapter) {
-        this.converterAdapter = converterAdapter
+    fun init(converter: Converter<T>) {
+        this.converter = converter
     }
 
     abstract fun insert(repositoryClass: Class<*>, url: String,

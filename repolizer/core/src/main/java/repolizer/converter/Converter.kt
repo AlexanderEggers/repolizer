@@ -1,6 +1,6 @@
-package repolizer.adapter
+package repolizer.converter
 
-abstract class ConverterAdapter<T> {
+abstract class Converter<T> {
     abstract fun convertStringToData(repositoryClass: Class<*>, data: String): T?
     abstract fun convertDataToString(repositoryClass: Class<*>, data: Any): String?
 }

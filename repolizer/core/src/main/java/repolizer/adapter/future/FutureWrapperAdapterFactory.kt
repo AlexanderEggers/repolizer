@@ -8,8 +8,8 @@ import java.lang.reflect.Type
 
 class FutureWrapperAdapterFactory : AdapterFactory<WrapperAdapter<*>> {
 
-    override fun get(returnType: Type, repositoryClass: Class<*>, repolizer: Repolizer): WrapperAdapter<*>? {
-        return if (returnType.javaClass != Future::class.java) null
+    override fun get(type: Type, repositoryClass: Class<*>, repolizer: Repolizer): WrapperAdapter<*>? {
+        return if (type.javaClass != Future::class.java) null
         else FutureWrapperAdapter()
     }
 }

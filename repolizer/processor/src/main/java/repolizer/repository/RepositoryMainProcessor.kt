@@ -10,7 +10,6 @@ import repolizer.ProcessorUtil.Companion.getPackageName
 import repolizer.annotation.repository.*
 import repolizer.annotation.repository.parameter.*
 import repolizer.repository.method.*
-import javax.annotation.processing.Messager
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
@@ -60,7 +59,7 @@ class RepositoryMainProcessor {
                 }.build())
 
                 //Methods
-                getRepositoryMethods(mainProcessor.messager, repositoryElement).forEach {
+                getRepositoryMethods(repositoryElement).forEach {
                     addMethod(it)
                 }
             }.build().also { repoFile ->
@@ -72,7 +71,7 @@ class RepositoryMainProcessor {
         }
     }
 
-    private fun getRepositoryMethods(messager: Messager, repositoryClassElement: Element): List<MethodSpec> {
+    private fun getRepositoryMethods(repositoryClassElement: Element): List<MethodSpec> {
         return ArrayList<MethodSpec>().apply {
             addAll(RepositoryRefreshMethod().build(repositoryClassElement))
             addAll(RepositoryGetMethod().build(repositoryClassElement))

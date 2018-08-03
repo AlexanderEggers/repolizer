@@ -27,9 +27,21 @@ class AdapterUtil {
 
         fun getBodyType(returnType: Type): Class<*> {
             return if (returnType is ParameterizedType) {
-                returnType.actualTypeArguments[0] as Class<*>
+                return getBodyType(returnType.actualTypeArguments[0])
             } else {
                 returnType as Class<*>
+            }
+        }
+
+        fun hasListType(returnType: Type): Boolean {
+            return if (returnType is ParameterizedType) {
+                val type = returnType.actualTypeArguments[0]
+                if(type is ParameterizedType) {
+                    return type.rawType as Class<*> == List::class.java
+                }
+                return false
+            } else {
+                false
             }
         }
     }

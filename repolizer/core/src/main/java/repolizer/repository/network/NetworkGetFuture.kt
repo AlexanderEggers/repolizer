@@ -94,7 +94,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
                     null
                 }
             } else {
-                converterAdapter.convertStringToData(repositoryClass, response.body, bodyType)
+                converter.convertStringToData(repositoryClass, response.body)
             }
         } else {
             responseService?.handleRequestError(requestType, response)

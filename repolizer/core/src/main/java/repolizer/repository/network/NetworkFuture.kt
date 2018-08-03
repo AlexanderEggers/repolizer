@@ -1,12 +1,13 @@
 package repolizer.repository.network
 
+import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
 import repolizer.adapter.CacheAdapter
-import repolizer.adapter.ConverterAdapter
 import repolizer.adapter.NetworkAdapter
 import repolizer.adapter.StorageAdapter
 import repolizer.adapter.util.AdapterUtil
+import repolizer.converter.Converter
 import repolizer.repository.future.Future
 import repolizer.repository.login.LoginManager
 import repolizer.repository.progress.ProgressController
@@ -47,10 +48,11 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
 
     protected val networkAdapter: NetworkAdapter = AdapterUtil.getAdapter(repolizer.networkAdapters,
             wrapperType.type, repositoryClass, repolizer) as NetworkAdapter
-    protected val converterAdapter: ConverterAdapter = AdapterUtil.getAdapter(repolizer.converterAdapters,
-            wrapperType.type, repositoryClass, repolizer) as ConverterAdapter
     protected val storageAdapter: StorageAdapter<Body>?
     protected val cacheAdapter: CacheAdapter?
+
+    protected val converter: Converter<Body> = repolizer.converterClass
+            .getConstructor(Gson::class.java).newInstance(repolizer.gson) as Converter<Body>
 
     protected val progressController: ProgressController<*>? = repolizer.progressController
     protected val loginManager: LoginManager? = repolizer.loginManager
@@ -68,10 +70,11 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
     }
 
     init {
+
         if (saveData) {
             storageAdapter = AdapterUtil.getAdapter(repolizer.storageAdapters,
                     wrapperType.type, repositoryClass, repolizer) as StorageAdapter<Body>
-            storageAdapter.init(converterAdapter)
+            storageAdapter.init(converter)
 
             cacheAdapter = AdapterUtil.getAdapter(repolizer.cacheAdapters,
                     wrapperType.type, repositoryClass, repolizer) as CacheAdapter

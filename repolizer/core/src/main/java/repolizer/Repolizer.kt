@@ -1,9 +1,11 @@
 package repolizer
 
+import com.google.gson.Gson
 import repolizer.adapter.*
 import repolizer.adapter.factory.AdapterFactory
 import repolizer.adapter.future.FutureWrapperAdapterFactory
-import repolizer.adapter.gson.GsonConverterAdapterFactory
+import repolizer.converter.Converter
+import repolizer.converter.gson.GsonConverter
 import repolizer.repository.login.LoginManager
 import repolizer.repository.progress.ProgressController
 import repolizer.repository.provider.GlobalRepositoryProvider
@@ -19,11 +21,13 @@ class Repolizer private constructor(builder: Builder) {
     val loginManager: LoginManager? = builder.loginManager
     val responseService: ResponseService? = builder.responseService
 
+    val converterClass: Class<out Converter<*>> = builder.converterClass
+    var gson: Gson = builder.gson
+
     val wrapperAdapters: ArrayList<AdapterFactory<out WrapperAdapter<*>>> = builder.wrapperAdapters
     val networkAdapters: ArrayList<AdapterFactory<out NetworkAdapter>> = builder.networkAdapters
     val storageAdapters: ArrayList<AdapterFactory<out StorageAdapter<*>>> = builder.storageAdapters
     val cacheAdapters: ArrayList<AdapterFactory<out CacheAdapter>> = builder.cacheAdapters
-    val converterAdapters: ArrayList<AdapterFactory<out ConverterAdapter>> = builder.converterAdapters
 
     @Suppress("UNCHECKED_CAST")
     fun <T> getRepository(repositoryClass: Class<T>): T {
@@ -45,7 +49,6 @@ class Repolizer private constructor(builder: Builder) {
         val networkAdapters: ArrayList<AdapterFactory<out NetworkAdapter>> = ArrayList()
         val storageAdapters: ArrayList<AdapterFactory<out StorageAdapter<*>>> = ArrayList()
         val cacheAdapters: ArrayList<AdapterFactory<out CacheAdapter>> = ArrayList()
-        val converterAdapters: ArrayList<AdapterFactory<out ConverterAdapter>> = ArrayList()
 
         var requestProvider: RequestProvider<*>? = null
             private set
@@ -58,6 +61,11 @@ class Repolizer private constructor(builder: Builder) {
         var loginManager: LoginManager? = null
             private set
         var responseService: ResponseService? = null
+            private set
+
+        var converterClass: Class<out Converter<*>> = GsonConverter::class.java
+            private set
+        var gson: Gson = Gson()
             private set
 
         fun addWrapperAdapter(wrapperAdapter: AdapterFactory<out WrapperAdapter<*>>): Builder {
@@ -77,11 +85,6 @@ class Repolizer private constructor(builder: Builder) {
 
         fun addStorageAdapter(storageAdapter: AdapterFactory<out StorageAdapter<*>>): Builder {
             storageAdapters.add(storageAdapter)
-            return this@Builder
-        }
-
-        fun addConveterAdapter(converterAdapter: AdapterFactory<out ConverterAdapter>): Builder {
-            converterAdapters.add(converterAdapter)
             return this@Builder
         }
 
@@ -110,6 +113,16 @@ class Repolizer private constructor(builder: Builder) {
             return this@Builder
         }
 
+        fun setConverter(converterClass: Class<Converter<*>>): Builder {
+            this@Builder.converterClass = converterClass
+            return this@Builder
+        }
+
+        fun setGson(gson: Gson): Builder {
+            this@Builder.gson = gson
+            return this@Builder
+        }
+
         fun build(): Repolizer {
             addDefaultAdapterFactories()
             return Repolizer(this@Builder)
@@ -117,7 +130,6 @@ class Repolizer private constructor(builder: Builder) {
 
         private fun addDefaultAdapterFactories() {
             wrapperAdapters.add(FutureWrapperAdapterFactory())
-            converterAdapters.add(GsonConverterAdapterFactory())
         }
     }
 }

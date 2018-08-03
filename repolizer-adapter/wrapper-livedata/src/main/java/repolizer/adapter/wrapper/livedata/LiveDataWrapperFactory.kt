@@ -8,10 +8,10 @@ import java.lang.reflect.Type
 
 class LiveDataWrapperFactory: AdapterFactory<LiveDataWrapper> {
 
-    override fun get(returnType: Type, repositoryClass: Class<*>, repolizer: Repolizer): LiveDataWrapper? {
+    override fun <T: Type> get(bodyType: T, repositoryClass: Class<*>, repolizer: Repolizer): LiveDataWrapper? {
         return when {
-            returnType !is ParameterizedType -> null
-            returnType.rawType != LiveData::class.java -> null
+            bodyType !is ParameterizedType -> null
+            bodyType.rawType != LiveData::class.java -> null
             else -> LiveDataWrapper()
         }
     }

@@ -3,6 +3,6 @@ package repolizer.adapter.factory
 import repolizer.Repolizer
 import java.lang.reflect.Type
 
-interface AdapterFactory<T> {
-    fun get(returnType: Type, repositoryClass: Class<*>, repolizer: Repolizer): T?
+interface AdapterFactory<A> {
+    fun get(type: Type, repositoryClass: Class<*>, repolizer: Repolizer): A?
 }
