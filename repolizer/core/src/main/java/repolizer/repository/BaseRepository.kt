@@ -2,6 +2,7 @@ package repolizer.repository
 
 import repolizer.Repolizer
 import repolizer.adapter.util.AdapterUtil.Companion.getBodyType
+import repolizer.adapter.util.AdapterUtil.Companion.getLowestBodyClass
 import repolizer.repository.network.FetchSecurityLayer
 import repolizer.repository.network.NetworkFutureBuilder
 import repolizer.repository.persistent.PersistentFutureBuilder
@@ -13,13 +14,17 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
     private val fetchingData = AtomicBoolean(false)
 
     protected fun <T> executeRefresh(futureBuilder: NetworkFutureBuilder, returnType: Type): T {
-        val bodyType = getBodyType(returnType)
+        val bodyType = getLowestBodyClass(returnType)
+
+
         futureBuilder.bodyType = bodyType
+
+
         return futureBuilder.buildRefresh(repolizer).create()
     }
 
     protected fun <T> executeGet(futureBuilder: NetworkFutureBuilder, returnType: Type): T {
-        val bodyType = getBodyType(returnType)
+        val bodyType = getLowestBodyClass(returnType)
         futureBuilder.bodyType = bodyType
         return futureBuilder.buildGet(repolizer, bodyType).create()
     }

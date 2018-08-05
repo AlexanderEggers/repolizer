@@ -25,9 +25,17 @@ class AdapterUtil {
             }
         }
 
-        fun getBodyType(returnType: Type): Class<*> {
+        fun getBodyType(returnType: Type): Type {
             return if (returnType is ParameterizedType) {
-                return getBodyType(returnType.actualTypeArguments[0])
+                return returnType.actualTypeArguments[0]
+            } else {
+                returnType
+            }
+        }
+
+        fun getLowestBodyClass(returnType: Type): Class<*> {
+            return if (returnType is ParameterizedType) {
+                return getLowestBodyClass(returnType.actualTypeArguments[0])
             } else {
                 returnType as Class<*>
             }

@@ -56,6 +56,10 @@ open class NetworkFutureBuilder : FutureBuilder() {
         return NetworkGetFuture(repolizer, this)
     }
 
+    open fun <Body> buildGetWithList(repolizer: Repolizer, returnType: Class<Body>): NetworkGetFuture<List<Body>> {
+        return NetworkGetFuture(repolizer, this)
+    }
+
     open fun buildRefresh(repolizer: Repolizer): NetworkRefreshFuture {
         return NetworkRefreshFuture(repolizer, this)
     }
