@@ -110,12 +110,8 @@ class Repolizer private constructor(builder: Builder) {
         }
 
         fun build(): Repolizer {
-            addDefaultAdapterFactories()
-            return Repolizer(this@Builder)
-        }
-
-        private fun addDefaultAdapterFactories() {
             wrapperAdapters.add(FutureWrapperAdapterFactory())
+            return Repolizer(this@Builder)
         }
     }
 }

@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import repolizer.adapter.ConverterAdapter
 import java.lang.reflect.Type
 
-class GsonConverter(val gson: Gson): ConverterAdapter() {
+class GsonConverterAdapter(val gson: Gson): ConverterAdapter() {
 
     override fun <T> convertStringToData(repositoryClass: Class<*>, data: String, bodyType: Type): T? {
         return gson.fromJson(data, bodyType)
