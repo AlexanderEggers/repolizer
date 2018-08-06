@@ -35,22 +35,27 @@ class RepositoryStorageMethod {
                             addStatement("String sql = \"$sql\"")
                             if (sql.isNotEmpty()) addCode(buildSql(annotationMapKey))
 
+                            addCode("\n")
+
+                            val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
+                                    ClassName.get(methodElement.returnType))
+                            addStatement("$classTypeToken returnType = new $classWithTypeToken() {}")
+
+                            addCode("\n")
+
                             addStatement("$classDatabaseBuilder builder = new $classDatabaseBuilder()")
                             addStatement("builder.setRepositoryClass(${ClassName.get(element.asType())}.class)")
+                            addStatement("builder.setTypeToken(returnType)")
 
                             val operation = methodElement.getAnnotation(STORAGE::class.java).operation
                             addStatement("builder.setStorageOperation($operation)")
                             addStatement(getStorageSql(operation))
 
-                            val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
-                                    ClassName.get(methodElement.returnType))
-                            addStatement("builder.setTypeToken(new $classWithTypeToken() {})")
-
                             createStorageItemBuilderMethods(annotationMapKey).forEach {
                                 addStatement(it)
                             }
 
-                            addStatement("return super.executeStorage(builder)")
+                            addStatement("return super.executeStorage(builder, returnType)")
                         }.build()
                     } ?: ArrayList())
         }

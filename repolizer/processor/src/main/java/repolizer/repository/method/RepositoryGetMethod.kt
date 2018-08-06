@@ -116,8 +116,6 @@ class RepositoryGetMethod {
         return ArrayList<String>().apply {
             val annotation = methodElement.getAnnotation(GET::class.java)
 
-
-
             add("$classNetworkBuilder builder = new $classNetworkBuilder();")
 
             add("builder.setRequestType($classRequestType.GET);")

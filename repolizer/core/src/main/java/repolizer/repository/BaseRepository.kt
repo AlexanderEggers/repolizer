@@ -3,6 +3,7 @@ package repolizer.repository
 import repolizer.Repolizer
 import repolizer.adapter.util.AdapterUtil.Companion.getBodyType
 import repolizer.adapter.util.AdapterUtil.Companion.getLowestBodyClass
+import repolizer.adapter.util.AdapterUtil.Companion.hasListType
 import repolizer.repository.network.FetchSecurityLayer
 import repolizer.repository.network.NetworkFutureBuilder
 import repolizer.repository.persistent.PersistentFutureBuilder
@@ -14,26 +15,34 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
     private val fetchingData = AtomicBoolean(false)
 
     protected fun <T> executeRefresh(futureBuilder: NetworkFutureBuilder, returnType: Type): T {
-        val bodyType = getLowestBodyClass(returnType)
-
-
+        val bodyType = getBodyType(returnType)
         futureBuilder.bodyType = bodyType
-
 
         return futureBuilder.buildRefresh(repolizer).create()
     }
 
     protected fun <T> executeGet(futureBuilder: NetworkFutureBuilder, returnType: Type): T {
-        val bodyType = getLowestBodyClass(returnType)
+        val lowestBodyClass = getLowestBodyClass(returnType)
+        val hasList = hasListType(returnType)
+
+        val bodyType = getBodyType(returnType)
         futureBuilder.bodyType = bodyType
-        return futureBuilder.buildGet(repolizer, bodyType).create()
+
+        return if(hasList) {
+            futureBuilder.buildGet(repolizer, lowestBodyClass).create()
+        } else {
+            futureBuilder.buildGetWithList(repolizer, lowestBodyClass).create()
+        }
     }
 
     protected fun <T> executeCud(futureBuilder: NetworkFutureBuilder): T {
         return futureBuilder.buildCud(repolizer).create()
     }
 
-    protected fun <T> executeStorage(builder: PersistentFutureBuilder): T {
+    protected fun <T> executeStorage(builder: PersistentFutureBuilder, returnType: Type): T {
+        val bodyType = getBodyType(returnType)
+        builder.bodyType = bodyType
+
         return builder.buildCache(repolizer).create()
     }
 
