@@ -40,7 +40,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
 
         return if (response.isSuccessful() && response.body != null) {
             val saveSuccessful = storageAdapter?.insert(repositoryClass, fullUrl, insertSql,
-                    response.body)
+                    response.body, bodyType)
             if (saveSuccessful == true) {
                 responseService?.handleSuccess(requestType, response)
                 cacheAdapter?.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
