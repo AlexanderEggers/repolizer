@@ -12,6 +12,7 @@ import javax.lang.model.element.Modifier
 class RepositoryStorageMethod {
 
     private val classDatabaseBuilder = ClassName.get("repolizer.repository.persistent", "PersistentFutureBuilder")
+    private val classStorageOperation = ClassName.get("repolizer.annotation.repository.util", "StorageOperation")
 
     private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
 
@@ -22,6 +23,7 @@ class RepositoryStorageMethod {
                         MethodSpec.methodBuilder(methodElement.simpleName.toString()).apply {
                             addModifiers(Modifier.PUBLIC)
                             addAnnotation(Override::class.java)
+                            returns(ClassName.get(methodElement.returnType))
 
                             //Copy all interface parameter to the method implementation
                             methodElement.parameters.forEach { varElement ->
@@ -35,8 +37,6 @@ class RepositoryStorageMethod {
                             addStatement("String sql = \"$sql\"")
                             if (sql.isNotEmpty()) addCode(buildSql(annotationMapKey))
 
-                            addCode("\n")
-
                             val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
                                     ClassName.get(methodElement.returnType))
                             addStatement("$classTypeToken returnType = new $classWithTypeToken() {}")
@@ -48,14 +48,14 @@ class RepositoryStorageMethod {
                             addStatement("builder.setTypeToken(returnType)")
 
                             val operation = methodElement.getAnnotation(STORAGE::class.java).operation
-                            addStatement("builder.setStorageOperation($operation)")
+                            addStatement("builder.setStorageOperation($classStorageOperation.$operation)")
                             addStatement(getStorageSql(operation))
 
                             createStorageItemBuilderMethods(annotationMapKey).forEach {
                                 addStatement(it)
                             }
 
-                            addStatement("return super.executeStorage(builder, returnType)")
+                            addStatement("return super.executeStorage(builder, returnType.getType())")
                         }.build()
                     } ?: ArrayList())
         }
@@ -79,7 +79,7 @@ class RepositoryStorageMethod {
 
     private fun buildSql(annotationMapKey: String): String {
         return (RepositoryMapHolder.sqlParameterAnnotationMap[annotationMapKey]?.map {
-            "sql = sql.replace(\":${it.simpleName}\", \"$it\");"
+            "sql = sql.replace(\":${it.simpleName}\", ${it.simpleName} + \"\");"
         } ?: ArrayList()).joinToString(separator = "\n", postfix = "\n\n")
     }
 }

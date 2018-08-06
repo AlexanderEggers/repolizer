@@ -31,13 +31,12 @@ constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder) : Pers
         when (storageOperation) {
             StorageOperation.INSERT -> {
                 if (databaseItem == null) throw IllegalStateException("Database item is null.")
-                storageAdapter.insert(repositoryClass, fullUrl, insertSql, databaseItem, bodyType)
+                storageAdapter.insert(repositoryClass, "", insertSql, databaseItem, bodyType)
             }
             StorageOperation.UPDATE -> {
-                if (databaseItem == null) throw IllegalStateException("Database item is null.")
-                storageAdapter.update(repositoryClass, fullUrl, updateSql, databaseItem, bodyType)
+                storageAdapter.update(repositoryClass, "", updateSql, databaseItem, bodyType)
             }
-            StorageOperation.DELETE -> storageAdapter.delete(repositoryClass, fullUrl, deleteSql)
+            StorageOperation.DELETE -> storageAdapter.delete(repositoryClass, "", deleteSql)
         }
         return true
     }

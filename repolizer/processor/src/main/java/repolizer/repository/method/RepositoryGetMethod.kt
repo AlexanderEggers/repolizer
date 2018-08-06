@@ -60,8 +60,6 @@ class RepositoryGetMethod {
                     if (deleteSql.isNotEmpty()) addCode(buildSql(annotationMapKey,
                             "deleteSql", deleteSql))
 
-                    addCode("\n")
-
                     val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
                             ClassName.get(methodElement.returnType))
                     addStatement("$classTypeToken returnType = new $classWithTypeToken() {}")
@@ -104,7 +102,7 @@ class RepositoryGetMethod {
         return ArrayList<String>().apply {
             RepositoryMapHolder.sqlParameterAnnotationMap[annotationMapKey]?.forEach {
                 if (baseSql.contains(":${it.simpleName}")) {
-                    add("$sqlParamName = $sqlParamName.replace(\":${it.simpleName}\", \"$it\");")
+                    add("$sqlParamName = $sqlParamName.replace(\":${it.simpleName}\", ${it.simpleName} + \"\");")
                 }
             }
         }.joinToString(separator = "\n", postfix = "\n\n")

@@ -22,6 +22,7 @@ class RepositoryCacheMethod {
                         MethodSpec.methodBuilder(methodElement.simpleName.toString()).apply {
                             addModifiers(Modifier.PUBLIC)
                             addAnnotation(Override::class.java)
+                            returns(ClassName.get(methodElement.returnType))
 
                             //Copy all interface parameter to the method implementation
                             methodElement.parameters.forEach { varElement ->
@@ -44,7 +45,7 @@ class RepositoryCacheMethod {
                                 addStatement(it)
                             }
 
-                            addStatement("return super.executeStorage(builder)")
+                            addStatement("return super.executeCache(builder)")
                         }.build()
                     } ?: ArrayList())
         }

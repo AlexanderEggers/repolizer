@@ -46,8 +46,6 @@ class RepositoryRefreshMethod {
                     addStatement("String insertSql = \"$sql\"")
                     if (sql.isNotEmpty()) addCode(buildSql(annotationMapKey))
 
-                    addCode("\n")
-
                     val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
                             ClassName.get(methodElement.returnType))
                     addStatement("$classTypeToken returnType = new $classWithTypeToken() {}")
@@ -83,7 +81,7 @@ class RepositoryRefreshMethod {
 
     private fun buildSql(annotationMapKey: String): String {
         return (RepositoryMapHolder.sqlParameterAnnotationMap[annotationMapKey]?.map {
-            "insertSql = insertSql.replace(\":${it.simpleName}\", \"$it\");"
+            "insertSql = insertSql.replace(\":${it.simpleName}\", ${it.simpleName} + \"\");"
         } ?: ArrayList()).joinToString(separator = "\n", postfix = "\n\n")
     }
 

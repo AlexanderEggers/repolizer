@@ -29,8 +29,8 @@ class SharedPrefCacheAdapter(private val context: Context): CacheAdapter() {
         }
     }
 
-    override fun delete(repositoryClass: Class<*>, url: String) {
+    override fun delete(repositoryClass: Class<*>, data: CacheItem) {
         val prefs = context.getSharedPreferences("org.repolizer.cache", Context.MODE_PRIVATE)
-        prefs.edit().remove(url).apply()
+        prefs.edit().remove(data.url).apply()
     }
 }

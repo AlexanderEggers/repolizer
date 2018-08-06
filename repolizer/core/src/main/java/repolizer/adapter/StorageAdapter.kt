@@ -13,7 +13,7 @@ abstract class StorageAdapter<T> {
     abstract fun insert(repositoryClass: Class<*>, url: String,
                         sql: String, data: Any, bodyType: Type): Boolean
 
-    abstract fun update(repositoryClass: Class<*>, url: String, sql: String, data: Any, bodyType: Type)
+    abstract fun update(repositoryClass: Class<*>, url: String, sql: String, data: Any?, bodyType: Type)
 
     abstract fun get(repositoryClass: Class<*>, url: String, sql: String, bodyType: Type): T?
 

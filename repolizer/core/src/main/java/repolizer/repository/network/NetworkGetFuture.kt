@@ -83,7 +83,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
                         response.body, bodyType)
                 if (saveSuccessful == true) {
                     responseService?.handleSuccess(requestType, response)
-                    cacheAdapter?.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
+                    cacheAdapter?.save(repositoryClass, CacheItem(fullUrl))
 
                     if (!wrapperCanHaveActiveConnection
                             || storageAdapter?.canHaveActiveConnections() == false) {
@@ -100,6 +100,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
             responseService?.handleRequestError(requestType, response)
             if (deleteIfCacheIsTooOld && cacheState == CacheState.NEEDS_HARD_REFRESH) {
                 storageAdapter?.delete(repositoryClass, fullUrl, deleteSql)
+                cacheAdapter?.delete(repositoryClass, CacheItem(fullUrl))
             }
             null
         }

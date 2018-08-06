@@ -43,6 +43,10 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
         val bodyType = getBodyType(returnType)
         builder.bodyType = bodyType
 
+        return builder.buildStorage(repolizer).create()
+    }
+
+    protected fun <T> executeCache(builder: PersistentFutureBuilder): T {
         return builder.buildCache(repolizer).create()
     }
 
