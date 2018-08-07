@@ -28,6 +28,10 @@ abstract class ResponseService {
         callbacks.add(callback)
     }
 
+    fun removeCallback(callback: Callback) {
+        callbacks.remove(callback)
+    }
+
     abstract class Callback {
         open fun onSuccess(requestType: RequestType, response: NetworkResponse<String>) {
 
