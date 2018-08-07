@@ -1,4 +1,4 @@
-package repolizer.adapter.gson
+package repolizer.adapter.converter.gson
 
 import com.google.gson.Gson
 import repolizer.adapter.ConverterAdapter
