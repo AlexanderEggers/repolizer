@@ -3,6 +3,7 @@ package repolizer.repository.method
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
+import repolizer.annotation.repository.GET
 import repolizer.annotation.repository.REFRESH
 import repolizer.annotation.repository.parameter.Header
 import repolizer.annotation.repository.parameter.UrlQuery
@@ -46,8 +47,11 @@ class RepositoryRefreshMethod {
                     addStatement("String insertSql = \"$sql\"")
                     if (sql.isNotEmpty()) addCode(buildSql(annotationMapKey))
 
+                    //Uses the return type of the related GET method. This is needed for any
+                    //storage related actions.
+                    val relatedGetMethod = getGETExecutableElement(element, methodElement, url)
                     val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
-                            ClassName.get(methodElement.returnType))
+                            ClassName.get(relatedGetMethod.returnType))
                     addStatement("$classTypeToken returnType = new $classWithTypeToken() {}")
 
                     addCode("\n")
@@ -60,6 +64,17 @@ class RepositoryRefreshMethod {
                 }.build()
             } ?: ArrayList())
         }
+    }
+
+    private fun getGETExecutableElement(element: Element, refreshMethod: ExecutableElement, url: String): ExecutableElement {
+        RepositoryMapHolder.getAnnotationMap[element.simpleName.toString()]?.forEach {
+            val getUrl = it.getAnnotation(GET::class.java).url
+            if(getUrl == url) return it
+        }
+        throw IllegalStateException("@Refresh needs a @GET method as a reference. This reference is" +
+                "build by comparing the url. Therefore you need to have to have a @GET method" +
+                "that uses the same url then your refresh. Error for " +
+                "${element.simpleName}.${refreshMethod.simpleName}")
     }
 
     private fun buildUrl(annotationMapKey: String): String {
@@ -102,6 +117,10 @@ class RepositoryRefreshMethod {
             add("builder.setFetchSecurityLayer(this);")
             add("builder.setInsertSql(insertSql);")
             add("builder.setSaveData(true);")
+
+            RepositoryMapHolder.requestBodyAnnotationMap[annotationMapKey]?.forEach {
+                add("builder.setRaw(${it.simpleName});")
+            }
 
             RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {
                 add("builder.addHeader(" +

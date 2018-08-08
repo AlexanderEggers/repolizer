@@ -69,11 +69,9 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
     }
 
     init {
-
         if (saveData) {
             storageAdapter = AdapterUtil.getAdapter(repolizer.storageAdapters,
                     wrapperType.type, repositoryClass, repolizer) as StorageAdapter<Body>
-            storageAdapter.init(converterAdapter)
 
             cacheAdapter = AdapterUtil.getAdapter(repolizer.cacheAdapters,
                     wrapperType.type, repositoryClass, repolizer) as CacheAdapter

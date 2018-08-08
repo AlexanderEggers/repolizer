@@ -7,11 +7,12 @@ import repolizer.persistent.CacheState
 
 class SharedPrefCacheAdapter(private val context: Context): CacheAdapter() {
 
-    override fun save(repositoryClass: Class<*>, data: CacheItem) {
+    override fun save(repositoryClass: Class<*>, data: CacheItem): Boolean {
         val prefs = context.getSharedPreferences("org.repolizer.cache", Context.MODE_PRIVATE)
         val edit = prefs.edit()
         edit.putLong(data.url, data.cacheTime)
         edit.apply()
+        return true
     }
 
     override fun get(repositoryClass: Class<*>, url: String, freshCacheTime: Long, maxCacheTime: Long): CacheState {
@@ -29,8 +30,9 @@ class SharedPrefCacheAdapter(private val context: Context): CacheAdapter() {
         }
     }
 
-    override fun delete(repositoryClass: Class<*>, data: CacheItem) {
+    override fun delete(repositoryClass: Class<*>, data: CacheItem): Boolean {
         val prefs = context.getSharedPreferences("org.repolizer.cache", Context.MODE_PRIVATE)
         prefs.edit().remove(data.url).apply()
+        return true
     }
 }

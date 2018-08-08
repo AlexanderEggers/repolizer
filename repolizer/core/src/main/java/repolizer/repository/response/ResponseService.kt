@@ -18,6 +18,12 @@ abstract class ResponseService {
         }
     }
 
+    open fun handleCacheError(requestType: RequestType, response: NetworkResponse<String>) {
+        callbacks.forEach {
+            it.onCacheError(requestType, response)
+        }
+    }
+
     open fun handleRequestError(requestType: RequestType, response: NetworkResponse<String>) {
         callbacks.forEach {
             it.onRequestError(requestType, response)
@@ -38,6 +44,10 @@ abstract class ResponseService {
         }
 
         open fun onStorageError(requestType: RequestType, response: NetworkResponse<String>) {
+
+        }
+
+        open fun onCacheError(requestType: RequestType, response: NetworkResponse<String>) {
 
         }
 

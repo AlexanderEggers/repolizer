@@ -3,7 +3,6 @@ package repolizer.repository.persistent
 import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
 import repolizer.adapter.CacheAdapter
-import repolizer.adapter.ConverterAdapter
 import repolizer.adapter.StorageAdapter
 import repolizer.adapter.util.AdapterUtil
 import repolizer.repository.future.Future
@@ -35,8 +34,6 @@ constructor(protected val repolizer: Repolizer, futureBuilder: PersistentFutureB
             wrapperType.type, repositoryClass, repolizer) as StorageAdapter<Body>
     protected val cacheAdapter: CacheAdapter = AdapterUtil.getAdapter(repolizer.cacheAdapters,
             wrapperType.type, repositoryClass, repolizer) as CacheAdapter
-    protected val converterAdapter: ConverterAdapter = AdapterUtil.getAdapter(repolizer.converterAdapters,
-            wrapperType.type, repositoryClass, repolizer) as ConverterAdapter
 
     override fun execute(): Body? {
         onStart()

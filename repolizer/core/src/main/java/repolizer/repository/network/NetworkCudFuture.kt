@@ -9,8 +9,6 @@ import repolizer.repository.response.NetworkResponse
 class NetworkCudFuture
 constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : NetworkFuture<String>(repolizer, futureBuilder) {
 
-    val rawBody: Any? = futureBuilder.raw
-
     override fun <Wrapper> create(): Wrapper {
         val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, wrapperType.type,
                 repositoryClass, repolizer) as WrapperAdapter<Wrapper>

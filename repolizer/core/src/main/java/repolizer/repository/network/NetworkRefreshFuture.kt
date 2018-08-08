@@ -39,19 +39,24 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
         val response: NetworkResponse<String> = networkAdapter.execute(this, requestProvider)
 
         return if (response.isSuccessful() && response.body != null) {
-            val saveSuccessful = storageAdapter?.insert(repositoryClass, fullUrl, insertSql,
-                    response.body, bodyType)
+            val saveSuccessful = storageAdapter?.insert(repositoryClass, converterAdapter, fullUrl,
+                    insertSql, response.body, bodyType)
             if (saveSuccessful == true) {
-                responseService?.handleSuccess(requestType, response)
-                cacheAdapter?.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
-                true
+                val successfullyCached = cacheAdapter?.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
+                if(successfullyCached == true) {
+                    responseService?.handleSuccess(requestType, response)
+                    true
+                } else {
+                    responseService?.handleCacheError(requestType, response)
+                    false
+                }
             } else {
                 responseService?.handleStorageError(requestType, response)
-                null
+                false
             }
         } else {
             responseService?.handleRequestError(requestType, response)
-            null
+            false
         }
     }
 
