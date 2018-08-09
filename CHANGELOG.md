@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+Version 0.3.2 *(2018-08-01)*
+----------------------------
+- **BUGFIX:** Fixed UrlParameter processor implementation (938ea6c6732d81138bfd8126b4015e421befa7d4)
+
 Version 0.3.1 *(2018-07-10)*
 ----------------------------
 - **NEW:** Added support for network queries that include non-unique queries ids, like https://myurl.com/myapi?id=1&id=2
