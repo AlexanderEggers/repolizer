@@ -12,11 +12,11 @@ class AppDatabaseAdapterFactory(context: Context): AdapterFactory<AppDatabaseAda
 
     init {
         val db = Room.databaseBuilder(context,
-                AppDatabase::class.java, "database-name").build()
+                AppDatabase::class.java, "app_example_db").build()
         weatherModelDao = db.weatherDao()
     }
 
-    override fun get(returnType: Type, repositoryClass: Class<*>, repolizer: Repolizer): AppDatabaseAdapter? {
+    override fun get(type: Type, repositoryClass: Class<*>, repolizer: Repolizer): AppDatabaseAdapter? {
         return AppDatabaseAdapter(weatherModelDao)
     }
 }

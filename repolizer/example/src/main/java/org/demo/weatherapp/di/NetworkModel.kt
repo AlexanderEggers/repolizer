@@ -11,6 +11,7 @@ import org.demo.weatherapp.api.WeatherRepository
 import org.demo.weatherapp.storage.AppDatabaseAdapterFactory
 import repolizer.Repolizer
 import repolizer.adapter.cache.sharedprefs.SharedPrefCacheAdapterFactory
+import repolizer.adapter.converter.gson.GsonConverterAdapterFactory
 import repolizer.adapter.wrapper.livedata.LiveDataWrapperFactory
 import repolizer.adapter.network.retrofit.RetrofitNetworkAdapterFactory
 import javax.inject.Singleton
@@ -29,6 +30,7 @@ class NetworkModel {
                 .addWrapperAdapter(LiveDataWrapperFactory())
                 .addStorageAdapter(AppDatabaseAdapterFactory(context))
                 .addCacheAdapter(SharedPrefCacheAdapterFactory(context))
+                .addConverterAdapter(GsonConverterAdapterFactory())
                 .build()
                 .getRepository(WeatherRepository::class.java)
     }

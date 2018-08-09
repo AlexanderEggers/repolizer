@@ -31,10 +31,9 @@ ext {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    api "com.google.code.gson:gson:$gson_version"
 
     implementation project(":repolizer-core")
-
-    api "com.google.code.gson:gson:$gson_version"
 }
 
 apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
