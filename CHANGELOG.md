@@ -3,7 +3,7 @@ Change Log
 
 Version 0.3.2 *(2018-08-01)*
 ----------------------------
-- **BUGFIX:** Fixed UrlParameter processor implementation (938ea6c6732d81138bfd8126b4015e421befa7d4)
+- **BUGFIX:** Fixed UrlParameter processor implementation
 
 Version 0.3.1 *(2018-07-10)*
 ----------------------------
