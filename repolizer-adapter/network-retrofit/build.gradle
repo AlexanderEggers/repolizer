@@ -3,11 +3,11 @@ apply plugin: 'kotlin'
 
 ext {
     bintrayRepo = 'android'
-    bintrayName = 'repolizer-retrofit'
+    bintrayName = 'repolizer-network-retrofit'
 
     publishedGroupId = 'org.repolizer'
-    libraryName = 'repolizer-retrofit'
-    artifact = 'repolizer-retrofit'
+    libraryName = 'network-retrofit'
+    artifact = 'network-retrofit'
 
     libraryDescription = 'Android annotation processor to add a MVVM-based repository pattern to your App.'
 
@@ -37,6 +37,7 @@ dependencies {
     implementation "com.google.code.gson:gson:$gson_version"
 
     implementation project(":repolizer-core")
+    //implementation "org.repolizer:repolizer-core:$repolizer_library_version"
 }
 
 apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'

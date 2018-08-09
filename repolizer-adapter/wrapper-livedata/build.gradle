@@ -3,11 +3,11 @@ apply plugin: 'kotlin-android'
 
 ext {
     bintrayRepo = 'android'
-    bintrayName = 'repolizer-livedata'
+    bintrayName = 'repolizer-wrapper-livedata'
 
     publishedGroupId = 'org.repolizer'
-    libraryName = 'repolizer-livedata'
-    artifact = 'repolizer-livedata'
+    libraryName = 'wrapper-livedata'
+    artifact = 'wrapper-livedata'
 
     libraryDescription = 'Android annotation processor to add a MVVM-based repository pattern to your App.'
 
@@ -54,6 +54,7 @@ dependencies {
     api "android.arch.lifecycle:livedata:$livedata_version"
 
     implementation project(":repolizer-core")
+    //implementation "org.repolizer:repolizer-core:$repolizer_library_version"
 }
 
 apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
