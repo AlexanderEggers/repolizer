@@ -1,6 +1,7 @@
 package repolizer.repository
 
 import repolizer.MainProcessor
+import repolizer.annotation.repository.parameter.UrlQuery
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
@@ -46,6 +47,33 @@ class RepositoryProcessorUtil {
                 currentList.add(it as VariableElement)
                 hashMap[key] = currentList
             }
+        }
+
+        fun buildUrl(annotationMapKey: String): String {
+            return ArrayList<String>().apply {
+                addAll(RepositoryMapHolder.urlParameterAnnotationMap[annotationMapKey]?.map {
+                    "url = url.replace(\":${it.simpleName}\", ${it.simpleName} + \"\");"
+                } ?: ArrayList())
+
+                val queries = RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]
+                if (queries?.isNotEmpty() == true) add(getFullUrlQueryPart(queries))
+            }.joinToString(separator = "\n", postfix = "\n\n")
+        }
+
+        private fun getFullUrlQueryPart(queries: ArrayList<VariableElement>): String {
+            return (queries.map { urlQuery ->
+                "url += " + "\"${urlQuery.getAnnotation(UrlQuery::class.java).key}=\" + ${urlQuery.simpleName};"
+            }).joinToString(prefix = "url += \"?\";", separator = "\nurl += \"&\";\n")
+        }
+
+        fun buildSql(annotationMapKey: String, sqlParamName: String, baseSql: String): String {
+            return ArrayList<String>().apply {
+                RepositoryMapHolder.sqlParameterAnnotationMap[annotationMapKey]?.forEach {
+                    if (baseSql.contains(":${it.simpleName}")) {
+                        add("$sqlParamName = $sqlParamName.replace(\":${it.simpleName}\", ${it.simpleName} + \"\");")
+                    }
+                }
+            }.joinToString(separator = "\n", postfix = "\n\n")
         }
     }
 }

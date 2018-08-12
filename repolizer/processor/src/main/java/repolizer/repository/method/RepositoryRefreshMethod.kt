@@ -8,10 +8,11 @@ import repolizer.annotation.repository.REFRESH
 import repolizer.annotation.repository.parameter.Header
 import repolizer.annotation.repository.parameter.UrlQuery
 import repolizer.repository.RepositoryMapHolder
+import repolizer.repository.RepositoryProcessorUtil.Companion.buildSql
+import repolizer.repository.RepositoryProcessorUtil.Companion.buildUrl
 import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
-import javax.lang.model.element.VariableElement
 
 class RepositoryRefreshMethod {
 
@@ -45,7 +46,8 @@ class RepositoryRefreshMethod {
 
                     val sql = methodElement.getAnnotation(REFRESH::class.java).insertSql
                     addStatement("String insertSql = \"$sql\"")
-                    if (sql.isNotEmpty()) addCode(buildSql(annotationMapKey))
+                    if (sql.isNotEmpty()) addCode(buildSql(annotationMapKey,
+                            "insertSql", sql))
 
                     //Uses the return type of the related GET method. This is needed for any
                     //storage related actions.
@@ -75,29 +77,6 @@ class RepositoryRefreshMethod {
                 "build by comparing the url. Therefore you need to have to have a @GET method" +
                 "that uses the same url then your refresh. Error for " +
                 "${element.simpleName}.${refreshMethod.simpleName}")
-    }
-
-    private fun buildUrl(annotationMapKey: String): String {
-        return ArrayList<String>().apply {
-            addAll(RepositoryMapHolder.urlParameterAnnotationMap[annotationMapKey]?.map {
-                "url = url.replace(\":${it.simpleName}\", ${it.simpleName} + \"\");"
-            } ?: ArrayList())
-
-            val queries = RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]
-            if (queries?.isNotEmpty() == true) add(getFullUrlQueryPart(queries))
-        }.joinToString(separator = "\n", postfix = "\n\n")
-    }
-
-    private fun getFullUrlQueryPart(queries: ArrayList<VariableElement>): String {
-        return (queries.map { urlQuery ->
-            "url += " + "\"${urlQuery.getAnnotation(UrlQuery::class.java).key}=\" + ${urlQuery.simpleName};"
-        }).joinToString(prefix = "url += \"?\";", separator = "\nurl += \"&\";\n")
-    }
-
-    private fun buildSql(annotationMapKey: String): String {
-        return (RepositoryMapHolder.sqlParameterAnnotationMap[annotationMapKey]?.map {
-            "insertSql = insertSql.replace(\":${it.simpleName}\", ${it.simpleName} + \"\");"
-        } ?: ArrayList()).joinToString(separator = "\n", postfix = "\n\n")
     }
 
     private fun getBuilderCode(annotationMapKey: String, classElement: Element,

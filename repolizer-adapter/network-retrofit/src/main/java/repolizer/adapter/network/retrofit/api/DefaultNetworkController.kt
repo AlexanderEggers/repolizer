@@ -17,7 +17,7 @@ constructor(networkInterface: NetworkInterface, gson: Gson) : NetworkController(
     override fun post(headerMap: Map<String, String>, url: String, queryMap: QueryHashMap, rawObject: Any?): Call<String> {
         return if (rawObject != null) {
             val json = super.gson.toJson(rawObject)
-            val requestBody = RequestBody.create(MediaType.parse("application/json"), json)
+            val requestBody = RequestBody.create(MediaType.parse(DEFAULT_MEDIA_TYPE), json)
             return super.networkInterface.post(headerMap, Utils.prepareUrl(url), queryMap, requestBody)
         } else {
             super.networkInterface.post(headerMap, Utils.prepareUrl(url), queryMap, null)
@@ -27,7 +27,7 @@ constructor(networkInterface: NetworkInterface, gson: Gson) : NetworkController(
     override fun put(headerMap: Map<String, String>, url: String, queryMap: QueryHashMap, rawObject: Any?): Call<String> {
         return if (rawObject != null) {
             val json = super.gson.toJson(rawObject)
-            val requestBody = RequestBody.create(MediaType.parse("application/json"), json)
+            val requestBody = RequestBody.create(MediaType.parse(DEFAULT_MEDIA_TYPE), json)
             return super.networkInterface.put(headerMap, Utils.prepareUrl(url), queryMap, requestBody)
         } else {
             super.networkInterface.put(headerMap, Utils.prepareUrl(url), queryMap, null)
@@ -37,10 +37,14 @@ constructor(networkInterface: NetworkInterface, gson: Gson) : NetworkController(
     override fun delete(headerMap: Map<String, String>, url: String, queryMap: QueryHashMap, rawObject: Any?): Call<String> {
         return if (rawObject != null) {
             val json = super.gson.toJson(rawObject)
-            val requestBody = RequestBody.create(MediaType.parse("application/json"), json)
+            val requestBody = RequestBody.create(MediaType.parse(DEFAULT_MEDIA_TYPE), json)
             super.networkInterface.delete(headerMap, Utils.prepareUrl(url), queryMap, requestBody)
         } else {
             super.networkInterface.delete(headerMap, Utils.prepareUrl(url), queryMap)
         }
+    }
+
+    companion object {
+        private const val DEFAULT_MEDIA_TYPE = "application/json"
     }
 }

@@ -10,10 +10,11 @@ import repolizer.annotation.repository.parameter.RepositoryParameter
 import repolizer.annotation.repository.parameter.UrlQuery
 import repolizer.annotation.repository.util.ParameterType
 import repolizer.repository.RepositoryMapHolder
+import repolizer.repository.RepositoryProcessorUtil.Companion.buildSql
+import repolizer.repository.RepositoryProcessorUtil.Companion.buildUrl
 import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
-import javax.lang.model.element.VariableElement
 
 class RepositoryGetMethod {
 
@@ -79,33 +80,6 @@ class RepositoryGetMethod {
                 }.build()
             } ?: ArrayList())
         }
-    }
-
-    private fun buildUrl(annotationMapKey: String): String {
-        return ArrayList<String>().apply {
-            addAll(RepositoryMapHolder.urlParameterAnnotationMap[annotationMapKey]?.map {
-                "url = url.replace(\":${it.simpleName}\", ${it.simpleName} + \"\");"
-            } ?: ArrayList())
-
-            val queries = RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]
-            if (queries?.isNotEmpty() == true) add(getFullUrlQueryPart(queries))
-        }.joinToString(separator = "\n", postfix = "\n\n")
-    }
-
-    private fun getFullUrlQueryPart(queries: ArrayList<VariableElement>): String {
-        return (queries.map { urlQuery ->
-            "url += " + "\"${urlQuery.getAnnotation(UrlQuery::class.java).key}=\" + ${urlQuery.simpleName};"
-        }).joinToString(prefix = "url += \"?\";", separator = "\nurl += \"&\";\n")
-    }
-
-    private fun buildSql(annotationMapKey: String, sqlParamName: String, baseSql: String): String {
-        return ArrayList<String>().apply {
-            RepositoryMapHolder.sqlParameterAnnotationMap[annotationMapKey]?.forEach {
-                if (baseSql.contains(":${it.simpleName}")) {
-                    add("$sqlParamName = $sqlParamName.replace(\":${it.simpleName}\", ${it.simpleName} + \"\");")
-                }
-            }
-        }.joinToString(separator = "\n", postfix = "\n\n")
     }
 
     private fun getBuilderCode(annotationMapKey: String, classElement: Element,

@@ -40,19 +40,19 @@ abstract class ResponseService {
 
     abstract class Callback {
         open fun onSuccess(requestType: RequestType, response: NetworkResponse<String>) {
-
+            //do nothing by default
         }
 
         open fun onStorageError(requestType: RequestType, response: NetworkResponse<String>) {
-
+            //do nothing by default
         }
 
         open fun onCacheError(requestType: RequestType, response: NetworkResponse<String>) {
-
+            //do nothing by default
         }
 
         open fun onRequestError(requestType: RequestType, response: NetworkResponse<String>) {
-
+            //do nothing by default
         }
     }
 }

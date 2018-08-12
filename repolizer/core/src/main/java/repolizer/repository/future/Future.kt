@@ -13,14 +13,14 @@ abstract class Future<Body> {
     protected abstract fun onDetermineExecutionType(): ExecutionType
 
     protected open fun onCreate() {
-
+        //do nothing by default
     }
 
     protected open fun onStart() {
-
+        //do nothing by default
     }
 
     protected open fun onFinished() {
-
+        //do nothing by default
     }
 }

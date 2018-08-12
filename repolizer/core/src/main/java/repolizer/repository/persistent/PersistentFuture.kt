@@ -13,16 +13,6 @@ import java.lang.reflect.Type
 abstract class PersistentFuture<Body>
 constructor(protected val repolizer: Repolizer, futureBuilder: PersistentFutureBuilder) : Future<Body>() {
 
-    val fullUrl: String by lazy {
-        repolizer.baseUrl?.let { baseUrl ->
-            if (baseUrl.substring(baseUrl.length) != "/") {
-                "$baseUrl/${futureBuilder.url}"
-            } else {
-                "$baseUrl${futureBuilder.url}"
-            }
-        } ?: futureBuilder.url
-    }
-
     protected val repositoryClass: Class<*> = futureBuilder.repositoryClass
             ?: throw IllegalStateException("Repository class type is null.")
     protected val wrapperType: TypeToken<*> = futureBuilder.typeToken
