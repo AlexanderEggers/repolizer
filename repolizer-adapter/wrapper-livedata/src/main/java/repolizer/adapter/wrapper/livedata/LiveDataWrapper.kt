@@ -2,15 +2,13 @@ package repolizer.adapter.wrapper.livedata
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
+import archtree.helper.AppExecutor
 import repolizer.adapter.StorageAdapter
 import repolizer.adapter.WrapperAdapter
-import repolizer.adapter.wrapper.util.AppExecutor
 import repolizer.repository.future.Future
 import java.util.concurrent.atomic.AtomicBoolean
 
-class LiveDataWrapper: WrapperAdapter<LiveData<*>>() {
-
-    private val appExecutor = AppExecutor
+class LiveDataWrapper(private val appExecutor: AppExecutor): WrapperAdapter<LiveData<*>>() {
 
     override fun <B> execute(future: Future<B>): LiveData<B> {
         return object : MediatorLiveData<B>() {
