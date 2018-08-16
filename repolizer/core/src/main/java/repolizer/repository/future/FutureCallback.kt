@@ -1,4 +1,5 @@
 package repolizer.repository.future
 
-interface FutureCallback {
+interface FutureCallback<Body> {
+    fun onFinished(body: Body?)
 }

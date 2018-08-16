@@ -1,4 +1,8 @@
 package repolizer.repository.util
 
-class RepositoryExecutor {
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
+
+object RepositoryExecutor {
+    val workerThread: Executor = Executors.newSingleThreadExecutor()
 }

@@ -2,13 +2,13 @@ package repolizer.adapter.wrapper.livedata
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MediatorLiveData
-import archtree.helper.AppExecutor
 import repolizer.adapter.StorageAdapter
 import repolizer.adapter.WrapperAdapter
 import repolizer.repository.future.Future
+import repolizer.repository.future.FutureCallback
 import java.util.concurrent.atomic.AtomicBoolean
 
-class LiveDataWrapper(private val appExecutor: AppExecutor): WrapperAdapter<LiveData<*>>() {
+class LiveDataWrapper: WrapperAdapter<LiveData<*>>() {
 
     override fun <B> execute(future: Future<B>): LiveData<B> {
         return object : MediatorLiveData<B>() {
@@ -17,9 +17,12 @@ class LiveDataWrapper(private val appExecutor: AppExecutor): WrapperAdapter<Live
             override fun onActive() {
                 super.onActive()
                 if (started.compareAndSet(false, true)) {
-                    appExecutor.workerThread.execute {
-                        postValue(future.execute())
-                    }
+                    future.executeAsync(object: FutureCallback<B> {
+
+                        override fun onFinished(body: B?) {
+                            postValue(body)
+                        }
+                    })
                 }
             }
         }
@@ -27,10 +30,7 @@ class LiveDataWrapper(private val appExecutor: AppExecutor): WrapperAdapter<Live
 
     override fun <B> execute(future: Future<B>, storageAdapter: StorageAdapter<B>,
                              repositoryClass: Class<*>, url: String, sql: String): LiveData<B>? {
-        appExecutor.workerThread.execute {
-            future.execute()
-        }
-
+        future.executeAsync()
         return storageAdapter.establishConnection(repositoryClass, url, sql)
     }
 
