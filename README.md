@@ -20,7 +20,7 @@ repositories {
 dependencies {
   def repolizer_version = "0.4.0"
 
-  //includes all library artifacts and required classes (this artifact is required if you want to use the processor)
+  //main dependency which is required for the app (including the processor)
   implementation "org.repolizer:repolizer-core:$repolizer_version"
   //just annotations
   implementation "org.repolizer:repolizer-annotation:$repolizer_version"
