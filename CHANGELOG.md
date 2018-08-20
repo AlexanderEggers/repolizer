@@ -1,6 +1,27 @@
 Change Log
 ==========
 
+Version 0.4.0 *(2018-08-09)*
+----------------------------
+With this release I have refactored the whole project to have a more flexible implementation.
+
+### Breaking changes:
+- Repolizer-core is now a java library and is therefore producing a jar instead of aar file.
+- The Room default implementation has been removed from the project (for now). Because of the major changes, I have to rewrite the whole processor in how database files are being created. Therefore all database related annotations has been removed.
+- The annotations for Repository has been changed regarding which fields are included. That change will break your code.
+- The DB annotation has been renamed to Storage
+- The Repolizer class has dropped several builder methods. You won't be able to set a gson object or context via this builder.
+- Internally Repolizer's service classes (like ResponseService) which allows a custom implementation, has been changed. The original implementation is still there but the changes includes methods renaming or simply fixing bugs.
+
+### Summary of the changes:
+- The library is now supporting adapters. Those adapters are used for different areas within the library, like network. You can use adapters to define your own custom implementation in how things are being done. One adapter implementation depends on the AdapterFactory and the Adapter itself. The factory will help the internal system to find the right adapter for the used repository method. Means you can use different adapters based on methods, types etc. These adapters can be added to the Repolizer class and will be stored as a list.
+   - Wrapper Adapter: This adapter can be used to define the wrapper for the repository. You could write your own JavaRx wrapper so that your calls are wrapped into that.
+   - Storage Adapter: That adapter is relevant for persisting your data. You could implement something with Room or even SharedPrefs if you prefer that.
+   - Cache Adapter: That adapter will be used to keep track of your persistent data "age". The adapter saves the time when your data was downloaded and also helps to determine if the data should be refreshed.
+    - Converter Adapter: This adapter is used by the storage adapter to convert any web stuff into real objects. You could have your own Gson Converter or even use something like Jackson. That's up to you.
+    - Network Adapter: This adapter can be used to implement your own network logic. You could you Retrofit, okHttp or what ever you think is best.
+- The app already provides you with several default adapter: GsonConveterAdapter, RetrofitNetworkAdapter, LiveDataWrapperAdapter, SharedPrefsCacheAdapter. The storage adapter is currently missing and is something I would like to do in the future. This adapter will probably use the missing Room implementation (and it's annotation processor).
+
 Version 0.3.2 *(2018-08-01)*
 ----------------------------
 - **BUGFIX:** Fixed UrlParameter processor implementation
@@ -11,7 +32,6 @@ Version 0.3.1 *(2018-07-10)*
 - **BUGFIX:** Fixed annotation processor bug for the NetworkGetMethod that was wrongly initialising the CacheItem when the method url is empty.
 - **MISC:** Updated kotlin to version 1.2.51.
 - **MISC:** Updated room to version 1.1.1.
-
 
 Version 0.3.0 *(2018-06-12)*
 ----------------------------
