@@ -2,13 +2,11 @@ Repolizer
 =====
 [![Download](https://api.bintray.com/packages/mordag/android/repolizer-core/images/download.svg) ](https://bintray.com/mordag/android/repolizer-core/_latestVersion)
 
-Repolizer is generating the backend related classes for your Android/Java project. Backends are usually complex, containing a lot of potential errors and consuming most of the development time. The generated backend includes databases, webservices, caching and repositories.
+Repolizer is generating the backend related classes for your Android/Java project. Backends are usually complex, containing a lot of potential errors and consuming most of the development time.
 
-Since the release of Android Room most of the required work for backends has been simplified. Also the usage of Retrofit and Dagger helped people to decrease the development time in creating app backends. But there's still a lot of effort and time that needs to be put into creating a fully working backend.
+Repolizer provides you with a solution for that using a handful of annotations and adapters. The library is designed to give you access to a full stack of implementations (downloading, caching, converting, persisting). You can use the default implementations or write your adapters (like if you want to use your own http client).
 
-Repolizer provides you with a solution for that using a handful of annotations and adapters. The library is designed to give you access to a full stack of implementations (downloading, caching, converting, persisting).
-
-If you need more information in how to use the library, take a look inside **[this wiki][4]**. **Due to the latest changes (0.4.0) the wiki is not up-to-date, you should therefore use the [example project][3] to get an idea how to use the library.**
+If you need more information in how to use the library, take a look inside **[this wiki][4]**. **NOTE: Due to the latest changes (0.4.0) the wiki is not up-to-date, you should therefore use the [example project][3] to get an idea how to use the library for now.**
 
 Download
 --------
