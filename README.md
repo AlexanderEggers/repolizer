@@ -68,5 +68,5 @@ Apache 2.0. See the [LICENSE][1] file for details.
 
 [1]: https://github.com/Mordag/repolizer/blob/master/LICENSE
 [2]: https://github.com/Mordag
-[3]: https://github.com/Mordag/repolizer/tree/master/examples/src/main/java/org/demo/weatherapp
+[3]: https://github.com/Mordag/repolizer/tree/master/repolizer/example
 [4]: https://github.com/Mordag/repolizer/wiki
