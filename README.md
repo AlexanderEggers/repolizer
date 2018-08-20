@@ -4,7 +4,7 @@ Repolizer
 
 Repolizer is generating the backend related classes for your Android/Java project. Backends are usually complex, containing a lot of potential errors and consuming most of the development time.
 
-Repolizer provides you with a solution for that using a handful of annotations and adapters. The library is designed to give you access to a full stack of implementations (downloading, caching, converting, persisting). You can use the default implementations or write your adapters (like if you want to use your own http client).
+Repolizer provides you with a solution for that using a handful of annotations and adapters. The library is designed to give you access to a full stack of implementations (downloading, caching, converting, persisting). You can use the default implementations or write your own adapters (like if you want to use your own http client).
 
 If you need more information in how to use the library, take a look inside **[this wiki][4]**. **NOTE: Due to the latest changes (0.4.0) the wiki is not up-to-date, you should therefore use the [example project][3] to get an idea how to use the library for now.**
 
