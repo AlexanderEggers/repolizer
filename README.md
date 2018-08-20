@@ -8,7 +8,7 @@ Since the release of Android Room most of the required work for backends has bee
 
 Repolizer provides you with a solution for that using a handful of annotations and adapters. The library is designed to give you access to a full stack of implementations (caching, network, persisting).
 
-If you need more information in how to use the library, take a look inside **[this wiki][4]**. Due to the latest changes (0.4.0) the wiki is not up-to-date, you should therefore use the [example project][3] to get an idea how to use the library.
+If you need more information in how to use the library, take a look inside **[this wiki][4]**. **Due to the latest changes (0.4.0) the wiki is not up-to-date, you should therefore use the [example project][3] to get an idea how to use the library.**
 
 Download
 --------
