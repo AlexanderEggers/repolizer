@@ -50,7 +50,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
         val needsFetch = cacheState == CacheState.NEEDS_SOFT_REFRESH ||
                 cacheState == CacheState.NEEDS_HARD_REFRESH || cacheState == CacheState.NO_CACHE
 
-        return if ((cacheData == null || needsFetch) && allowFetch) {
+        return if (builderUrl.isNotEmpty() && (cacheData == null || needsFetch) && allowFetch) {
             if (allowMultipleRequestsAtSameTime || fetchSecurityLayer.allowFetch()) {
                 ExecutionType.USE_NETWORK
             } else {

@@ -30,13 +30,15 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
 
     val fullUrl: String by lazy {
         repolizer.baseUrl?.let { baseUrl ->
-            if (baseUrl.substring(baseUrl.length) != "/") {
+            if (baseUrl.substring(baseUrl.length - 1) != "/") {
                 "$baseUrl/${futureBuilder.url}"
             } else {
                 "$baseUrl${futureBuilder.url}"
             }
         } ?: futureBuilder.url
     }
+
+    protected val builderUrl: String = futureBuilder.url
 
     protected val repositoryClass: Class<*> = futureBuilder.repositoryClass
             ?: throw IllegalStateException("Repository class type is null.")
