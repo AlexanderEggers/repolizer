@@ -96,20 +96,20 @@ class RepositoryMainProcessor {
 
         //Param annotations
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
-                RepositoryParameter::class.java, RepositoryMapHolder.repositoryParameterAnnotationMap)
+                RepositoryParameter::class.java, false, RepositoryMapHolder.repositoryParameterAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
-                Header::class.java, RepositoryMapHolder.headerAnnotationMap)
+                Header::class.java, false, RepositoryMapHolder.headerAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
-                RequestBody::class.java, RepositoryMapHolder.requestBodyAnnotationMap)
+                RequestBody::class.java, true, RepositoryMapHolder.requestBodyAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
-                StorageBody::class.java, RepositoryMapHolder.storageBodyAnnotationMap)
+                StorageBody::class.java, true, RepositoryMapHolder.storageBodyAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
-                SqlParameter::class.java, RepositoryMapHolder.sqlParameterAnnotationMap)
+                SqlParameter::class.java, false, RepositoryMapHolder.sqlParameterAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
-                UrlParameter::class.java, RepositoryMapHolder.urlParameterAnnotationMap)
+                UrlParameter::class.java, false, RepositoryMapHolder.urlParameterAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
-                UrlQuery::class.java, RepositoryMapHolder.urlQueryAnnotationMap)
+                UrlQuery::class.java, false, RepositoryMapHolder.urlQueryAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
-                Progress::class.java, RepositoryMapHolder.progressParamsAnnotationMap)
+                Progress::class.java, true, RepositoryMapHolder.progressParamsAnnotationMap)
     }
 }

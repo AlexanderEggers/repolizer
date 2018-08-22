@@ -31,7 +31,9 @@ class RepositoryProcessorUtil {
         }
 
         fun initParamAnnotations(mainProcessor: MainProcessor, roundEnv: RoundEnvironment,
-                                 clazz: Class<out Annotation>, hashMap: HashMap<String, ArrayList<VariableElement>>) {
+                                 clazz: Class<out Annotation>,
+                                 singleValuePerKey: Boolean,
+                                 hashMap: HashMap<String, ArrayList<VariableElement>>) {
             roundEnv.getElementsAnnotatedWith(clazz).forEach {
                 val typeElement = it.enclosingElement.enclosingElement as TypeElement
                 val methodElement = it.enclosingElement as ExecutableElement
@@ -43,9 +45,20 @@ class RepositoryProcessorUtil {
                 }
 
                 val key = "${typeElement.simpleName}.${methodElement.simpleName}"
-                val currentList: ArrayList<VariableElement> = hashMap[key] ?: ArrayList()
-                currentList.add(it as VariableElement)
-                hashMap[key] = currentList
+                var currentList: ArrayList<VariableElement>? = hashMap[key]
+                if (singleValuePerKey && currentList == null) {
+                    currentList = ArrayList()
+                    currentList.add(it as VariableElement)
+                    hashMap[key] = currentList
+                } else if (!singleValuePerKey) {
+                    if (currentList == null) currentList = ArrayList()
+                    currentList.add(it as VariableElement)
+                    hashMap[key] = currentList
+                } else {
+                    mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR,
+                            "@${clazz.simpleName} can only be applied once to one method. Error for " +
+                                    "${typeElement.simpleName}.${methodElement.simpleName}")
+                }
             }
         }
 
