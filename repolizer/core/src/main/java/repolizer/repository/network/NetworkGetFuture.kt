@@ -80,10 +80,10 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
         return if (response.isSuccessful() && response.body != null) {
             if (saveData) {
                 val saveSuccessful = storageAdapter?.insert(repositoryClass, converterAdapter, fullUrl, insertSql,
-                        response.body, bodyType)
-                if (saveSuccessful == true) {
-                    val cacheSuccessful = cacheAdapter?.save(repositoryClass, CacheItem(fullUrl))
-                    if(cacheSuccessful == true) {
+                        response.body, bodyType) ?: false
+                if (saveSuccessful) {
+                    val cacheSuccessful = cacheAdapter?.save(repositoryClass, CacheItem(fullUrl)) ?: true
+                    if(cacheSuccessful) {
                         responseService?.handleSuccess(requestType, response)
                         if (!wrapperCanHaveActiveConnection
                                 || storageAdapter?.canHaveActiveConnections() == false) {
