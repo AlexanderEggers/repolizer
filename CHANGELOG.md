@@ -3,7 +3,7 @@ Changelog
 
 Version 0.4.1 *(2018-08-22)*
 ----------------------------
-- **NEW:** The future class got a default method to run async. This method will use the internal RepositoryThread (single thread). The goal is to leave the app worker thread clear from any repository based work to prevent blocking any work for those. Repository thread normally could run for a longer period, especially if webserver call is slow or the response a quite large file to convert.
+- **NEW:** The future class got a default method to run async. This method will use the internal RepositoryThread (single thread). The goal is to leave the app worker thread clear from any repository based work to prevent blocking any work for those. Repository thread normally could run for a longer period, especially if webserver call is slow or the response a quite large file to convert. **Note: You can still assign your own threading to the library by using the existing Future.execute() method which runs synchronized.**
 - **NEW:** AppExecutor for livedata wrapper adapter will use the new Future.executeAsync() instead of a local excutor singleton.
 - **BUGFIX:** Ensured that CacheAdapter is optional.
 - **BUGFIX:** Fixed bug that was still using network if the get builder url is empty.
