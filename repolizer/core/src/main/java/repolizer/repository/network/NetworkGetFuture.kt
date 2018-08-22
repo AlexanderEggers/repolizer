@@ -100,7 +100,11 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
                     null
                 }
             } else {
-                converterAdapter.convertStringToData(repositoryClass, response.body, bodyType)
+                if(bodyType != String::class.java) {
+                    response.body as? Body?
+                } else {
+                    converterAdapter?.convertStringToData(repositoryClass, response.body, bodyType)
+                }
             }
         } else {
             responseService?.handleRequestError(requestType, response)

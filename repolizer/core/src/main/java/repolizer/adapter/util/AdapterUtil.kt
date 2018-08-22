@@ -26,6 +26,15 @@ class AdapterUtil {
             }
         }
 
+        fun <T : AdapterFactory<*>> getSafeAdapter(list: List<T>, returnType: Type, repositoryClass: Class<*>,
+                                               repolizer: Repolizer): Any? {
+            return try {
+                getAdapter(list, returnType, repositoryClass, repolizer)
+            } catch (e: IllegalArgumentException) {
+                null
+            }
+        }
+
         fun getBodyType(returnType: Type): Type {
             return if (returnType is ParameterizedType) {
                 return returnType.actualTypeArguments[0]

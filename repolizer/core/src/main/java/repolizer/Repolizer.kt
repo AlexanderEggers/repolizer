@@ -1,7 +1,6 @@
 package repolizer
 
 import repolizer.adapter.*
-import repolizer.adapter.converter.EmptyConverterAdapterFactory
 import repolizer.adapter.factory.AdapterFactory
 import repolizer.adapter.future.FutureWrapperAdapterFactory
 import repolizer.repository.login.LoginManager
@@ -112,7 +111,6 @@ class Repolizer private constructor(builder: Builder) {
 
         fun build(): Repolizer {
             wrapperAdapters.add(FutureWrapperAdapterFactory())
-            converterAdapters.add(EmptyConverterAdapterFactory())
             return Repolizer(this@Builder)
         }
     }
