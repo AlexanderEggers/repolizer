@@ -81,38 +81,47 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
 
         return if (response.isSuccessful() && response.body != null) {
             if (saveData) {
-                val saveSuccessful = storageAdapter?.insert(repositoryClass, converterAdapter, fullUrl, insertSql,
-                        response.body, bodyType) ?: false
-                if (saveSuccessful) {
-                    val cacheSuccessful = cacheAdapter?.save(repositoryClass, CacheItem(fullUrl)) ?: true
-                    if(cacheSuccessful) {
-                        responseService?.handleSuccess(requestType, response)
-                        if (!wrapperCanHaveActiveConnection
-                                || storageAdapter?.canHaveActiveConnections() == false) {
-                            storageAdapter?.get(repositoryClass, converterAdapter, fullUrl, querySql, bodyType)
-                        } else null
-                    } else {
-                        responseService?.handleCacheError(requestType, response)
-                        null
-                    }
-                } else {
-                    responseService?.handleStorageError(requestType, response)
-                    null
-                }
+                saveNetworkResponse(response)
             } else {
-                if(bodyType != String::class.java) {
+                if (bodyType == String::class.java) {
                     response.body as? Body?
                 } else {
                     converterAdapter?.convertStringToData(repositoryClass, response.body, bodyType)
                 }
             }
         } else {
-            responseService?.handleRequestError(requestType, response)
-            if (deleteIfCacheIsTooOld && cacheState == CacheState.NEEDS_HARD_REFRESH) {
-                storageAdapter?.delete(repositoryClass, fullUrl, deleteSql)
-                cacheAdapter?.delete(repositoryClass, CacheItem(fullUrl))
-            }
+            handleRequestError(response)
             null
+        }
+    }
+
+    private fun saveNetworkResponse(response: NetworkResponse<String>): Body? {
+        val saveSuccessful = storageAdapter?.insert(repositoryClass, converterAdapter, fullUrl, insertSql,
+                response.body!!, bodyType) ?: false
+        return if (saveSuccessful) {
+            val cacheSuccessful = cacheAdapter?.save(repositoryClass, CacheItem(fullUrl)) ?: true
+
+            //If no cacheAdapter given, ignore check
+            if (cacheSuccessful) {
+                responseService?.handleSuccess(requestType, response)
+                if (!wrapperCanHaveActiveConnection || storageAdapter?.canHaveActiveConnections() == false) {
+                    storageAdapter?.get(repositoryClass, converterAdapter, fullUrl, querySql, bodyType)
+                } else null
+            } else {
+                responseService?.handleCacheError(requestType, response)
+                null
+            }
+        } else {
+            responseService?.handleStorageError(requestType, response)
+            null
+        }
+    }
+
+    private fun handleRequestError(response: NetworkResponse<String>) {
+        responseService?.handleRequestError(requestType, response)
+        if (deleteIfCacheIsTooOld && cacheState == CacheState.NEEDS_HARD_REFRESH) {
+            storageAdapter?.delete(repositoryClass, fullUrl, deleteSql)
+            cacheAdapter?.delete(repositoryClass, CacheItem(fullUrl))
         }
     }
 

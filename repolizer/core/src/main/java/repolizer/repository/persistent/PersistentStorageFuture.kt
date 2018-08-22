@@ -26,15 +26,16 @@ constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder) : Pers
     }
 
     override fun onExecute(executionType: ExecutionType): Boolean? {
-        return when (storageOperation) {
+        if (storageAdapter == null) throw IllegalStateException("Storage adapter is null.")
+        else return when (storageOperation) {
             StorageOperation.INSERT -> {
                 if (databaseItem == null) throw IllegalStateException("Database item is null.")
-                storageAdapter?.insert(repositoryClass, null,"", insertSql, databaseItem, bodyType)
+                storageAdapter.insert(repositoryClass, null, "", insertSql, databaseItem, bodyType)
             }
             StorageOperation.UPDATE -> {
-                storageAdapter?.update(repositoryClass, updateSql, databaseItem)
+                storageAdapter.update(repositoryClass, updateSql, databaseItem)
             }
-            StorageOperation.DELETE -> storageAdapter?.delete(repositoryClass, "", deleteSql)
+            StorageOperation.DELETE -> storageAdapter.delete(repositoryClass, "", deleteSql)
         }
     }
 }

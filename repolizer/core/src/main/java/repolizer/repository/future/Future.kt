@@ -6,7 +6,7 @@ import repolizer.repository.util.RepositoryExecutor
 abstract class Future<Body> {
 
     private val executor = RepositoryExecutor
-    private val defaultFutureCallback = object: FutureCallback<Body> {
+    private val defaultFutureCallback = object : FutureCallback<Body> {
 
         override fun onFinished(body: Body?) {
             //do nothing

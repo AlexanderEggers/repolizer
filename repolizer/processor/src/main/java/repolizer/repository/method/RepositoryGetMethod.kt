@@ -106,10 +106,6 @@ class RepositoryGetMethod {
             add("builder.setFreshCacheTime(${annotation.maxFreshTime}L);")
             add("builder.setMaxCacheTime(${annotation.maxCacheTime}L);")
 
-            RepositoryMapHolder.requestBodyAnnotationMap[annotationMapKey]?.forEach {
-                add("builder.setRaw(${it.simpleName});")
-            }
-
             RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {
                 add("builder.addHeader(" +
                         "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName});")

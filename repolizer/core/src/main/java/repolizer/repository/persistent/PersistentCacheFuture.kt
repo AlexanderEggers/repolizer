@@ -23,9 +23,10 @@ constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder) : Pers
     }
 
     override fun onExecute(executionType: ExecutionType): Boolean? {
-        return when (cacheOperation) {
-            CacheOperation.INSERT -> cacheAdapter?.save(repositoryClass, cacheItem)
-            CacheOperation.DELETE -> cacheAdapter?.delete(repositoryClass, cacheItem)
+        if (cacheAdapter == null) throw IllegalStateException("Cache adapter is null.")
+        else return when (cacheOperation) {
+            CacheOperation.INSERT -> cacheAdapter.save(repositoryClass, cacheItem)
+            CacheOperation.DELETE -> cacheAdapter.delete(repositoryClass, cacheItem)
         }
     }
 }

@@ -97,10 +97,6 @@ class RepositoryRefreshMethod {
             add("builder.setInsertSql(insertSql);")
             add("builder.setSaveData(true);")
 
-            RepositoryMapHolder.requestBodyAnnotationMap[annotationMapKey]?.forEach {
-                add("builder.setRaw(${it.simpleName});")
-            }
-
             RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {
                 add("builder.addHeader(" +
                         "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName});")

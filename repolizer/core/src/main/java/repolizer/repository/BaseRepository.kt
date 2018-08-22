@@ -28,7 +28,7 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
         val bodyType = getBodyType(returnType)
         futureBuilder.bodyType = bodyType
 
-        return if(hasList) {
+        return if (hasList) {
             futureBuilder.buildGet(repolizer, lowestBodyClass).create()
         } else {
             futureBuilder.buildGetWithList(repolizer, lowestBodyClass).create()

@@ -70,22 +70,19 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
     }
 
     init {
-        networkAdapter = if(builderUrl.isNotEmpty()) {
+        networkAdapter = if (builderUrl.isNotEmpty()) {
             AdapterUtil.getAdapter(repolizer.networkAdapters,
-                    wrapperType.type, repositoryClass, repolizer) as NetworkAdapter
-        } else {
-            null
-        }
+                    wrapperType.type, repositoryClass, repolizer) as? NetworkAdapter?
+        } else null
 
         if (saveData) {
             storageAdapter = AdapterUtil.getAdapter(repolizer.storageAdapters,
                     wrapperType.type, repositoryClass, repolizer) as StorageAdapter<Body>
 
             cacheAdapter = AdapterUtil.getSafeAdapter(repolizer.cacheAdapters,
-                    wrapperType.type, repositoryClass, repolizer) as? CacheAdapter
+                    wrapperType.type, repositoryClass, repolizer) as? CacheAdapter?
         } else {
             storageAdapter = null
-
             cacheAdapter = null
         }
     }

@@ -27,7 +27,7 @@ class AdapterUtil {
         }
 
         fun <T : AdapterFactory<*>> getSafeAdapter(list: List<T>, returnType: Type, repositoryClass: Class<*>,
-                                               repolizer: Repolizer): Any? {
+                                                   repolizer: Repolizer): Any? {
             return try {
                 getAdapter(list, returnType, repositoryClass, repolizer)
             } catch (e: IllegalArgumentException) {
@@ -54,7 +54,7 @@ class AdapterUtil {
         fun hasListType(returnType: Type): Boolean {
             return if (returnType is ParameterizedType) {
                 val type = returnType.actualTypeArguments[0]
-                if(type is ParameterizedType) {
+                if (type is ParameterizedType) {
                     return type.rawType as Class<*> == List::class.java
                 }
                 return false

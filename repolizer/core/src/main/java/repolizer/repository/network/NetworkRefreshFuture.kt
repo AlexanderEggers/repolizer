@@ -45,7 +45,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
                     insertSql, response.body, bodyType)
             if (saveSuccessful == true) {
                 val successfullyCached = cacheAdapter?.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
-                if(successfullyCached == true) {
+                if (successfullyCached == true) {
                     responseService?.handleSuccess(requestType, response)
                     true
                 } else {
