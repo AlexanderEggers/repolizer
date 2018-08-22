@@ -24,8 +24,8 @@ constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder) : Pers
 
     override fun onExecute(executionType: ExecutionType): Boolean? {
         return when (cacheOperation) {
-            CacheOperation.INSERT -> cacheAdapter.save(repositoryClass, cacheItem)
-            CacheOperation.DELETE -> cacheAdapter.delete(repositoryClass, cacheItem)
+            CacheOperation.INSERT -> cacheAdapter?.save(repositoryClass, cacheItem)
+            CacheOperation.DELETE -> cacheAdapter?.delete(repositoryClass, cacheItem)
         }
     }
 }
