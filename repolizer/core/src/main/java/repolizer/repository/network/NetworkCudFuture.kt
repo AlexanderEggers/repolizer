@@ -20,7 +20,9 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
     }
 
     override fun onExecute(executionType: ExecutionType): String? {
-        val response: NetworkResponse<String> = networkAdapter.execute(this, requestProvider)
+        val response: NetworkResponse<String> = networkAdapter?.execute(this, requestProvider)
+                ?: throw IllegalStateException("Network Adapter error: Your url that you have " +
+                        "set inside your repository method is empty.")
 
         return if (response.isSuccessful()) {
             responseService?.handleSuccess(requestType, response)

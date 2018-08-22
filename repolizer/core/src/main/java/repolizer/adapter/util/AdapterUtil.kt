@@ -9,7 +9,8 @@ class AdapterUtil {
 
     companion object {
 
-        fun <T : AdapterFactory<*>> getAdapter(list: List<T>, returnType: Type, repositoryClass: Class<*>, repolizer: Repolizer): Any {
+        fun <T : AdapterFactory<*>> getAdapter(list: List<T>, returnType: Type, repositoryClass: Class<*>,
+                                               repolizer: Repolizer): Any {
             var adapter: Any? = null
 
             for (i in 0 until list.size) {

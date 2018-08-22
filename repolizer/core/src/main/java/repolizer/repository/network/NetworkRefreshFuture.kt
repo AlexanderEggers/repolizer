@@ -36,7 +36,9 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
     }
 
     private fun fetchFromNetwork(): Boolean? {
-        val response: NetworkResponse<String> = networkAdapter.execute(this, requestProvider)
+        val response: NetworkResponse<String> = networkAdapter?.execute(this, requestProvider)
+                ?: throw IllegalStateException("Network Adapter error: Your url that you have " +
+                        "set inside your repository method is empty.")
 
         return if (response.isSuccessful() && response.body != null) {
             val saveSuccessful = storageAdapter?.insert(repositoryClass, converterAdapter, fullUrl,

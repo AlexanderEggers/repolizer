@@ -48,8 +48,7 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
     protected val bodyType: Type = futureBuilder.bodyType
             ?: throw IllegalStateException("Body type is null.")
 
-    protected val networkAdapter: NetworkAdapter = AdapterUtil.getAdapter(repolizer.networkAdapters,
-            wrapperType.type, repositoryClass, repolizer) as NetworkAdapter
+    protected val networkAdapter: NetworkAdapter?
     protected val converterAdapter: ConverterAdapter = AdapterUtil.getAdapter(repolizer.converterAdapters,
             wrapperType.type, repositoryClass, repolizer) as ConverterAdapter
     protected val storageAdapter: StorageAdapter<Body>?
@@ -71,6 +70,13 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
     }
 
     init {
+        networkAdapter = if(builderUrl.isNotEmpty()) {
+            AdapterUtil.getAdapter(repolizer.networkAdapters,
+                    wrapperType.type, repositoryClass, repolizer) as NetworkAdapter
+        } else {
+            null
+        }
+
         if (saveData) {
             storageAdapter = AdapterUtil.getAdapter(repolizer.storageAdapters,
                     wrapperType.type, repositoryClass, repolizer) as StorageAdapter<Body>
