@@ -21,10 +21,20 @@ class RepositoryProcessorUtil {
                     mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR,
                             "@${clazz.simpleName} can only be applied to a method. Error for " +
                                     "${typeElement.simpleName}.${it.simpleName}")
+                    return
                 }
 
                 val key = typeElement.simpleName.toString()
                 val currentList: ArrayList<ExecutableElement> = hashMap[key] ?: ArrayList()
+                currentList.forEach { existingMethod ->
+                    if (existingMethod.simpleName == it.simpleName) {
+                        mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR,
+                                "@${clazz.simpleName} should always have a unique name per class. Error for " +
+                                        "${typeElement.simpleName}.${it.simpleName}")
+                    }
+                    return
+                }
+
                 currentList.add(it as ExecutableElement)
                 hashMap[typeElement.simpleName.toString()] = currentList
             }
@@ -42,6 +52,7 @@ class RepositoryProcessorUtil {
                     mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR,
                             "@${clazz.simpleName} can only be applied to a parameter. Error for " +
                                     "${typeElement.simpleName}.${methodElement.simpleName}.${it.simpleName}")
+                    return
                 }
 
                 val key = "${typeElement.simpleName}.${methodElement.simpleName}"
@@ -58,6 +69,7 @@ class RepositoryProcessorUtil {
                     mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR,
                             "@${clazz.simpleName} can only be applied once to one method. Error for " +
                                     "${typeElement.simpleName}.${methodElement.simpleName}")
+                    return
                 }
             }
         }

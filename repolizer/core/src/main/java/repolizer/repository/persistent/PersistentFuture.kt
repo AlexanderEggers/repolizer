@@ -21,9 +21,9 @@ constructor(protected val repolizer: Repolizer, futureBuilder: PersistentFutureB
             ?: throw IllegalStateException("Body type is null.")
 
     protected val storageAdapter: StorageAdapter<Body>? = AdapterUtil.getSafeAdapter(repolizer.storageAdapters,
-            wrapperType.type, repositoryClass, repolizer) as? StorageAdapter<Body>
+            bodyType, repositoryClass, repolizer) as? StorageAdapter<Body>
     protected val cacheAdapter: CacheAdapter? = AdapterUtil.getSafeAdapter(repolizer.cacheAdapters,
-            wrapperType.type, repositoryClass, repolizer) as? CacheAdapter
+            bodyType, repositoryClass, repolizer) as? CacheAdapter
 
     override fun execute(): Body? {
         onStart()

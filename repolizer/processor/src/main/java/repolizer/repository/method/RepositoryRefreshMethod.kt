@@ -52,9 +52,13 @@ class RepositoryRefreshMethod {
                     //Uses the return type of the related GET method. This is needed for any
                     //storage related actions.
                     val relatedGetMethod = getGETExecutableElement(element, methodElement, url)
-                    val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
+                    val returnTypeWithTypeToken = ParameterizedTypeName.get(classTypeToken,
                             ClassName.get(relatedGetMethod.returnType))
-                    addStatement("$classTypeToken returnType = new $classWithTypeToken() {}")
+                    addStatement("$classTypeToken returnType = new $returnTypeWithTypeToken() {}")
+
+                    val refreshMethodReturnTypeWithTypeToken = ParameterizedTypeName.get(classTypeToken,
+                            ClassName.get(methodElement.returnType))
+                    addStatement("$classTypeToken refreshMethodReturnType = new $refreshMethodReturnTypeWithTypeToken() {}")
 
                     addCode("\n")
 
@@ -86,7 +90,7 @@ class RepositoryRefreshMethod {
 
             add("$classNetworkBuilder builder = new $classNetworkBuilder();")
 
-            add("builder.setTypeToken(returnType);")
+            add("builder.setTypeToken(refreshMethodReturnType);")
 
             add("builder.setRequestType($classRequestType.GET);")
             add("builder.setRepositoryClass(${ClassName.get(classElement.asType())}.class);")
