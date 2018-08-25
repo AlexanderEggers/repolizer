@@ -12,10 +12,10 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.lang.reflect.Type
 
 class RetrofitNetworkAdapterFactory
-constructor(baseUrl: String,
-            gson: Gson = Gson(),
-            httpClient: OkHttpClient? = null,
-            networkControllerClass: Class<out NetworkController> = DefaultNetworkController::class.java) : AdapterFactory<RetrofitNetworkAdapter> {
+@JvmOverloads constructor(baseUrl: String,
+                          gson: Gson = Gson(),
+                          httpClient: OkHttpClient? = null,
+                          networkControllerClass: Class<out NetworkController> = DefaultNetworkController::class.java) : AdapterFactory<RetrofitNetworkAdapter> {
 
     private var networkController: NetworkController
 

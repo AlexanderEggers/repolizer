@@ -4,7 +4,7 @@ import repolizer.repository.request.RequestProvider
 import java.util.*
 import kotlin.collections.HashMap
 
-abstract class ProgressController<C> constructor(private val requestProvider: RequestProvider<C>?) {
+abstract class ProgressController constructor(private val requestProvider: RequestProvider<*>?) {
 
     private val sourceMap: HashMap<String, Int> = HashMap()
 
@@ -27,7 +27,6 @@ abstract class ProgressController<C> constructor(private val requestProvider: Re
         else sourceMap[url] = count
     }
 
-    @JvmName("internalShow")
     internal fun internalShow(url: String, progressData: ProgressData) {
         synchronized(syncLock) {
             increaseSourceCount(url)
@@ -42,7 +41,6 @@ abstract class ProgressController<C> constructor(private val requestProvider: Re
         }
     }
 
-    @JvmName("internalClose")
     internal fun internalClose(url: String) {
         synchronized(syncLock) {
             decreaseSourceCount(url)
