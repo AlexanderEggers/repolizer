@@ -1,9 +1,11 @@
 package repolizer.repository.future
 
+import repolizer.Repolizer
 import repolizer.repository.network.ExecutionType
 import repolizer.repository.util.RepositoryExecutor
+import java.util.concurrent.Executor
 
-abstract class Future<Body> {
+abstract class Future<Body>(private val repolizer: Repolizer) {
 
     private val executor = RepositoryExecutor
     private val defaultFutureCallback = object : FutureCallback<Body> {
@@ -16,9 +18,14 @@ abstract class Future<Body> {
     abstract fun <Wrapper> create(): Wrapper
 
     @JvmOverloads
-    fun executeAsync(callback: FutureCallback<Body> = defaultFutureCallback) {
+    fun executeAsync(callback: FutureCallback<Body> = defaultFutureCallback,
+                     mainThread: Executor = repolizer.defaultMainThread) {
         executor.workerThread.execute {
-            callback.onFinished(execute())
+            val result = execute()
+
+            mainThread.execute {
+                callback.onFinished(result)
+            }
         }
     }
 

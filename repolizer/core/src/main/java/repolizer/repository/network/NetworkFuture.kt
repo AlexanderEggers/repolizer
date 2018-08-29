@@ -19,7 +19,7 @@ import java.lang.reflect.Type
 
 @Suppress("UNCHECKED_CAST")
 abstract class NetworkFuture<Body>
-constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Future<Body>() {
+constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Future<Body>(repolizer) {
 
     val requestType: RequestType = futureBuilder.requestType
             ?: throw IllegalStateException("Request type is null.")
@@ -54,7 +54,7 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
     protected val storageAdapter: StorageAdapter<Body>?
     protected val cacheAdapter: CacheAdapter?
 
-    protected val progressController: ProgressController<*>? = repolizer.progressController
+    protected val progressController: ProgressController? = repolizer.progressController
     protected val loginManager: LoginManager? = repolizer.loginManager
     protected val responseService: ResponseService? = repolizer.responseService
     protected val requestProvider: RequestProvider<*>? = repolizer.requestProvider

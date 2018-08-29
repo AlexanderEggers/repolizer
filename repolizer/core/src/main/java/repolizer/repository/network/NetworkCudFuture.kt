@@ -25,10 +25,14 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
                         "set inside your repository method is empty.")
 
         return if (response.isSuccessful()) {
-            responseService?.handleSuccess(requestType, response)
+            repolizer.defaultMainThread.execute {
+                responseService?.handleSuccess(requestType, response)
+            }
             response.body
         } else {
-            responseService?.handleRequestError(requestType, response)
+            repolizer.defaultMainThread.execute {
+                responseService?.handleRequestError(requestType, response)
+            }
             null
         }
     }

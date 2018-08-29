@@ -46,18 +46,26 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
             if (saveSuccessful == true) {
                 val successfullyCached = cacheAdapter?.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
                 if (successfullyCached == true) {
-                    responseService?.handleSuccess(requestType, response)
+                    repolizer.defaultMainThread.execute {
+                        responseService?.handleSuccess(requestType, response)
+                    }
                     true
                 } else {
-                    responseService?.handleCacheError(requestType, response)
+                    repolizer.defaultMainThread.execute {
+                        responseService?.handleCacheError(requestType, response)
+                    }
                     false
                 }
             } else {
-                responseService?.handleStorageError(requestType, response)
+                repolizer.defaultMainThread.execute {
+                    responseService?.handleStorageError(requestType, response)
+                }
                 false
             }
         } else {
-            responseService?.handleRequestError(requestType, response)
+            repolizer.defaultMainThread.execute {
+                responseService?.handleRequestError(requestType, response)
+            }
             false
         }
     }

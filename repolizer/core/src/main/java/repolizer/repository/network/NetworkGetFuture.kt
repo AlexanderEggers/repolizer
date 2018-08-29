@@ -103,22 +103,32 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
 
             //If no cacheAdapter given, ignore check
             if (cacheSuccessful) {
-                responseService?.handleSuccess(requestType, response)
+                repolizer.defaultMainThread.execute {
+                    responseService?.handleSuccess(requestType, response)
+                }
+
                 if (!wrapperCanHaveActiveConnection || storageAdapter?.canHaveActiveConnections() == false) {
                     storageAdapter?.get(repositoryClass, converterAdapter, fullUrl, querySql, bodyType)
                 } else null
             } else {
-                responseService?.handleCacheError(requestType, response)
+                repolizer.defaultMainThread.execute {
+                    responseService?.handleCacheError(requestType, response)
+                }
                 null
             }
         } else {
-            responseService?.handleStorageError(requestType, response)
+            repolizer.defaultMainThread.execute {
+                responseService?.handleStorageError(requestType, response)
+            }
             null
         }
     }
 
     private fun handleRequestError(response: NetworkResponse<String>) {
-        responseService?.handleRequestError(requestType, response)
+        repolizer.defaultMainThread.execute {
+            responseService?.handleRequestError(requestType, response)
+        }
+
         if (deleteIfCacheIsTooOld && cacheState == CacheState.NEEDS_HARD_REFRESH) {
             storageAdapter?.delete(repositoryClass, fullUrl, deleteSql)
             cacheAdapter?.delete(repositoryClass, CacheItem(fullUrl))

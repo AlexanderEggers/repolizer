@@ -11,7 +11,7 @@ import java.lang.reflect.Type
 
 @Suppress("UNCHECKED_CAST")
 abstract class PersistentFuture<Body>
-constructor(protected val repolizer: Repolizer, futureBuilder: PersistentFutureBuilder) : Future<Body>() {
+constructor(protected val repolizer: Repolizer, futureBuilder: PersistentFutureBuilder) : Future<Body>(repolizer) {
 
     protected val repositoryClass: Class<*> = futureBuilder.repositoryClass
             ?: throw IllegalStateException("Repository class type is null.")

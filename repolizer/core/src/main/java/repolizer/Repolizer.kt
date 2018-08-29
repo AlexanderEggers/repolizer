@@ -8,15 +8,19 @@ import repolizer.repository.progress.ProgressController
 import repolizer.repository.provider.GlobalRepositoryProvider
 import repolizer.repository.request.RequestProvider
 import repolizer.repository.response.ResponseService
+import repolizer.repository.util.RepositoryExecutor
+import java.util.concurrent.Executor
 
 class Repolizer private constructor(builder: Builder) {
 
     val baseUrl: String? = builder.baseUrl
 
     val requestProvider: RequestProvider<*>? = builder.requestProvider
-    val progressController: ProgressController<*>? = builder.progressController
+    val progressController: ProgressController? = builder.progressController
     val loginManager: LoginManager? = builder.loginManager
     val responseService: ResponseService? = builder.responseService
+
+    val defaultMainThread: Executor = builder.defaultMainThread ?: RepositoryExecutor.applicationThread
 
     val wrapperAdapters: ArrayList<AdapterFactory<out WrapperAdapter<*>>> = builder.wrapperAdapters
     val networkAdapters: ArrayList<AdapterFactory<out NetworkAdapter>> = builder.networkAdapters
@@ -52,11 +56,14 @@ class Repolizer private constructor(builder: Builder) {
         var baseUrl: String? = null
             private set
 
-        var progressController: ProgressController<*>? = null
+        var progressController: ProgressController? = null
             private set
         var loginManager: LoginManager? = null
             private set
         var responseService: ResponseService? = null
+            private set
+
+        var defaultMainThread: Executor? = null
             private set
 
         fun addWrapperAdapter(wrapperAdapter: AdapterFactory<out WrapperAdapter<*>>): Builder {
@@ -89,7 +96,7 @@ class Repolizer private constructor(builder: Builder) {
             return this@Builder
         }
 
-        fun setProgress(progressController: ProgressController<*>): Builder {
+        fun setProgress(progressController: ProgressController): Builder {
             this@Builder.progressController = progressController
             return this@Builder
         }
@@ -106,6 +113,11 @@ class Repolizer private constructor(builder: Builder) {
 
         fun setRequestProvider(requestProvider: RequestProvider<*>): Builder {
             this@Builder.requestProvider = requestProvider
+            return this@Builder
+        }
+
+        fun setDefaultMainThread(defaultMainThread: Executor): Builder {
+            this@Builder.defaultMainThread = defaultMainThread
             return this@Builder
         }
 

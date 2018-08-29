@@ -5,4 +5,5 @@ import java.util.concurrent.Executors
 
 object RepositoryExecutor {
     val workerThread: Executor = Executors.newSingleThreadExecutor()
+    val applicationThread: Executor = Executors.newSingleThreadExecutor()
 }
