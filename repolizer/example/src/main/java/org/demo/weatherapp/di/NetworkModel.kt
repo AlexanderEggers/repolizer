@@ -2,6 +2,7 @@ package org.demo.weatherapp.di
 
 import android.content.Context
 import archknife.annotation.ProvideModule
+import archtree.helper.AppExecutor
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -22,7 +23,7 @@ class NetworkModel {
 
     @Singleton
     @Provides
-    fun provideWeatherRepository(context: Context, httpClient: OkHttpClient): WeatherRepository {
+    fun provideWeatherRepository(context: Context, appExecutor: AppExecutor, httpClient: OkHttpClient): WeatherRepository {
         return Repolizer.newBuilder()
                 .setBaseUrl(context.getString(R.string.server_base_url))
                 .addNetworkAdapter(RetrofitNetworkAdapterFactory(context.getString(R.string.server_base_url),
@@ -31,6 +32,7 @@ class NetworkModel {
                 .addStorageAdapter(AppDatabaseAdapterFactory(context))
                 .addCacheAdapter(SharedPrefCacheAdapterFactory(context))
                 .addConverterAdapter(GsonConverterAdapterFactory())
+                .setDefaultMainThread(appExecutor.mainThread)
                 .build()
                 .getRepository(WeatherRepository::class.java)
     }
