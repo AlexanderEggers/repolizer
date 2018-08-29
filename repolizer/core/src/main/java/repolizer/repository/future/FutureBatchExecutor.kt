@@ -5,21 +5,21 @@ import repolizer.repository.util.RepositoryExecutor
 object FutureBatchExecutor {
 
     private val executor = RepositoryExecutor
-    private val defaultCallback = object : FutureCallback<Boolean> {
+    private val defaultCallback = object : FutureBatchCallback {
 
-        override fun onFinished(body: Boolean?) {
+        override fun onFinished() {
             //do nothing
         }
     }
 
     @JvmOverloads
     @JvmStatic
-    fun executeFutures(callback: FutureCallback<Boolean> = defaultCallback, vararg futures: Future<*>) {
+    fun executeFutures(callback: FutureBatchCallback = defaultCallback, vararg futures: Future<*>) {
         executor.workerThread.execute {
             futures.forEach {
                 it.execute()
             }
-            callback.onFinished(true)
+            callback.onFinished()
         }
     }
 }
