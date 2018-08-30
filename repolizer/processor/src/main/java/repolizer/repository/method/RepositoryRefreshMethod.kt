@@ -77,8 +77,8 @@ class RepositoryRefreshMethod {
             val getUrl = it.getAnnotation(GET::class.java).url
             if(getUrl == url) return it
         }
-        throw IllegalStateException("@Refresh needs a @GET method as a reference. This reference is" +
-                "build by comparing the url. Therefore you need to have to have a @GET method" +
+        throw IllegalStateException("@Refresh needs a @GET method as a reference. This reference is " +
+                "build by comparing the url. Therefore you need to have to have a @GET method " +
                 "that uses the same url then your refresh. Error for " +
                 "${element.simpleName}.${refreshMethod.simpleName}")
     }

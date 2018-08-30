@@ -31,8 +31,8 @@ class RepositoryProcessorUtil {
                         mainProcessor.messager.printMessage(Diagnostic.Kind.ERROR,
                                 "@${clazz.simpleName} should always have a unique name per class. Error for " +
                                         "${typeElement.simpleName}.${it.simpleName}")
+                        return
                     }
-                    return
                 }
 
                 currentList.add(it as ExecutableElement)
