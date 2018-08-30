@@ -1,20 +1,42 @@
 package repolizer.repository.future
 
-import repolizer.repository.util.RepositoryExecutor
 import java.util.concurrent.Executor
 
 open class FutureTask
-@JvmOverloads constructor(private val afterExecuteThread: Executor = RepositoryExecutor.applicationThread) {
+constructor(private var workerThread: Executor,
+            private var afterExecuteThread: Executor): FutureTaskDoWork, FutureTaskDoAfter {
 
-    private val executor = RepositoryExecutor
+    private val workerBlockList = ArrayList<() -> Unit>()
+    private var postWorkerBlock: () -> Unit? = { }
 
-    @JvmOverloads
-    open fun execute(callback: FutureTaskCallback, thread: Executor = afterExecuteThread) {
-        executor.workerThread.execute {
-            callback.onExecute()
+    override fun doWork(runnable: () -> Unit): FutureTaskDoWork {
+        workerBlockList.add(runnable)
+        return this
+    }
 
-            thread.execute {
-                callback.onFinished()
+    override fun doAfter(runnable: () -> Unit): FutureTaskDoAfter {
+        postWorkerBlock = runnable
+        return this
+    }
+
+    override fun withWorkerThread(executor: Executor): FutureTaskDoAfter {
+        workerThread = executor
+        return this
+    }
+
+    override fun withAfterWorkThread(executor: Executor): FutureTaskDoAfter {
+        afterExecuteThread = executor
+        return this
+    }
+
+    override fun execute() {
+        workerThread.execute {
+            workerBlockList.forEach {
+                it()
+            }
+
+            afterExecuteThread.execute {
+                postWorkerBlock()
             }
         }
     }
