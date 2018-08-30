@@ -4,7 +4,7 @@ import java.util.concurrent.Executor
 
 open class FutureTask
 constructor(private var workerThread: Executor,
-            private var afterExecuteThread: Executor): FutureTaskDoWork, FutureTaskDoAfter {
+            private var afterExecuteThread: Executor) : FutureTaskDoWork, FutureTaskDoAfter {
 
     private val workerBlockList = ArrayList<() -> Unit>()
     private var postWorkerBlock: () -> Unit? = { }

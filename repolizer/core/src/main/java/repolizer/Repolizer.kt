@@ -20,7 +20,8 @@ class Repolizer private constructor(builder: Builder) {
     val loginManager: LoginManager? = builder.loginManager
     val responseService: ResponseService? = builder.responseService
 
-    val defaultMainThread: Executor = builder.defaultMainThread ?: RepositoryExecutor.applicationThread
+    val defaultMainThread: Executor = builder.defaultMainThread
+            ?: RepositoryExecutor.applicationThread
 
     val wrapperAdapters: ArrayList<AdapterFactory<out WrapperAdapter<*>>> = builder.wrapperAdapters
     val networkAdapters: ArrayList<AdapterFactory<out NetworkAdapter>> = builder.networkAdapters
