@@ -3,13 +3,12 @@ package repolizer.repository.future
 import repolizer.repository.util.RepositoryExecutor
 import java.util.concurrent.Executor
 
-object FutureHelper {
+class FutureTask
+@JvmOverloads constructor(private val afterExecuteThread: Executor = RepositoryExecutor.applicationThread) {
 
     private val executor = RepositoryExecutor
 
-    @JvmOverloads
-    @JvmStatic
-    fun executeFutures(callback: FutureWorkerCallback, afterExecuteThread: Executor = executor.applicationThread) {
+    fun execute(callback: FutureTaskCallback) {
         executor.workerThread.execute {
             callback.onExecute()
 

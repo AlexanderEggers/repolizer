@@ -1,6 +1,6 @@
 package repolizer.repository.future
 
-interface FutureWorkerCallback {
+interface FutureTaskCallback {
     fun onExecute()
     fun onFinished()
 }
