@@ -4,12 +4,12 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import repolizer.annotation.repository.CUD
 import repolizer.annotation.repository.parameter.Header
+import repolizer.annotation.repository.parameter.MultipartBody
 import repolizer.annotation.repository.parameter.UrlQuery
 import repolizer.repository.RepositoryMapHolder
 import repolizer.repository.RepositoryProcessorUtil.Companion.buildUrl
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
-import javax.lang.model.element.VariableElement
 
 class RepositoryCudMethod {
 
@@ -63,7 +63,11 @@ class RepositoryCudMethod {
             add("builder.setSaveData(false);")
 
             RepositoryMapHolder.requestBodyAnnotationMap[annotationMapKey]?.forEach {
-                add("builder.setRaw(${it.simpleName});")
+                add("builder.addRaw(${it.simpleName});")
+            }
+
+            RepositoryMapHolder.multipartBodyAnnotationMap[annotationMapKey]?.forEach {
+                add("builder.addMultipartBody(${it.simpleName});")
             }
 
             RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {

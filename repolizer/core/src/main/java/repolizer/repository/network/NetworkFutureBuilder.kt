@@ -10,13 +10,8 @@ open class NetworkFutureBuilder : FutureBuilder() {
 
     var requestType: RequestType? = null
 
-    var raw: Any? = null
-        set(value) {
-            if (field != null) {
-                throw IllegalStateException("Only ONE raw body can be set. Make sure that you don't " +
-                        "use more than one @RequestBody parameter for this method.")
-            } else field = value
-        }
+    val rawObjects = ArrayList<Any>()
+    val partObjects = ArrayList<Any>()
 
     var progressData: ProgressData? = null
         set(value) {
@@ -50,6 +45,14 @@ open class NetworkFutureBuilder : FutureBuilder() {
         val list = queryMap[key] as? ArrayList<String> ?: ArrayList()
         list.add(value)
         queryMap[key] = list
+    }
+
+    open fun addRaw(raw: Any) {
+        rawObjects.add(raw)
+    }
+
+    open fun addMultipartBody(body: Any) {
+        partObjects.add(body)
     }
 
     open fun <Body> buildGet(repolizer: Repolizer, returnType: Class<Body>): NetworkGetFuture<Body> {

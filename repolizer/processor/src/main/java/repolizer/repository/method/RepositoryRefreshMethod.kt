@@ -75,7 +75,7 @@ class RepositoryRefreshMethod {
     private fun getGETExecutableElement(element: Element, refreshMethod: ExecutableElement, url: String): ExecutableElement {
         RepositoryMapHolder.getAnnotationMap[element.simpleName.toString()]?.forEach {
             val getUrl = it.getAnnotation(GET::class.java).url
-            if(getUrl == url) return it
+            if (getUrl == url) return it
         }
         throw IllegalStateException("@Refresh needs a @GET method as a reference. This reference is " +
                 "build by comparing the url. Therefore you need to have to have a @GET method " +

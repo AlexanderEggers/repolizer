@@ -1,7 +1,6 @@
 package repolizer.adapter.network.retrofit.api
 
 import okhttp3.RequestBody
-import repolizer.repository.response.NetworkResponse
 import repolizer.repository.util.QueryHashMap
 import retrofit2.Call
 import retrofit2.http.*

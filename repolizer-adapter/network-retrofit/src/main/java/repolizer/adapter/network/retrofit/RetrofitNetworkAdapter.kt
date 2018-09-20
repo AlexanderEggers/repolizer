@@ -14,28 +14,38 @@ import java.lang.reflect.ParameterizedType
 import java.util.logging.Level
 import java.util.logging.Logger
 
-class RetrofitNetworkAdapter(private val networkController: NetworkController): NetworkAdapter() {
+class RetrofitNetworkAdapter(private val networkController: NetworkController) : NetworkAdapter() {
 
     override fun execute(networkFuture: NetworkFuture<*>, requestProvider: RequestProvider<*>?): NetworkResponse<String> {
         val url = prepareUrl(networkFuture.fullUrl)
+        val raw = if (networkFuture.rawObjects.isNotEmpty()) networkFuture.rawObjects[0] else null
 
-        val call = when(networkFuture.requestType) {
+        //TODO show message when requestbodyparts are set
+        if (networkFuture.rawObjects.size > 1 || networkFuture.partObjects.isNotEmpty())
+            Logger.getLogger("repolizer").log(Level.SEVERE, "This retrofit adapter implementation " +
+                    "only supports one raw body for put/post/delete requests. If you want to want " +
+                    "to use multipartbody (therefore to upload more than one object), consider " +
+                    "implementing your own network adapter due to the complexity of multipartbody " +
+                    "requests. Use @MultipartBody(partName) inside your repositories " +
+                    "to provide relevant parameters to your own network implementation.")
+
+        val call = when (networkFuture.requestType) {
             RequestType.REFRESH -> networkController.get(networkFuture.headerMap, url, networkFuture.queryMap)
             RequestType.GET -> networkController.get(networkFuture.headerMap, url, networkFuture.queryMap)
             RequestType.POST -> networkController.post(networkFuture.headerMap, url, networkFuture.queryMap,
-                    networkFuture.rawObject)
+                    networkFuture.rawObjects[0])
             RequestType.PUT -> networkController.put(networkFuture.headerMap, url, networkFuture.queryMap,
-                    networkFuture.rawObject)
+                    raw)
             RequestType.DELETE -> networkController.delete(networkFuture.headerMap, url, networkFuture.queryMap,
-                    networkFuture.rawObject)
+                    raw)
         }
 
         val requestProviderCast: RequestProvider<Call<String>>? = try {
             val requestType = requestProvider?.getRequestType()
-            if(requestType == Call::class.java) {
+            if (requestType == Call::class.java) {
 
                 @Suppress("UNCHECKED_CAST")
-                if(requestType is ParameterizedType
+                if (requestType is ParameterizedType
                         && requestType.actualTypeArguments[0] == String::class.java) {
                     requestProvider as? RequestProvider<Call<String>>
                 }
