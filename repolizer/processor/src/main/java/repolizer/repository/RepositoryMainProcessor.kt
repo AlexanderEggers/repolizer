@@ -112,6 +112,6 @@ class RepositoryMainProcessor {
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
                 Progress::class.java, true, RepositoryMapHolder.progressParamsAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
-                MultipartBody::class.java, true, RepositoryMapHolder.multipartBodyAnnotationMap)
+                MultipartBody::class.java, false, RepositoryMapHolder.multipartBodyAnnotationMap)
     }
 }

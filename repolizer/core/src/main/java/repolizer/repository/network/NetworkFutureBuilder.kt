@@ -10,8 +10,8 @@ open class NetworkFutureBuilder : FutureBuilder() {
 
     var requestType: RequestType? = null
 
-    val rawObjects = ArrayList<Any>()
-    val partObjects = ArrayList<Any>()
+    val rawObjects = ArrayList<Any?>()
+    val partObjects = ArrayList<Any?>()
 
     var progressData: ProgressData? = null
         set(value) {
@@ -47,11 +47,11 @@ open class NetworkFutureBuilder : FutureBuilder() {
         queryMap[key] = list
     }
 
-    open fun addRaw(raw: Any) {
+    open fun addRaw(raw: Any?) {
         rawObjects.add(raw)
     }
 
-    open fun addMultipartBody(body: Any) {
+    open fun addMultipartBody(body: Any?) {
         partObjects.add(body)
     }
 
