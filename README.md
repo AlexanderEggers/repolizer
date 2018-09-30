@@ -6,7 +6,7 @@ Repolizer is generating the backend related classes for your Android/Java projec
 
 Repolizer provides you with a solution using a handful of annotations and adapters. The library is designed to give you access to a full stack of implementations (downloading, caching, converting, persisting). You can use the default implementations or write your own adapters (like if you want to use your own http client).
 
-If you need more information in how to use the library, take a look inside **[this wiki][4]**. **NOTE: Due to the latest changes (0.4.x) the wiki is not up-to-date, you should therefore use the [example project][3] to get an idea how to use the library for now.**
+If you need more information in how to use the library, take a look inside **[this wiki][4]**. **NOTE: Due to the latest changes (since 0.4.x) the wiki is not up-to-date, you should therefore use the [example project][3] to get an idea how to use the library for now.**
 
 Download
 --------
@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-  def repolizer_version = "0.4.1"
+  def repolizer_version = "0.6.1"
 
   //main dependency which is required for the app (including the processor)
   implementation "org.repolizer:repolizer-core:$repolizer_version"
@@ -46,7 +46,7 @@ apiKey= MY_API_KEY
 
 Status
 ------
-Version 1.0.0 is currently under development in the master branch. The latest version 0.4.1 can be found in the master branch.
+Version 1.0.0 is currently under development in the master branch. The latest version 0.6.1 can be found in the master branch.
 
 Comments/bugs/questions/pull requests are always welcome!
 
