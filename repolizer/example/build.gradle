@@ -4,11 +4,13 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
+    buildToolsVersion "28.0.3"
+
     defaultConfig {
         applicationId "org.demo.weatherapp"
         minSdkVersion 14
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
 
@@ -57,6 +59,4 @@ dependencies {
     implementation project(":cache-sharedprefs")
     implementation project(":converter-gson")
     kapt project(":repolizer-processor")
-
-    kapt "com.android.databinding:compiler:$android_studio_version"
 }

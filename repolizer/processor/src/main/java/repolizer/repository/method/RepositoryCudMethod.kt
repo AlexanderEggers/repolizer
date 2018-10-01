@@ -2,9 +2,9 @@ package repolizer.repository.method
 
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterizedTypeName
 import repolizer.annotation.repository.CUD
 import repolizer.annotation.repository.parameter.Header
-import repolizer.annotation.repository.parameter.MultipartBody
 import repolizer.annotation.repository.parameter.UrlQuery
 import repolizer.repository.RepositoryMapHolder
 import repolizer.repository.RepositoryProcessorUtil.Companion.buildUrl
@@ -15,6 +15,8 @@ class RepositoryCudMethod {
 
     private val classNetworkBuilder = ClassName.get("repolizer.repository.network", "NetworkFutureBuilder")
     private val classRequestType = ClassName.get("repolizer.repository.request", "RequestType")
+
+    private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
 
     fun build(element: Element): List<MethodSpec> {
         return ArrayList<MethodSpec>().apply {
@@ -40,12 +42,18 @@ class RepositoryCudMethod {
                             addStatement("String url = \"$url\"")
                             addCode(buildUrl(annotationMapKey))
 
+                            val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
+                                    ClassName.get(methodElement.returnType))
+                            addStatement("$classTypeToken returnType = new $classWithTypeToken() {}")
+
+                            addCode("\n")
+
                             //Generates the code which will be used for the NetworkBuilder to
                             //initialise it's values
                             addCode(getBuilderCode(annotationMapKey, element,
                                     methodElement.getAnnotation(CUD::class.java)))
 
-                            addStatement("return super.executeCud(builder)")
+                            addStatement("return super.executeCud(builder, returnType.getType())")
                         }.build()
                     } ?: ArrayList())
         }
@@ -57,6 +65,7 @@ class RepositoryCudMethod {
 
             add("builder.setRepositoryClass(${ClassName.get(element.asType())}.class);")
             add("builder.setRequestType($classRequestType.${annotation.cudType.name});")
+            add("builder.setTypeToken(returnType);")
             add("builder.setRequiresLogin(${annotation.requiresLogin});")
             add("builder.setShowProgress(${annotation.showProgress});")
             add("builder.setUrl(url);")

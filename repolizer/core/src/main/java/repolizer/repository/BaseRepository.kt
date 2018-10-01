@@ -35,7 +35,10 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
         }
     }
 
-    protected fun <T> executeCud(futureBuilder: NetworkFutureBuilder): T {
+    protected fun <T> executeCud(futureBuilder: NetworkFutureBuilder, returnType: Type): T {
+        val bodyType = getBodyType(returnType)
+        futureBuilder.bodyType = bodyType
+
         return futureBuilder.buildCud(repolizer).create()
     }
 
