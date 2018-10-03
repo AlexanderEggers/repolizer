@@ -31,11 +31,7 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
 
     val fullUrl: String by lazy {
         repolizer.baseUrl?.let { baseUrl ->
-            if (baseUrl.substring(baseUrl.length - 1) != "/") {
-                "$baseUrl/${futureBuilder.url}"
-            } else {
-                "$baseUrl${futureBuilder.url}"
-            }
+            "$baseUrl${futureBuilder.url}"
         } ?: futureBuilder.url
     }
 
