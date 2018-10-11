@@ -35,7 +35,16 @@ abstract class ResponseService {
     }
 
     fun removeCallback(callback: Callback) {
-        callbacks.remove(callback)
+        val iterator = callbacks.iterator()
+
+        while (iterator.hasNext()) {
+            val item = iterator.next()
+
+            if (item == callback) {
+                iterator.remove()
+                break
+            }
+        }
     }
 
     abstract class Callback {
