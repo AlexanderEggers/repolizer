@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-  def repolizer_version = "0.6.1"
+  def repolizer_version = "0.6.4"
 
   //main dependency which is required for the app (including the processor)
   implementation "org.repolizer:repolizer-core:$repolizer_version"
@@ -46,7 +46,7 @@ apiKey= MY_API_KEY
 
 Status
 ------
-Version 1.0.0 is currently under development in the master branch. The latest version 0.6.1 can be found in the master branch.
+Version 1.0.0 is currently under development in the master branch. The latest version 0.6.4 can be found in the master branch.
 
 Comments/bugs/questions/pull requests are always welcome!
 
