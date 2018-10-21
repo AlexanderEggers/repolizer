@@ -1,6 +1,6 @@
-package repolizer.adapter.network.retrofit.util
+package repolizer.adapter.network.retrofit
 
-class Utils {
+class RetrofitAdapterUtils {
 
     companion object {
 

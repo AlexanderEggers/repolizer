@@ -3,7 +3,7 @@ package repolizer.adapter.network.retrofit.api
 import com.google.gson.Gson
 import okhttp3.MediaType
 import okhttp3.RequestBody
-import repolizer.adapter.network.retrofit.util.Utils
+import repolizer.adapter.network.retrofit.RetrofitAdapterUtils
 import repolizer.repository.util.QueryHashMap
 import retrofit2.Call
 
@@ -18,9 +18,9 @@ constructor(networkInterface: NetworkInterface, gson: Gson) : NetworkController(
         return if (rawObject != null) {
             val json = super.gson.toJson(rawObject)
             val requestBody = RequestBody.create(MediaType.parse(DEFAULT_MEDIA_TYPE), json)
-            return super.networkInterface.post(headerMap, Utils.prepareUrl(url), queryMap, requestBody)
+            return super.networkInterface.post(headerMap, RetrofitAdapterUtils.prepareUrl(url), queryMap, requestBody)
         } else {
-            super.networkInterface.post(headerMap, Utils.prepareUrl(url), queryMap, null)
+            super.networkInterface.post(headerMap, RetrofitAdapterUtils.prepareUrl(url), queryMap, null)
         }
     }
 
@@ -28,9 +28,9 @@ constructor(networkInterface: NetworkInterface, gson: Gson) : NetworkController(
         return if (rawObject != null) {
             val json = super.gson.toJson(rawObject)
             val requestBody = RequestBody.create(MediaType.parse(DEFAULT_MEDIA_TYPE), json)
-            return super.networkInterface.put(headerMap, Utils.prepareUrl(url), queryMap, requestBody)
+            return super.networkInterface.put(headerMap, RetrofitAdapterUtils.prepareUrl(url), queryMap, requestBody)
         } else {
-            super.networkInterface.put(headerMap, Utils.prepareUrl(url), queryMap, null)
+            super.networkInterface.put(headerMap, RetrofitAdapterUtils.prepareUrl(url), queryMap, null)
         }
     }
 
@@ -38,9 +38,9 @@ constructor(networkInterface: NetworkInterface, gson: Gson) : NetworkController(
         return if (rawObject != null) {
             val json = super.gson.toJson(rawObject)
             val requestBody = RequestBody.create(MediaType.parse(DEFAULT_MEDIA_TYPE), json)
-            super.networkInterface.delete(headerMap, Utils.prepareUrl(url), queryMap, requestBody)
+            super.networkInterface.delete(headerMap, RetrofitAdapterUtils.prepareUrl(url), queryMap, requestBody)
         } else {
-            super.networkInterface.delete(headerMap, Utils.prepareUrl(url), queryMap)
+            super.networkInterface.delete(headerMap, RetrofitAdapterUtils.prepareUrl(url), queryMap)
         }
     }
 
