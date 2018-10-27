@@ -22,6 +22,8 @@ class Repolizer private constructor(builder: Builder) {
 
     val defaultMainThread: Executor = builder.defaultMainThread
             ?: RepositoryExecutor.applicationThread
+    val workerThread: Executor = builder.workerThread
+            ?: RepositoryExecutor.getRepositoryDefaultThread()
 
     val wrapperAdapters: ArrayList<AdapterFactory<out WrapperAdapter<*>>> = builder.wrapperAdapters
     val networkAdapters: ArrayList<AdapterFactory<out NetworkAdapter>> = builder.networkAdapters
@@ -65,6 +67,8 @@ class Repolizer private constructor(builder: Builder) {
             private set
 
         var defaultMainThread: Executor? = null
+            private set
+        var workerThread: Executor? = null
             private set
 
         fun addWrapperAdapter(wrapperAdapter: AdapterFactory<out WrapperAdapter<*>>): Builder {
@@ -119,6 +123,17 @@ class Repolizer private constructor(builder: Builder) {
 
         fun setDefaultMainThread(defaultMainThread: Executor): Builder {
             this@Builder.defaultMainThread = defaultMainThread
+            return this@Builder
+        }
+
+        fun setWorkerThread(executor: Executor): Builder {
+            this@Builder.workerThread = executor
+            return this@Builder
+        }
+
+        fun setWorkerThread(threadName: String): Builder {
+            RepositoryExecutor.addRepositoryThread(threadName)
+            this@Builder.workerThread = RepositoryExecutor.getRepositoryThread(threadName)
             return this@Builder
         }
 

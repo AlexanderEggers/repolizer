@@ -4,7 +4,7 @@ import repolizer.repository.util.RepositoryExecutor
 import java.util.concurrent.Executor
 
 open class FutureTaskFactory
-@JvmOverloads constructor(private val defaultWorkerThread: Executor = RepositoryExecutor.workerThread,
+@JvmOverloads constructor(private val defaultWorkerThread: Executor = RepositoryExecutor.getRepositoryDefaultThread(),
                           private val defaultAfterExecuteThread: Executor = RepositoryExecutor.applicationThread) {
 
     fun create(): FutureTaskDoWork {
