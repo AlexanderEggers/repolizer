@@ -2,11 +2,9 @@ package repolizer.repository.future
 
 import repolizer.Repolizer
 import repolizer.repository.network.ExecutionType
-import repolizer.repository.util.RepositoryExecutor
 
 abstract class Future<Body>(private val repolizer: Repolizer) {
 
-    private val executor = RepositoryExecutor
     private val defaultFutureCallback = object : FutureCallback<Body> {
 
         override fun onFinished(body: Body?) {
@@ -33,15 +31,11 @@ abstract class Future<Body>(private val repolizer: Repolizer) {
 
     protected abstract fun onDetermineExecutionType(): ExecutionType
 
-    protected open fun onCreate() {
-        //do nothing by default
-    }
-
     protected open fun onStart() {
-        //do nothing by default
+        //do nothing
     }
 
-    protected open fun onFinished() {
-        //do nothing by default
+    protected open fun onFinished(result: Body?) {
+        //do nothing
     }
 }

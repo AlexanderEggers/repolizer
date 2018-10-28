@@ -18,6 +18,5 @@ object RepositoryMapHolder {
     val sqlParameterAnnotationMap: HashMap<String, ArrayList<VariableElement>> = HashMap()
     val urlParameterAnnotationMap: HashMap<String, ArrayList<VariableElement>> = HashMap()
     val urlQueryAnnotationMap: HashMap<String, ArrayList<VariableElement>> = HashMap()
-    val progressParamsAnnotationMap: HashMap<String, ArrayList<VariableElement>> = HashMap()
     val multipartBodyAnnotationMap: HashMap<String, ArrayList<VariableElement>> = HashMap()
 }

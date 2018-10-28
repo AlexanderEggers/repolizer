@@ -115,10 +115,6 @@ class RepositoryGetMethod {
                 add("builder.addQuery(" +
                         "\"${it.getAnnotation(UrlQuery::class.java).key}\", ${it.simpleName});")
             }
-
-            RepositoryMapHolder.progressParamsAnnotationMap[annotationMapKey]?.forEach {
-                add("builder.setProgressData(${it.simpleName});")
-            }
         }.joinToString(separator = "\n", postfix = "\n")
     }
 

@@ -9,8 +9,6 @@ import repolizer.adapter.StorageAdapter
 import repolizer.adapter.util.AdapterUtil
 import repolizer.repository.future.Future
 import repolizer.repository.login.LoginManager
-import repolizer.repository.progress.ProgressController
-import repolizer.repository.progress.ProgressData
 import repolizer.repository.request.RequestProvider
 import repolizer.repository.request.RequestType
 import repolizer.repository.response.ResponseService
@@ -51,7 +49,6 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
     protected val storageAdapter: StorageAdapter<Body>?
     protected val cacheAdapter: CacheAdapter?
 
-    protected val progressController: ProgressController? = repolizer.progressController
     protected val loginManager: LoginManager? = repolizer.loginManager
     protected val responseService: ResponseService? = repolizer.responseService
     protected val requestProvider: RequestProvider<*>? = repolizer.requestProvider
@@ -59,12 +56,6 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
     protected val requiresLogin: Boolean = futureBuilder.requiresLogin
     protected val showProgress: Boolean = futureBuilder.showProgress
     protected val saveData: Boolean = futureBuilder.saveData
-
-    protected val progressData: ProgressData by lazy {
-        val lazyProgressData = futureBuilder.progressData ?: ProgressData()
-        lazyProgressData.requestType = requestType
-        lazyProgressData
-    }
 
     init {
         networkAdapter = if (builderUrl.isNotEmpty()) {
@@ -85,13 +76,13 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
     }
 
     override fun execute(): Body? {
-        onStart()
+        repolizer.defaultMainThread.execute {
+            onStart()
+        }
 
         val executionType = onDetermineExecutionType()
         val newBody = when (executionType) {
             ExecutionType.USE_NETWORK -> {
-                if (showProgress) progressController?.internalShow(fullUrl, progressData)
-
                 if (requiresLogin) {
                     val checkSuccessful = checkLogin()
                     if (checkSuccessful) onExecute(executionType)
@@ -104,7 +95,10 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
             ExecutionType.DO_NOTHING -> null
         }
 
-        onFinished()
+        repolizer.defaultMainThread.execute {
+            onFinished(newBody)
+        }
+
         return newBody
     }
 
@@ -121,10 +115,5 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
                 ?: throw IllegalStateException("Checking the login requires a LoginManager. " +
                         "Use the setter of the Repolizer class to set your custom " +
                         "implementation.")
-    }
-
-    override fun onFinished() {
-        super.onFinished()
-        progressController?.internalClose(fullUrl)
     }
 }

@@ -70,8 +70,8 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
         }
     }
 
-    override fun onFinished() {
-        super.onFinished()
+    override fun onFinished(result: Boolean?) {
+        super.onFinished(result)
         fetchSecurityLayer.onFetchFinished()
     }
 }

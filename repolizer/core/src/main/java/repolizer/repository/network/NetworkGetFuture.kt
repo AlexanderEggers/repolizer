@@ -69,8 +69,8 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
         }
     }
 
-    override fun onFinished() {
-        super.onFinished()
+    override fun onFinished(result: Body?) {
+        super.onFinished(result)
         fetchSecurityLayer.onFetchFinished()
     }
 
@@ -113,6 +113,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
             } else {
                 repolizer.defaultMainThread.execute {
                     responseService?.handleCacheError(requestType, response)
+
                 }
                 null
             }

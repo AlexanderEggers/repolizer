@@ -110,8 +110,6 @@ class RepositoryMainProcessor {
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
                 UrlQuery::class.java, false, RepositoryMapHolder.urlQueryAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
-                Progress::class.java, true, RepositoryMapHolder.progressParamsAnnotationMap)
-        RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
                 MultipartBody::class.java, false, RepositoryMapHolder.multipartBodyAnnotationMap)
     }
 }
