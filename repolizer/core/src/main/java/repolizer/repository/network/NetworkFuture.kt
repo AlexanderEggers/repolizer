@@ -76,9 +76,7 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
     }
 
     override fun execute(): Body? {
-        repolizer.defaultMainThread.execute {
-            onStart()
-        }
+        onStart()
 
         val executionType = onDetermineExecutionType()
         val newBody = when (executionType) {
@@ -95,10 +93,7 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
             ExecutionType.DO_NOTHING -> null
         }
 
-        repolizer.defaultMainThread.execute {
-            onFinished(newBody)
-        }
-
+        onFinished(newBody)
         return newBody
     }
 

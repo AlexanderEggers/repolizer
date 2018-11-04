@@ -26,16 +26,9 @@ constructor(protected val repolizer: Repolizer, futureBuilder: PersistentFutureB
             bodyType, repositoryClass, repolizer) as? CacheAdapter
 
     override fun execute(): Body? {
-        repolizer.defaultMainThread.execute {
-            onStart()
-        }
-
+        onStart()
         val result = onExecute(onDetermineExecutionType())
-
-        repolizer.defaultMainThread.execute {
-            onFinished(result)
-        }
-
+        onFinished(result)
         return result
     }
 
