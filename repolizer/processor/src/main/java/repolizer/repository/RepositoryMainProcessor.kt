@@ -104,6 +104,8 @@ class RepositoryMainProcessor {
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
                 StorageBody::class.java, true, RepositoryMapHolder.storageBodyAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
+                CacheBody::class.java, true, RepositoryMapHolder.cacheBodyAnnotationMap)
+        RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
                 SqlParameter::class.java, false, RepositoryMapHolder.sqlParameterAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
                 UrlParameter::class.java, false, RepositoryMapHolder.urlParameterAnnotationMap)

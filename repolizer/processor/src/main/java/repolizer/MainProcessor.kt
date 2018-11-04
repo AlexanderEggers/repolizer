@@ -47,7 +47,7 @@ class MainProcessor : AbstractProcessor() {
                 CUD::class.java.name, CACHE::class.java.name,
 
                 //Repository parameter annotations
-                StorageBody::class.java.name, Header::class.java.name,
+                StorageBody::class.java.name, CacheBody::class.java.name, Header::class.java.name,
                 RepositoryParameter::class.java.name, RequestBody::class.java.name,
                 SqlParameter::class.java.name, UrlParameter::class.java.name,
                 UrlQuery::class.java.name, MultipartBody::class.java.name)
