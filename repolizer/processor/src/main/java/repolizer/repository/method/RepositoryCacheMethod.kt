@@ -34,19 +34,22 @@ class RepositoryCacheMethod {
                             val annotationMapKey = "${element.simpleName}.${methodElement.simpleName}"
                             val operation = methodElement.getAnnotation(CACHE::class.java).operation
 
+                            val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
+                                    ClassName.get(methodElement.returnType))
+                            addStatement("$classTypeToken returnType = new $classWithTypeToken() {}")
+
+                            addCode("\n")
+
                             addStatement("$classPersistentBuilder builder = new $classPersistentBuilder()")
                             addStatement("builder.setCacheOperation($classCacheOperation.$operation)")
                             addStatement("builder.setRepositoryClass(${ClassName.get(element.asType())}.class)")
-
-                            val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
-                                    ClassName.get(methodElement.returnType))
                             addStatement("builder.setTypeToken(new $classWithTypeToken() {})")
 
                             createCacheItemBuilderMethods(annotationMapKey).forEach {
                                 addStatement(it)
                             }
 
-                            addStatement("return super.executeCache(builder)")
+                            addStatement("return super.executeCache(builder, returnType.getType())")
                         }.build()
                     } ?: ArrayList())
         }

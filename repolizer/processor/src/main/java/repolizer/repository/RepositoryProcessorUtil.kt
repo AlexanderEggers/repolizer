@@ -88,7 +88,7 @@ class RepositoryProcessorUtil {
         private fun getFullUrlQueryPart(queries: ArrayList<VariableElement>): String {
             return (queries.map { urlQuery ->
                 "url += " + "\"${urlQuery.getAnnotation(UrlQuery::class.java).key}=\" + ${urlQuery.simpleName};"
-            }).joinToString(prefix = "url += \"?\";", separator = "\nurl += \"&\";\n")
+            }).joinToString(prefix = "url += \"?\";\n", separator = "\nurl += \"&\";\n")
         }
 
         fun buildSql(annotationMapKey: String, sqlParamName: String, baseSql: String): String {

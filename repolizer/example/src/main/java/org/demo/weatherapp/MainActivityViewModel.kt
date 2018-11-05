@@ -8,6 +8,7 @@ import archknife.annotation.ProvideViewModel
 import org.demo.weatherapp.api.WeatherRepository
 import org.demo.weatherapp.model.WeatherModel
 import org.demo.weatherapp.util.WeatherIconUtil
+import repolizer.persistent.CacheItem
 import java.text.DateFormat
 import java.util.*
 import javax.inject.Inject
@@ -45,6 +46,8 @@ class MainActivityViewModel @Inject constructor(weatherRepository: WeatherReposi
 
     init {
         weatherRawData.observeForever(observer)
+
+        weatherRepository.insertCache(CacheItem("test")).execute()
     }
 
     override fun onCleared() {

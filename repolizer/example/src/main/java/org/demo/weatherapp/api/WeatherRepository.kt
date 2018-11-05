@@ -3,12 +3,16 @@ package org.demo.weatherapp.api
 import android.app.AlarmManager
 import android.arch.lifecycle.LiveData
 import org.demo.weatherapp.model.WeatherModel
+import repolizer.annotation.repository.CACHE
 import repolizer.annotation.repository.CUD
 import repolizer.annotation.repository.GET
 import repolizer.annotation.repository.Repository
+import repolizer.annotation.repository.parameter.CacheBody
 import repolizer.annotation.repository.parameter.UrlParameter
 import repolizer.annotation.repository.parameter.UrlQuery
+import repolizer.annotation.repository.util.CacheOperation
 import repolizer.annotation.repository.util.CudType
+import repolizer.persistent.CacheItem
 import repolizer.repository.future.Future
 
 @Repository
@@ -22,4 +26,7 @@ interface WeatherRepository {
 
     @CUD(url = ":weather", cudType = CudType.POST)
     fun sendTest(): Future<String>
+
+    @CACHE(operation = CacheOperation.INSERT)
+    fun insertCache(@CacheBody cacheItem: CacheItem): Future<Boolean>
 }
