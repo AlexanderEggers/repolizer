@@ -17,7 +17,6 @@ open class NetworkFutureBuilder : FutureBuilder() {
 
     var fetchSecurityLayer: FetchSecurityLayer? = null
     var requiresLogin: Boolean = false
-    var showProgress: Boolean = false
     var saveData: Boolean = true
 
     var allowFetch: Boolean = false

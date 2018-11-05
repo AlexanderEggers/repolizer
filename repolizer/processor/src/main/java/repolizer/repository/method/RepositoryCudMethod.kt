@@ -67,7 +67,6 @@ class RepositoryCudMethod {
             add("builder.setRequestType($classRequestType.${annotation.cudType.name});")
             add("builder.setTypeToken(returnType);")
             add("builder.setRequiresLogin(${annotation.requiresLogin});")
-            add("builder.setShowProgress(${annotation.showProgress});")
             add("builder.setUrl(url);")
             add("builder.setSaveData(false);")
 

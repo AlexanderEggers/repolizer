@@ -48,7 +48,7 @@ constructor(private var workerThread: Executor,
     private fun executeWorkerTask(position: Int) {
         val executor = workerExecutorMap["worker$position"] ?: workerThread
         executor.execute {
-            workerBlockMap["worker$position"]
+            workerBlockMap["worker$position"]?.invoke()
 
             if(workerBlockMap.size > position + 1) {
                 executeWorkerTask(position + 1)

@@ -96,7 +96,6 @@ class RepositoryRefreshMethod {
             add("builder.setRepositoryClass(${ClassName.get(classElement.asType())}.class);")
             add("builder.setUrl(url);")
             add("builder.setRequiresLogin(${annotation.requiresLogin});")
-            add("builder.setShowProgress(${annotation.showProgress});")
             add("builder.setFetchSecurityLayer(this);")
             add("builder.setInsertSql(insertSql);")
             add("builder.setSaveData(true);")

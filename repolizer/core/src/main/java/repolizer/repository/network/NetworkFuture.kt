@@ -54,7 +54,6 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
     protected val requestProvider: RequestProvider<*>? = repolizer.requestProvider
 
     protected val requiresLogin: Boolean = futureBuilder.requiresLogin
-    protected val showProgress: Boolean = futureBuilder.showProgress
     protected val saveData: Boolean = futureBuilder.saveData
 
     init {
