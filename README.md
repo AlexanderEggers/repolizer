@@ -16,19 +16,19 @@ repositories {
 }
 
 dependencies {
-  def repolizer_version = "0.6.4"
+  def repolizer_version = "0.7.2"
 
   //main dependency which is required for the app (including the processor)
   implementation "org.repolizer:repolizer-core:$repolizer_version"
   //just annotations
   implementation "org.repolizer:repolizer-annotation:$repolizer_version"
-  //livedata wrapper adapter dependency
+  //optional livedata wrapper adapter dependency
   implementation "org.repolizer:wrapper-livedata:$repolizer_version"
-  //retrofit network adapter dependency
+  //optional retrofit network adapter dependency
   implementation "org.repolizer:network-retrofit:$repolizer_version"
-  //sharedprefs cache adapter dependency
+  //optional sharedprefs cache adapter dependency
   implementation "org.repolizer:cache-sharedprefs:$repolizer_version"
-  //gson converter adapter dependency
+  //optional gson converter adapter dependency
   implementation "org.repolizer:converter-gson:$repolizer_version"
   
   kapt "org.repolizer:repolizer-processor:$repolizer_version"
