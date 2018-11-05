@@ -46,7 +46,7 @@ apiKey= MY_API_KEY
 
 Status
 ------
-Version 1.0.0 is currently under development in the master branch. The latest version 0.7.2 can be found in the master branch.
+Version 1.0.0 is currently under development in the master branch.
 
 Comments/bugs/questions/pull requests are always welcome!
 
