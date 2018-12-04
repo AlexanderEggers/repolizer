@@ -44,6 +44,23 @@ If you need a fully working example, please use the [example project][3]. In ord
 apiKey= MY_API_KEY
 ```
 
+ProGuard
+------
+All Repolizer generated classes will be added to the related repository (interface) package. It is recommended to have a seperate package from your app that only includes your repository classes (like com.example.app.repositories).
+```
+-keep public class * extends repolizer.adapter.network.retrofit.api.NetworkController { *; }
+-keep public class * extends repolizer.repository.BaseRepository { *; }
+-keep class {MY_REPOSITORY_PACKAGE}.api.** { *; }
+
+## if using AndroidX
+-keep class androidx.core.app.CoreComponentFactory { *; }
+
+## if not using AndroidX
+-keep class android.support.v4.app.CoreComponentFactory { *; }
+
+```
+Note regarding the android.support.v4.app.CoreComponentFactory class: 
+
 Status
 ------
 Version 1.0.0 is currently under development in the master branch.
@@ -53,7 +70,7 @@ Comments/bugs/questions/pull requests are always welcome!
 Compatibility
 -------------
 
- * The library requires at minimum Java 7.
+ * The library requires at minimum Java 7. Some Repolizer adapter require a minimum Android SDK level of 16.
 
 Author
 ------
