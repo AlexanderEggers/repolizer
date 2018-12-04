@@ -18,8 +18,9 @@ repositories {
 dependencies {
   def repolizer_version = "0.7.2"
 
-  //main dependency which is required for the app (including the processor)
+  //main dependency which is required for the app
   implementation "org.repolizer:repolizer-core:$repolizer_version"
+  
   //just annotations
   implementation "org.repolizer:repolizer-annotation:$repolizer_version"
   //optional livedata wrapper adapter dependency
