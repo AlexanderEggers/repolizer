@@ -51,7 +51,7 @@ All Repolizer generated classes will be added to the related repository (interfa
 ```
 -keep public class * extends repolizer.adapter.network.retrofit.api.NetworkController { *; }
 -keep public class * extends repolizer.repository.BaseRepository { *; }
--keep class {MY_REPOSITORY_PACKAGE}.api.** { *; }
+-keep class {MY_REPOSITORY_PACKAGE}.** { *; }
 
 ## if using AndroidX
 -keep class androidx.core.app.CoreComponentFactory { *; }
