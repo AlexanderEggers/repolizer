@@ -27,9 +27,9 @@ class RetrofitNetworkAdapterFactory
             httpClient?.let { client(it) }
         }
 
-        val networkInterface = retrofitBuilder.build()?.create(NetworkInterface::class.java)
+        val networkInterface = retrofitBuilder.build().create(NetworkInterface::class.java)
         networkController = networkInterface
-                ?.let { networkControllerClass.getConstructor(NetworkInterface::class.java, Gson::class.java) }
+                .let { networkControllerClass.getConstructor(NetworkInterface::class.java, Gson::class.java) }
                 ?.newInstance(networkInterface, gson)
                 ?: throw IllegalStateException("NetworkController is null. Usage of reflection to " +
                 "create an instance of your NetworkController ($networkControllerClass.class) has failed.")
