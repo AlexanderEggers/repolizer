@@ -59,7 +59,6 @@ All Repolizer generated classes will be added to the related repository (interfa
 -keep class android.support.v4.app.CoreComponentFactory { *; }
 
 ```
-Note regarding the android.support.v4.app.CoreComponentFactory class: 
 
 Status
 ------
