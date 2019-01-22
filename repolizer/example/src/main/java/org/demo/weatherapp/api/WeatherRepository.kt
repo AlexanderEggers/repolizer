@@ -1,7 +1,7 @@
 package org.demo.weatherapp.api
 
 import android.app.AlarmManager
-import android.arch.lifecycle.LiveData
+import androidx.lifecycle.LiveData
 import org.demo.weatherapp.model.WeatherModel
 import repolizer.annotation.repository.CACHE
 import repolizer.annotation.repository.CUD

@@ -1,9 +1,9 @@
 package org.demo.weatherapp
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModel
-import android.databinding.ObservableField
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.databinding.ObservableField
 import archknife.annotation.ProvideViewModel
 import org.demo.weatherapp.api.WeatherRepository
 import org.demo.weatherapp.model.WeatherModel

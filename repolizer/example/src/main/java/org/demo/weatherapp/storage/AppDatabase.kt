@@ -1,8 +1,8 @@
 package org.demo.weatherapp.storage
 
-import android.arch.persistence.room.Database
-import android.arch.persistence.room.RoomDatabase
-import android.arch.persistence.room.TypeConverters
+import androidx.room.Database
+import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import org.demo.weatherapp.model.WeatherModel
 
 @Database(version = 1, entities = [WeatherModel::class])
