@@ -1,10 +1,10 @@
 package org.demo.weatherapp
 
-import android.arch.lifecycle.ViewModelProvider
-import android.arch.lifecycle.ViewModelProviders
-import android.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
+import androidx.databinding.DataBindingUtil
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import archknife.annotation.ProvideActivity
 import archknife.annotation.util.Injectable
 import org.demo.weatherapp.databinding.ActivityMainBinding

@@ -1,7 +1,7 @@
 package repolizer.adapter.wrapper.livedata
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MediatorLiveData
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import repolizer.adapter.StorageAdapter
 import repolizer.adapter.WrapperAdapter
 import repolizer.repository.future.Future

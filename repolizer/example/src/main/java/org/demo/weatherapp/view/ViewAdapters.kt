@@ -1,6 +1,6 @@
 package org.demo.weatherapp.view
 
-import android.databinding.BindingAdapter
+import androidx.databinding.BindingAdapter
 import android.text.Html
 import android.widget.TextView
 

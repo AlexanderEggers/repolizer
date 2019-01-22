@@ -51,7 +51,7 @@ tasks.withType(Javadoc).all {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    api "android.arch.lifecycle:livedata:$livedata_version"
+    api "androidx.lifecycle:lifecycle-livedata:$livedata_version"
 
     implementation project(":repolizer-core")
     //implementation "org.repolizer:repolizer-core:$repolizer_library_version"

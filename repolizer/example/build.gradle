@@ -59,8 +59,8 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.android.support:appcompat-v7:$support_lib_version"
-    implementation "com.android.support:design:$support_lib_version"
+    implementation "androidx.appcompat:appcompat:$support_lib_appcompat_version"
+    implementation "com.google.android.material:material:$support_lib_version"
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
 
     implementation "org.archknife:archknife-core:$archknife_version"
@@ -68,9 +68,9 @@ dependencies {
 
     implementation "org.archtree:archtree-core:$archtree_version"
 
-    api "android.arch.persistence.room:runtime:$room_version"
-    kapt "android.arch.persistence.room:compiler:$room_version"
-    kapt "android.arch.lifecycle:compiler:$livedata_version"
+    api "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    kapt "androidx.lifecycle:lifecycle-compiler:$livedata_version"
 
     implementation project(":repolizer-core")
     implementation project(":wrapper-livedata")

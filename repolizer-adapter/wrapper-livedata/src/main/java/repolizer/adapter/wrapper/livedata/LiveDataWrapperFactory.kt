@@ -1,6 +1,6 @@
 package repolizer.adapter.wrapper.livedata
 
-import android.arch.lifecycle.LiveData
+import androidx.lifecycle.LiveData
 import repolizer.Repolizer
 import repolizer.adapter.factory.AdapterFactory
 import java.lang.reflect.ParameterizedType
