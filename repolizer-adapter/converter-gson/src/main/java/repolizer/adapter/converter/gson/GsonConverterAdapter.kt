@@ -7,10 +7,18 @@ import java.lang.reflect.Type
 class GsonConverterAdapter(val gson: Gson): ConverterAdapter() {
 
     override fun <T> convertStringToData(repositoryClass: Class<*>, data: String, bodyType: Type): T? {
-        return gson.fromJson(data, bodyType)
+        return try {
+            gson.fromJson(data, bodyType)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     override fun convertDataToString(repositoryClass: Class<*>, data: Any): String? {
-        return gson.toJson(data)
+        return try {
+            gson.toJson(data)
+        } catch (e: Exception) {
+            null
+        }
     }
 }
