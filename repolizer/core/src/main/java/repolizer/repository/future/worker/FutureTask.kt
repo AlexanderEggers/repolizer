@@ -1,14 +1,15 @@
 package repolizer.repository.future.worker
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import repolizer.repository.util.RepositoryExecutor
-import java.lang.IllegalStateException
-import java.util.concurrent.Executor
 
 open class FutureTask
-constructor(private var workerThread: Executor,
-            private var afterExecuteThread: Executor) : FutureTaskDoWork, FutureTaskDoAfter, FutureTaskExecute {
+constructor(private var workerThread: CoroutineDispatcher,
+            private var afterExecuteThread: CoroutineDispatcher) : FutureTaskDoWork, FutureTaskDoAfter, FutureTaskExecute {
 
-    private val workerExecutorMap = HashMap<String, Executor?>()
+    private val workerExecutorMap = HashMap<String, CoroutineDispatcher?>()
     private val workerBlockMap = HashMap<String, () -> Unit>()
     private var postWorkerBlock: () -> Unit? = { }
 
@@ -17,7 +18,7 @@ constructor(private var workerThread: Executor,
         return this
     }
 
-    override fun withWorkerThread(executor: Executor): FutureTaskDoAfter {
+    override fun withWorkerThread(executor: CoroutineDispatcher): FutureTaskDoAfter {
         workerExecutorMap["worker${workerBlockMap.size - 1}"] = executor
         return this
     }
@@ -32,13 +33,13 @@ constructor(private var workerThread: Executor,
         return this
     }
 
-    override fun withAfterWorkThread(executor: Executor): FutureTaskExecute {
+    override fun withAfterWorkThread(executor: CoroutineDispatcher): FutureTaskExecute {
         afterExecuteThread = executor
         return this
     }
 
     override fun execute() {
-        if(workerBlockMap.isNotEmpty()) {
+        if (workerBlockMap.isNotEmpty()) {
             executeWorkerTask(0)
         } else {
             throw IllegalStateException("FutureTask requires at least one worker task.")
@@ -47,10 +48,11 @@ constructor(private var workerThread: Executor,
 
     private fun executeWorkerTask(position: Int) {
         val executor = workerExecutorMap["worker$position"] ?: workerThread
-        executor.execute {
+
+        GlobalScope.launch(executor) {
             workerBlockMap["worker$position"]?.invoke()
 
-            if(workerBlockMap.size > position + 1) {
+            if (workerBlockMap.size > position + 1) {
                 executeWorkerTask(position + 1)
             } else {
                 executeAfterExecuteTask()
@@ -59,7 +61,7 @@ constructor(private var workerThread: Executor,
     }
 
     private fun executeAfterExecuteTask() {
-        afterExecuteThread.execute {
+        GlobalScope.launch(afterExecuteThread) {
             postWorkerBlock()
         }
     }

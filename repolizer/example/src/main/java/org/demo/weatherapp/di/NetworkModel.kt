@@ -5,6 +5,7 @@ import archknife.annotation.ProvideModule
 import archtree.helper.AppExecutor
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.asCoroutineDispatcher
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.demo.weatherapp.R
@@ -32,7 +33,7 @@ class NetworkModel {
                 .addStorageAdapter(AppDatabaseAdapterFactory(context))
                 .addCacheAdapter(SharedPrefCacheAdapterFactory(context))
                 .addConverterAdapter(GsonConverterAdapterFactory())
-                .setDefaultMainThread(appExecutor.mainThread)
+                .setDefaultMainThread(appExecutor.mainThread.asCoroutineDispatcher())
                 .build()
                 .getRepository(WeatherRepository::class.java)
     }

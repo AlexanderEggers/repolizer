@@ -1,5 +1,6 @@
 package repolizer
 
+import kotlinx.coroutines.CoroutineDispatcher
 import repolizer.adapter.*
 import repolizer.adapter.factory.AdapterFactory
 import repolizer.adapter.future.FutureWrapperAdapterFactory
@@ -8,7 +9,6 @@ import repolizer.repository.provider.GlobalRepositoryProvider
 import repolizer.repository.request.RequestProvider
 import repolizer.repository.response.ResponseService
 import repolizer.repository.util.RepositoryExecutor
-import java.util.concurrent.Executor
 
 class Repolizer private constructor(builder: Builder) {
 
@@ -18,9 +18,9 @@ class Repolizer private constructor(builder: Builder) {
     val loginManager: LoginManager? = builder.loginManager
     val responseService: ResponseService? = builder.responseService
 
-    val defaultMainThread: Executor = builder.defaultMainThread
+    val defaultMainThread: CoroutineDispatcher = builder.defaultMainThread
             ?: RepositoryExecutor.applicationThread
-    val workerThread: Executor = builder.workerThread
+    val workerThread: CoroutineDispatcher = builder.workerThread
             ?: RepositoryExecutor.getRepositoryDefaultThread()
 
     val wrapperAdapters: ArrayList<AdapterFactory<out WrapperAdapter<*>>> = builder.wrapperAdapters
@@ -62,9 +62,9 @@ class Repolizer private constructor(builder: Builder) {
         var responseService: ResponseService? = null
             private set
 
-        var defaultMainThread: Executor? = null
+        var defaultMainThread: CoroutineDispatcher? = null
             private set
-        var workerThread: Executor? = null
+        var workerThread: CoroutineDispatcher? = null
             private set
 
         fun addWrapperAdapter(wrapperAdapter: AdapterFactory<out WrapperAdapter<*>>): Builder {
@@ -112,12 +112,12 @@ class Repolizer private constructor(builder: Builder) {
             return this@Builder
         }
 
-        fun setDefaultMainThread(defaultMainThread: Executor): Builder {
+        fun setDefaultMainThread(defaultMainThread: CoroutineDispatcher): Builder {
             this@Builder.defaultMainThread = defaultMainThread
             return this@Builder
         }
 
-        fun setWorkerThread(executor: Executor): Builder {
+        fun setWorkerThread(executor: CoroutineDispatcher): Builder {
             this@Builder.workerThread = executor
             return this@Builder
         }

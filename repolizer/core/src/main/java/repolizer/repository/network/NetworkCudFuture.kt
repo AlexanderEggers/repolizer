@@ -1,5 +1,7 @@
 package repolizer.repository.network
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import repolizer.Repolizer
 import repolizer.adapter.WrapperAdapter
 import repolizer.adapter.util.AdapterUtil
@@ -25,12 +27,12 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
                         "set inside your repository method is empty.")
 
         return if (response.isSuccessful()) {
-            repolizer.defaultMainThread.execute {
+            GlobalScope.launch(repolizer.defaultMainThread) {
                 responseService?.handleSuccess(requestType, response)
             }
             response.body
         } else {
-            repolizer.defaultMainThread.execute {
+            GlobalScope.launch(repolizer.defaultMainThread) {
                 responseService?.handleRequestError(requestType, response)
             }
             null

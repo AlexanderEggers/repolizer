@@ -1,23 +1,24 @@
 package repolizer.repository.util
 
-import java.util.concurrent.Executor
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.asCoroutineDispatcher
 import java.util.concurrent.Executors
 
 object RepositoryExecutor {
-    private val repositoryThreadMap = HashMap<String, Executor>()
-    private val defaultWorkerThread: Executor = Executors.newSingleThreadExecutor()
+    private val repositoryThreadMap = HashMap<String, CoroutineDispatcher>()
+    private val defaultWorkerThread = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
-    val applicationThread: Executor = Executors.newSingleThreadExecutor()
+    val applicationThread = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
     fun addRepositoryThread(name: String) {
         repositoryThreadMap[name] = defaultWorkerThread
     }
 
-    fun getRepositoryThread(name: String): Executor? {
+    fun getRepositoryThread(name: String): CoroutineDispatcher? {
         return repositoryThreadMap[name]
     }
 
-    fun getRepositoryDefaultThread(): Executor {
+    fun getRepositoryDefaultThread(): CoroutineDispatcher {
         return defaultWorkerThread
     }
 }

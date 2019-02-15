@@ -1,5 +1,7 @@
 package repolizer.repository.future
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import repolizer.Repolizer
 import repolizer.repository.network.ExecutionType
 
@@ -16,10 +18,10 @@ abstract class Future<Body>(private val repolizer: Repolizer) {
 
     @JvmOverloads
     fun executeAsync(callback: FutureCallback<Body> = defaultFutureCallback) {
-        repolizer.workerThread.execute {
+        GlobalScope.launch(repolizer.workerThread) {
             val result = execute()
 
-            repolizer.defaultMainThread.execute {
+            launch(repolizer.defaultMainThread) {
                 callback.onFinished(result)
             }
         }

@@ -1,5 +1,8 @@
 package repolizer.repository.network
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import repolizer.Repolizer
 import repolizer.adapter.WrapperAdapter
 import repolizer.adapter.util.AdapterUtil
@@ -46,24 +49,26 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
             if (saveSuccessful == true) {
                 val successfullyCached = cacheAdapter?.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
                 if (successfullyCached == true) {
-                    repolizer.defaultMainThread.execute {
+                    GlobalScope.launch(repolizer.defaultMainThread) {
                         responseService?.handleSuccess(requestType, response)
                     }
+
+                    GlobalScope.launch() {  }
                     true
                 } else {
-                    repolizer.defaultMainThread.execute {
+                    GlobalScope.launch(repolizer.defaultMainThread) {
                         responseService?.handleCacheError(requestType, response)
                     }
                     false
                 }
             } else {
-                repolizer.defaultMainThread.execute {
+                GlobalScope.launch(repolizer.defaultMainThread) {
                     responseService?.handleStorageError(requestType, response)
                 }
                 false
             }
         } else {
-            repolizer.defaultMainThread.execute {
+            GlobalScope.launch(repolizer.defaultMainThread) {
                 responseService?.handleRequestError(requestType, response)
             }
             false

@@ -1,5 +1,7 @@
 package repolizer.repository.network
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import repolizer.Repolizer
 import repolizer.adapter.WrapperAdapter
 import repolizer.adapter.util.AdapterUtil
@@ -103,7 +105,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
 
             //If no cacheAdapter given, ignore check
             if (cacheSuccessful) {
-                repolizer.defaultMainThread.execute {
+                GlobalScope.launch(repolizer.defaultMainThread) {
                     responseService?.handleSuccess(requestType, response)
                 }
 
@@ -111,14 +113,14 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
                     storageAdapter?.get(repositoryClass, converterAdapter, fullUrl, querySql, bodyType)
                 } else null
             } else {
-                repolizer.defaultMainThread.execute {
+                GlobalScope.launch(repolizer.defaultMainThread) {
                     responseService?.handleCacheError(requestType, response)
 
                 }
                 null
             }
         } else {
-            repolizer.defaultMainThread.execute {
+            GlobalScope.launch(repolizer.defaultMainThread) {
                 responseService?.handleStorageError(requestType, response)
             }
             null
@@ -126,7 +128,7 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
     }
 
     private fun handleRequestError(response: NetworkResponse<String>) {
-        repolizer.defaultMainThread.execute {
+        GlobalScope.launch(repolizer.defaultMainThread) {
             responseService?.handleRequestError(requestType, response)
         }
 
