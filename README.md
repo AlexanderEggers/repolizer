@@ -47,18 +47,11 @@ apiKey= MY_API_KEY
 
 ProGuard
 ------
-All Repolizer generated classes will be added to the related repository (interface) package. It is recommended to have a seperate package from your app that only includes your repository classes (like com.example.app.repositories).
 ```
 -keep public class * extends repolizer.adapter.network.retrofit.api.NetworkController { *; }
 -keep public class * extends repolizer.repository.BaseRepository { *; }
--keep class {MY_REPOSITORY_PACKAGE}.** { *; }
-
-## if using AndroidX
+-keep @repolizer.annotation.repository.Repository public class * { *; }
 -keep class androidx.core.app.CoreComponentFactory { *; }
-
-## if not using AndroidX
--keep class android.support.v4.app.CoreComponentFactory { *; }
-
 ```
 
 Status
