@@ -3,7 +3,7 @@ package repolizer.repository.future
 import com.google.gson.reflect.TypeToken
 import java.lang.reflect.Type
 
-abstract class FutureBuilder {
+abstract class FutureRequest {
     var repositoryClass: Class<*>? = null
     var typeToken: TypeToken<*>? = null
     var bodyType: Type? = null

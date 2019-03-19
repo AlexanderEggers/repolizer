@@ -11,13 +11,14 @@ import java.lang.reflect.Type
 
 @Suppress("UNCHECKED_CAST")
 abstract class PersistentFuture<Body>
-constructor(protected val repolizer: Repolizer, futureBuilder: PersistentFutureBuilder) : Future<Body>(repolizer) {
+constructor(protected val repolizer: Repolizer,
+            @Suppress("UNUSED_PARAMETER") protected val futureRequest: PersistentFutureRequest) : Future<Body>(repolizer) {
 
-    protected val repositoryClass: Class<*> = futureBuilder.repositoryClass
+    protected val repositoryClass: Class<*> = futureRequest.repositoryClass
             ?: throw IllegalStateException("Repository class type is null.")
-    protected val wrapperType: TypeToken<*> = futureBuilder.typeToken
+    protected val wrapperType: TypeToken<*> = futureRequest.typeToken
             ?: throw IllegalStateException("Wrapper type is null.")
-    protected val bodyType: Type = futureBuilder.bodyType
+    protected val bodyType: Type = futureRequest.bodyType
             ?: throw IllegalStateException("Body type is null.")
 
     protected val storageAdapter: StorageAdapter<Body>? = AdapterUtil.getSafeAdapter(repolizer.storageAdapters,

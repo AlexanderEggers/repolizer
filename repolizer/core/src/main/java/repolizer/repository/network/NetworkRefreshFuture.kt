@@ -8,13 +8,13 @@ import repolizer.repository.response.NetworkResponse
 
 @Suppress("UNCHECKED_CAST")
 class NetworkRefreshFuture
-constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : NetworkFuture<Boolean>(repolizer, futureBuilder) {
+constructor(repolizer: Repolizer,
+            futureRequest: NetworkFutureRequest) : NetworkFuture<Boolean>(repolizer, futureRequest) {
 
-    private val fetchSecurityLayer: FetchSecurityLayer = futureBuilder.fetchSecurityLayer
-            ?: throw IllegalStateException("FetchSecurityLayer is null.")
-    private val allowMultipleRequestsAtSameTime: Boolean = futureBuilder.allowMultipleRequestsAtSameTime
+    private val fetchSecurityLayer: FetchSecurityLayer = futureRequest.fetchSecurityLayer
+    private val allowMultipleRequestsAtSameTime: Boolean = futureRequest.allowMultipleRequestsAtSameTime
 
-    private val insertSql: String = futureBuilder.insertSql
+    private val insertSql: String = futureRequest.insertSql
 
     override fun <Wrapper> create(): Wrapper {
         val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, wrapperType.type,
@@ -36,35 +36,33 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
     }
 
     private fun fetchFromNetwork(): Boolean? {
-        val response: NetworkResponse<String> = networkAdapter?.execute(this, requestProvider)
-                ?: throw IllegalStateException("Network Adapter error: Your url that you have " +
-                        "set inside your repository method is empty.")
+        val response: NetworkResponse<String>? = networkAdapter?.execute(this, requestProvider)
 
-        return if (response.isSuccessful() && response.body != null) {
+        return if (response?.isSuccessful() == true && response.body != null) {
             val saveSuccessful = storageAdapter?.insert(repositoryClass, converterAdapter, fullUrl,
                     insertSql, response.body, bodyType)
             if (saveSuccessful == true) {
                 val successfullyCached = cacheAdapter?.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
                 if (successfullyCached == true) {
                     repolizer.defaultMainThread.execute {
-                        responseService?.handleSuccess(requestType, response)
+                        responseService?.handleSuccess(requestType, futureRequest)
                     }
                     true
                 } else {
                     repolizer.defaultMainThread.execute {
-                        responseService?.handleCacheError(requestType, response)
+                        responseService?.handleCacheError(requestType, futureRequest)
                     }
                     false
                 }
             } else {
                 repolizer.defaultMainThread.execute {
-                    responseService?.handleStorageError(requestType, response)
+                    responseService?.handleStorageError(requestType, futureRequest)
                 }
                 false
             }
         } else {
             repolizer.defaultMainThread.execute {
-                responseService?.handleRequestError(requestType, response)
+                responseService?.handleRequestError(requestType, futureRequest, response)
             }
             false
         }

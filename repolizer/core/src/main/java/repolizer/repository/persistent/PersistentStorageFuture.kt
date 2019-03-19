@@ -8,16 +8,16 @@ import repolizer.repository.network.ExecutionType
 
 @Suppress("UNCHECKED_CAST")
 class PersistentStorageFuture
-constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder) : PersistentFuture<Boolean>(repolizer, futureBuilder) {
+constructor(repolizer: Repolizer, futureRequest: PersistentFutureRequest) : PersistentFuture<Boolean>(repolizer, futureRequest) {
 
-    private val storageOperation: StorageOperation = futureBuilder.storageOperation
+    private val storageOperation: StorageOperation = futureRequest.storageOperation
             ?: throw IllegalStateException("StorageOperation is null.")
 
-    private val insertSql = futureBuilder.insertSql
-    private val updateSql = futureBuilder.updateSql
-    private val deleteSql = futureBuilder.deleteSql
+    private val insertSql = futureRequest.insertSql
+    private val updateSql = futureRequest.updateSql
+    private val deleteSql = futureRequest.deleteSql
 
-    private val databaseItem: Any? = futureBuilder.storageItem
+    private val databaseItem: Any? = futureRequest.storageItem
 
     override fun <Wrapper> create(): Wrapper {
         val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, wrapperType.type,

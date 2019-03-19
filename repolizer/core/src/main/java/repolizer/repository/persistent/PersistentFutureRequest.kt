@@ -4,9 +4,9 @@ import repolizer.Repolizer
 import repolizer.annotation.repository.util.CacheOperation
 import repolizer.annotation.repository.util.StorageOperation
 import repolizer.persistent.CacheItem
-import repolizer.repository.future.FutureBuilder
+import repolizer.repository.future.FutureRequest
 
-open class PersistentFutureBuilder : FutureBuilder() {
+open class PersistentFutureRequest : FutureRequest() {
 
     var cacheOperation: CacheOperation? = null
     var storageOperation: StorageOperation? = null
@@ -15,7 +15,7 @@ open class PersistentFutureBuilder : FutureBuilder() {
         set(value) {
             if (field != null) {
                 throw IllegalStateException("Only ONE cache item can be set. Make sure that " +
-                        "you don't use more than one CacheItem parameter for this method.")
+                        "you don't use more than one @CacheBody parameter for this method.")
             } else field = value
         }
 
