@@ -18,7 +18,7 @@ import javax.lang.model.element.Modifier
 
 class RepositoryGetMethod {
 
-    private val classNetworkBuilder = ClassName.get("repolizer.repository.network", "NetworkFutureBuilder")
+    private val classNetworkRequest = ClassName.get("repolizer.repository.network", "NetworkFutureRequest")
     private val classRequestType = ClassName.get("repolizer.repository.request", "RequestType")
 
     private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
@@ -76,7 +76,7 @@ class RepositoryGetMethod {
                     //cases (like cannot refresh data due to error and cache is too old).
                     addCode(getRepositoryCode(element, annotationMapKey))
 
-                    addStatement("return super.executeGet(builder, returnType.getType())")
+                    addStatement("return super.executeGet(request, returnType.getType())")
                 }.build()
             } ?: ArrayList())
         }
@@ -88,30 +88,29 @@ class RepositoryGetMethod {
         return ArrayList<String>().apply {
             val annotation = methodElement.getAnnotation(GET::class.java)
 
-            add("$classNetworkBuilder builder = new $classNetworkBuilder();")
+            add("$classNetworkRequest request = new $classNetworkRequest(this);")
 
-            add("builder.setRequestType($classRequestType.GET);")
-            add("builder.setTypeToken(returnType);")
-            add("builder.setUrl(url);")
-            add("builder.setRequiresLogin(${annotation.requiresLogin});")
-            add("builder.setSaveData(${annotation.saveData});")
-            add("builder.setRepositoryClass(${ClassName.get(classElement.asType())}.class);")
-            add("builder.setFetchSecurityLayer(this);")
+            add("request.setRequestType($classRequestType.GET);")
+            add("request.setTypeToken(returnType);")
+            add("request.setUrl(url);")
+            add("request.setRequiresLogin(${annotation.requiresLogin});")
+            add("request.setSaveData(${annotation.saveData});")
+            add("request.setRepositoryClass(${ClassName.get(classElement.asType())}.class);")
 
-            add("builder.setInsertSql(insertSql);")
-            add("builder.setQuerySql(querySql);")
-            add("builder.setDeleteSql(deleteSql);")
+            add("request.setInsertSql(insertSql);")
+            add("request.setQuerySql(querySql);")
+            add("request.setDeleteSql(deleteSql);")
 
-            add("builder.setFreshCacheTime(${annotation.maxFreshTime}L);")
-            add("builder.setMaxCacheTime(${annotation.maxCacheTime}L);")
+            add("request.setFreshCacheTime(${annotation.maxFreshTime}L);")
+            add("request.setMaxCacheTime(${annotation.maxCacheTime}L);")
 
             RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {
-                add("builder.addHeader(" +
+                add("request.addHeader(" +
                         "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName});")
             }
 
             RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]?.forEach {
-                add("builder.addQuery(" +
+                add("request.addQuery(" +
                         "\"${it.getAnnotation(UrlQuery::class.java).key}\", ${it.simpleName});")
             }
         }.joinToString(separator = "\n", postfix = "\n")
@@ -133,24 +132,24 @@ class RepositoryGetMethod {
             }
 
             if (deleteIfCacheIsTooOldParamName != null) {
-                add("builder.setDeletingCacheIfTooOld($deleteIfCacheIsTooOldParamName);")
+                add("request.setDeletingCacheIfTooOld($deleteIfCacheIsTooOldParamName);")
             } else {
                 val deleteIfCacheIsTooOldByDefault = element.getAnnotation(Repository::class.java).deleteIfCacheIsTooOld
-                add("builder.setDeletingCacheIfTooOld($deleteIfCacheIsTooOldByDefault);")
+                add("request.setDeletingCacheIfTooOld($deleteIfCacheIsTooOldByDefault);")
             }
 
             if (allowFetchParamName != null) {
-                add("builder.setAllowFetch($allowFetchParamName);")
+                add("request.setAllowFetch($allowFetchParamName);")
             } else {
                 val allowFetchByDefault = element.getAnnotation(Repository::class.java).allowFetchByDefault
-                add("builder.setAllowFetch($allowFetchByDefault);")
+                add("request.setAllowFetch($allowFetchByDefault);")
             }
 
             if (allowMultipleRequestsSameTimeParamName != null) {
-                add("builder.setAllowMultipleRequestsAtSameTime($allowMultipleRequestsSameTimeParamName);")
+                add("request.setAllowMultipleRequestsAtSameTime($allowMultipleRequestsSameTimeParamName);")
             } else {
                 val deleteIfCacheIsTooOldByDefault = element.getAnnotation(Repository::class.java).allowMultipleRequestsAtSameTime
-                add("builder.setAllowMultipleRequestsAtSameTime($deleteIfCacheIsTooOldByDefault);")
+                add("request.setAllowMultipleRequestsAtSameTime($deleteIfCacheIsTooOldByDefault);")
             }
         }.joinToString(separator = "\n", postfix = "\n")
     }

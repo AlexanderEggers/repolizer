@@ -10,7 +10,7 @@ import javax.lang.model.element.Modifier
 
 class RepositoryCacheMethod {
 
-    private val classPersistentBuilder = ClassName.get("repolizer.repository.persistent", "PersistentFutureBuilder")
+    private val classPersistentRequest = ClassName.get("repolizer.repository.persistent", "PersistentFutureRequest")
     private val classCacheItem = ClassName.get("repolizer.persistent", "CacheItem")
     private val classCacheOperation = ClassName.get("repolizer.annotation.repository.util", "CacheOperation")
 
@@ -40,16 +40,16 @@ class RepositoryCacheMethod {
 
                             addCode("\n")
 
-                            addStatement("$classPersistentBuilder builder = new $classPersistentBuilder()")
-                            addStatement("builder.setCacheOperation($classCacheOperation.$operation)")
-                            addStatement("builder.setRepositoryClass(${ClassName.get(element.asType())}.class)")
-                            addStatement("builder.setTypeToken(new $classWithTypeToken() {})")
+                            addStatement("$classPersistentRequest request = new $classPersistentRequest()")
+                            addStatement("request.setCacheOperation($classCacheOperation.$operation)")
+                            addStatement("request.setRepositoryClass(${ClassName.get(element.asType())}.class)")
+                            addStatement("request.setTypeToken(new $classWithTypeToken() {})")
 
                             createCacheItemBuilderMethods(annotationMapKey).forEach {
                                 addStatement(it)
                             }
 
-                            addStatement("return super.executeCache(builder, returnType.getType())")
+                            addStatement("return super.executeCache(request, returnType.getType())")
                         }.build()
                     } ?: ArrayList())
         }
@@ -61,7 +61,7 @@ class RepositoryCacheMethod {
                 val varType = ClassName.get(varElement.asType())
 
                 if (varType == classCacheItem) {
-                    add("builder.setCacheItem(${varElement.simpleName})")
+                    add("request.setCacheItem(${varElement.simpleName})")
                 }
             }
         }

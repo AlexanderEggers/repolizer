@@ -1,11 +1,11 @@
 package repolizer.repository.network
 
 import repolizer.Repolizer
-import repolizer.repository.future.FutureBuilder
+import repolizer.repository.future.FutureRequest
 import repolizer.repository.request.RequestType
 import repolizer.repository.util.QueryHashMap
 
-open class NetworkFutureBuilder : FutureBuilder() {
+open class NetworkFutureRequest(val fetchSecurityLayer: FetchSecurityLayer) : FutureRequest() {
 
     var requestType: RequestType? = null
 
@@ -15,7 +15,6 @@ open class NetworkFutureBuilder : FutureBuilder() {
     var freshCacheTime: Long = Long.MAX_VALUE
     var maxCacheTime: Long = Long.MAX_VALUE
 
-    var fetchSecurityLayer: FetchSecurityLayer? = null
     var requiresLogin: Boolean = false
     var saveData: Boolean = true
 

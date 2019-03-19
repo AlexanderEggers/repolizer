@@ -9,11 +9,12 @@ import repolizer.repository.network.ExecutionType
 
 @Suppress("UNCHECKED_CAST")
 class PersistentCacheFuture
-constructor(repolizer: Repolizer, futureBuilder: PersistentFutureBuilder) : PersistentFuture<Boolean>(repolizer, futureBuilder) {
+constructor(repolizer: Repolizer,
+            futureRequest: PersistentFutureRequest) : PersistentFuture<Boolean>(repolizer, futureRequest) {
 
-    private val cacheOperation: CacheOperation = futureBuilder.cacheOperation
+    private val cacheOperation: CacheOperation = futureRequest.cacheOperation
             ?: throw IllegalStateException("CacheOperation is null.")
-    private val cacheItem: CacheItem = futureBuilder.cacheItem
+    private val cacheItem: CacheItem = futureRequest.cacheItem
             ?: throw IllegalStateException("CacheItem is null.")
 
     override fun <Wrapper> create(): Wrapper {

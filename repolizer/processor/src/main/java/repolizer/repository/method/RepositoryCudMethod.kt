@@ -13,7 +13,7 @@ import javax.lang.model.element.Modifier
 
 class RepositoryCudMethod {
 
-    private val classNetworkBuilder = ClassName.get("repolizer.repository.network", "NetworkFutureBuilder")
+    private val classNetworkRequest = ClassName.get("repolizer.repository.network", "NetworkFutureRequest")
     private val classRequestType = ClassName.get("repolizer.repository.request", "RequestType")
 
     private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
@@ -53,7 +53,7 @@ class RepositoryCudMethod {
                             addCode(getBuilderCode(annotationMapKey, element,
                                     methodElement.getAnnotation(CUD::class.java)))
 
-                            addStatement("return super.executeCud(builder, returnType.getType())")
+                            addStatement("return super.executeCud(request, returnType.getType())")
                         }.build()
                     } ?: ArrayList())
         }
@@ -61,30 +61,30 @@ class RepositoryCudMethod {
 
     private fun getBuilderCode(annotationMapKey: String, element: Element, annotation: CUD): String {
         return ArrayList<String>().apply {
-            add("$classNetworkBuilder builder = new $classNetworkBuilder();")
+            add("$classNetworkRequest request = new $classNetworkRequest(this);")
 
-            add("builder.setRepositoryClass(${ClassName.get(element.asType())}.class);")
-            add("builder.setRequestType($classRequestType.${annotation.cudType.name});")
-            add("builder.setTypeToken(returnType);")
-            add("builder.setRequiresLogin(${annotation.requiresLogin});")
-            add("builder.setUrl(url);")
-            add("builder.setSaveData(false);")
+            add("request.setRepositoryClass(${ClassName.get(element.asType())}.class);")
+            add("request.setRequestType($classRequestType.${annotation.cudType.name});")
+            add("request.setTypeToken(returnType);")
+            add("request.setRequiresLogin(${annotation.requiresLogin});")
+            add("request.setUrl(url);")
+            add("request.setSaveData(false);")
 
             RepositoryMapHolder.requestBodyAnnotationMap[annotationMapKey]?.forEach {
-                add("builder.addRaw(${it.simpleName});")
+                add("request.addRaw(${it.simpleName});")
             }
 
             RepositoryMapHolder.multipartBodyAnnotationMap[annotationMapKey]?.forEach {
-                add("builder.addMultipartBody(${it.simpleName});")
+                add("request.addMultipartBody(${it.simpleName});")
             }
 
             RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {
-                add("builder.addHeader(" +
+                add("request.addHeader(" +
                         "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName});")
             }
 
             RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]?.forEach {
-                add("builder.addQuery(" +
+                add("request.addQuery(" +
                         "\"${it.getAnnotation(UrlQuery::class.java).key}\", ${it.simpleName});")
             }
         }.joinToString(separator = "\n", postfix = "\n")

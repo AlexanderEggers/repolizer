@@ -93,7 +93,9 @@ class Repolizer private constructor(builder: Builder) {
         }
 
         fun setBaseUrl(baseUrl: String): Builder {
-            this@Builder.baseUrl = baseUrl
+            if(baseUrl.isEmpty()) throw IllegalStateException("Network Adapter error: Your url that you have " +
+                    "set inside your repository method is empty.")
+            else this@Builder.baseUrl = baseUrl
             return this@Builder
         }
 

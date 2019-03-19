@@ -17,30 +17,31 @@ import java.lang.reflect.Type
 
 @Suppress("UNCHECKED_CAST")
 abstract class NetworkFuture<Body>
-constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Future<Body>(repolizer) {
+constructor(protected val repolizer: Repolizer,
+            protected val futureRequest: NetworkFutureRequest) : Future<Body>(repolizer) {
 
-    val requestType: RequestType = futureBuilder.requestType
+    val requestType: RequestType = futureRequest.requestType
             ?: throw IllegalStateException("Request type is null.")
 
-    val headerMap: Map<String, String> = futureBuilder.headerMap
-    val queryMap: QueryHashMap = futureBuilder.queryMap
-    val rawObjects: List<Any?> = futureBuilder.rawObjects
-    val partObjects: List<Any?> = futureBuilder.partObjects
+    val headerMap: Map<String, String> = futureRequest.headerMap
+    val queryMap: QueryHashMap = futureRequest.queryMap
+    val rawObjects: List<Any?> = futureRequest.rawObjects
+    val partObjects: List<Any?> = futureRequest.partObjects
 
     val fullUrl: String by lazy {
         repolizer.baseUrl?.let { baseUrl ->
-            "$baseUrl${futureBuilder.url}"
-        } ?: futureBuilder.url
+            "$baseUrl${futureRequest.url}"
+        } ?: futureRequest.url
     }
 
-    protected val builderUrl: String = futureBuilder.url
+    protected val requestUrl: String = futureRequest.url
 
-    protected val repositoryClass: Class<*> = futureBuilder.repositoryClass
+    protected val repositoryClass: Class<*> = futureRequest.repositoryClass
             ?: throw IllegalStateException("Repository class type is null.")
 
-    protected val wrapperType: TypeToken<*> = futureBuilder.typeToken
+    protected val wrapperType: TypeToken<*> = futureRequest.typeToken
             ?: throw IllegalStateException("Wrapper type is null.")
-    protected val bodyType: Type = futureBuilder.bodyType
+    protected val bodyType: Type = futureRequest.bodyType
             ?: throw IllegalStateException("Body type is null.")
 
     protected val networkAdapter: NetworkAdapter?
@@ -53,11 +54,11 @@ constructor(protected val repolizer: Repolizer, futureBuilder: NetworkFutureBuil
     protected val responseService: ResponseService? = repolizer.responseService
     protected val requestProvider: RequestProvider<*>? = repolizer.requestProvider
 
-    protected val requiresLogin: Boolean = futureBuilder.requiresLogin
-    protected val saveData: Boolean = futureBuilder.saveData
+    protected val requiresLogin: Boolean = futureRequest.requiresLogin
+    protected val saveData: Boolean = futureRequest.saveData
 
     init {
-        networkAdapter = if (builderUrl.isNotEmpty()) {
+        networkAdapter = if (requestUrl.isNotEmpty()) {
             AdapterUtil.getAdapter(repolizer.networkAdapters,
                     bodyType, repositoryClass, repolizer) as? NetworkAdapter?
         } else null

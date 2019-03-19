@@ -16,7 +16,7 @@ import javax.lang.model.element.Modifier
 
 class RepositoryRefreshMethod {
 
-    private val classNetworkBuilder = ClassName.get("repolizer.repository.network", "NetworkFutureBuilder")
+    private val classNetworkRequest = ClassName.get("repolizer.repository.network", "NetworkFutureRequest")
     private val classRequestType = ClassName.get("repolizer.repository.request", "RequestType")
 
     private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
@@ -66,7 +66,7 @@ class RepositoryRefreshMethod {
                     //initialise it's values
                     addCode(getBuilderCode(annotationMapKey, element, methodElement))
 
-                    addStatement("return super.executeRefresh(builder, returnType.getType())")
+                    addStatement("return super.executeRefresh(request, returnType.getType())")
                 }.build()
             } ?: ArrayList())
         }
@@ -88,25 +88,24 @@ class RepositoryRefreshMethod {
         return ArrayList<String>().apply {
             val annotation = methodElement.getAnnotation(REFRESH::class.java)
 
-            add("$classNetworkBuilder builder = new $classNetworkBuilder();")
+            add("$classNetworkRequest request = new $classNetworkRequest(this);")
 
-            add("builder.setTypeToken(refreshMethodReturnType);")
+            add("request.setTypeToken(refreshMethodReturnType);")
 
-            add("builder.setRequestType($classRequestType.GET);")
-            add("builder.setRepositoryClass(${ClassName.get(classElement.asType())}.class);")
-            add("builder.setUrl(url);")
-            add("builder.setRequiresLogin(${annotation.requiresLogin});")
-            add("builder.setFetchSecurityLayer(this);")
-            add("builder.setInsertSql(insertSql);")
-            add("builder.setSaveData(true);")
+            add("request.setRequestType($classRequestType.GET);")
+            add("request.setRepositoryClass(${ClassName.get(classElement.asType())}.class);")
+            add("request.setUrl(url);")
+            add("request.setRequiresLogin(${annotation.requiresLogin});")
+            add("request.setInsertSql(insertSql);")
+            add("request.setSaveData(true);")
 
             RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {
-                add("builder.addHeader(" +
+                add("request.addHeader(" +
                         "\"${it.getAnnotation(Header::class.java).key}\", ${it.simpleName});")
             }
 
             RepositoryMapHolder.urlQueryAnnotationMap[annotationMapKey]?.forEach {
-                add("builder.addQuery(" +
+                add("request.addQuery(" +
                         "\"${it.getAnnotation(UrlQuery::class.java).key}\", ${it.simpleName});")
             }
         }.joinToString(separator = "\n", postfix = "\n")

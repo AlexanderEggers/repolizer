@@ -7,7 +7,8 @@ import repolizer.repository.response.NetworkResponse
 
 @Suppress("UNCHECKED_CAST")
 class NetworkCudFuture
-constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : NetworkFuture<String>(repolizer, futureBuilder) {
+constructor(repolizer: Repolizer,
+            futureRequest: NetworkFutureRequest) : NetworkFuture<String>(repolizer, futureRequest) {
 
     override fun <Wrapper> create(): Wrapper {
         val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, wrapperType.type,
@@ -20,18 +21,16 @@ constructor(repolizer: Repolizer, futureBuilder: NetworkFutureBuilder) : Network
     }
 
     override fun onExecute(executionType: ExecutionType): String? {
-        val response: NetworkResponse<String> = networkAdapter?.execute(this, requestProvider)
-                ?: throw IllegalStateException("Network Adapter error: Your url that you have " +
-                        "set inside your repository method is empty.")
+        val response: NetworkResponse<String>? = networkAdapter?.execute(this, requestProvider)
 
-        return if (response.isSuccessful()) {
+        return if (response?.isSuccessful() == true) {
             repolizer.defaultMainThread.execute {
-                responseService?.handleSuccess(requestType, response)
+                responseService?.handleSuccess(requestType, futureRequest)
             }
             response.body
         } else {
             repolizer.defaultMainThread.execute {
-                responseService?.handleRequestError(requestType, response)
+                responseService?.handleRequestError(requestType, futureRequest, response)
             }
             null
         }
