@@ -61,7 +61,8 @@ Comments/bugs/questions/pull requests are always welcome!
 Compatibility
 -------------
 
- * The library requires at minimum Java 7. Some Repolizer adapter require a minimum Android SDK level of 16.
+ * The library requires at minimum Java 7.
+ * Some Repolizer adapter require a minimum Android SDK level of 16 and the usage of AndroidX instead of the legacy Android support libary.
 
 Author
 ------
