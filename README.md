@@ -49,7 +49,6 @@ ProGuard
 -keep public class * extends repolizer.adapter.network.retrofit.api.NetworkController { *; }
 -keep public class * extends repolizer.repository.BaseRepository { *; }
 -keep @repolizer.annotation.repository.Repository public class * { *; }
--keep class androidx.core.app.CoreComponentFactory { *; }
 ```
 
 Status
