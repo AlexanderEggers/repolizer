@@ -6,10 +6,13 @@ ext {
     bintrayName = 'repolizer-wrapper-livedata'
 
     publishedGroupId = 'org.repolizer'
-    libraryName = 'wrapper-livedata'
+    libraryName = 'Repolizer LiveData Wrapper Adapter Artifact'
     artifact = 'wrapper-livedata'
+    libraryYear = '2019'
 
-    libraryDescription = 'Android annotation processor to add a MVVM-based repository pattern to your App.'
+    libraryDescription = 'The Repolizer LiveData Wrapper Adapter Artifact is a adapter ' +
+            'implementation to use LiveData for the Repolizer wrapper implementation (stands ' +
+            'for return type wrapper, like LiveData<Boolean>).'
 
     siteUrl = 'https://github.com/Mordag/repolizer'
     gitUrl = 'https://github.com/Mordag/repolizer.git'
@@ -19,9 +22,7 @@ ext {
     developerId = 'mordag'
     developerName = 'Alexander Eggers'
 
-    Properties properties = new Properties()
-    properties.load(project.rootProject.file("local.properties").newDataInputStream())
-    developerEmail = properties.getProperty("user.email", "")
+    developerEmail = ''
 
     licenseName = 'The Apache Software License, Version 2.0'
     licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
@@ -57,5 +58,7 @@ dependencies {
     //implementation "org.repolizer:repolizer-core:$repolizer_library_version"
 }
 
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
+if (project.rootProject.file('local.properties').exists()) {
+    apply from: 'https://raw.githubusercontent.com/Mordag/JCenter/master/install.gradle'
+    apply from: 'https://raw.githubusercontent.com/Mordag/JCenter/master/bintray.gradle'
+}

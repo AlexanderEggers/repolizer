@@ -6,10 +6,13 @@ ext {
     bintrayName = 'repolizer-cache-sharedprefs'
 
     publishedGroupId = 'org.repolizer'
-    libraryName = 'cache-sharedprefs'
+    libraryName = 'Repolizer SharedPrefs Cache Adapter Artifact'
     artifact = 'cache-sharedprefs'
+    libraryYear = '2019'
 
-    libraryDescription = 'Android annotation processor to add a MVVM-based repository pattern to your App.'
+    libraryDescription = 'The Repolizer SharedPrefs Cache Adapter Artifact is a adapter ' +
+            'implementation to use SharedPrefs for the Repolizer cache implementation (reference ' +
+            'to when data has been downloaded).'
 
     siteUrl = 'https://github.com/Mordag/repolizer'
     gitUrl = 'https://github.com/Mordag/repolizer.git'
@@ -19,9 +22,7 @@ ext {
     developerId = 'mordag'
     developerName = 'Alexander Eggers'
 
-    Properties properties = new Properties()
-    properties.load(project.rootProject.file("local.properties").newDataInputStream())
-    developerEmail = properties.getProperty("user.email", "")
+    developerEmail = ''
 
     licenseName = 'The Apache Software License, Version 2.0'
     licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
@@ -56,5 +57,7 @@ dependencies {
     //implementation "org.repolizer:repolizer-core:$repolizer_library_version"
 }
 
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
+if (project.rootProject.file('local.properties').exists()) {
+    apply from: 'https://raw.githubusercontent.com/Mordag/JCenter/master/install.gradle'
+    apply from: 'https://raw.githubusercontent.com/Mordag/JCenter/master/bintray.gradle'
+}
