@@ -29,7 +29,7 @@ class NetworkModel {
                 .addNetworkAdapter(RetrofitNetworkAdapterFactory(context.getString(R.string.server_base_url),
                         httpClient = httpClient))
                 .addWrapperAdapter(LiveDataWrapperFactory())
-                .addStorageAdapter(AppDatabaseAdapterFactory(context))
+                .addDataAdapter(AppDatabaseAdapterFactory(context))
                 .addCacheAdapter(SharedPrefCacheAdapterFactory(context))
                 .addConverterAdapter(GsonConverterAdapterFactory())
                 .setDefaultMainThread(appExecutor.mainThread)

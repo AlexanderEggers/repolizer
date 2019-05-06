@@ -9,7 +9,7 @@ import repolizer.repository.RepositoryMapHolder
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
 
-class RepositoryStorageMethod {
+class RepositoryDataMethod {
 
     private val classDatabaseRequest = ClassName.get("repolizer.repository.persistent", "PersistentFutureRequestBuilder")
     private val classStorageOperation = ClassName.get("repolizer.annotation.repository.util", "StorageOperation")
@@ -35,7 +35,7 @@ class RepositoryStorageMethod {
 
                             val sql = methodElement.getAnnotation(DATA::class.java).statement
                             addStatement("String statement = \"$sql\"")
-                            if (sql.isNotEmpty()) addCode(buildSql(annotationMapKey))
+                            if (sql.isNotEmpty()) addCode(buildStatement(annotationMapKey))
 
                             val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
                                     ClassName.get(methodElement.returnType))
@@ -51,11 +51,11 @@ class RepositoryStorageMethod {
                             addStatement("request.setStorageOperation($classStorageOperation.$operation)")
                             addStatement(getStorageSql(operation))
 
-                            createStorageItemBuilderMethods(annotationMapKey).forEach {
+                            createDataItemBuilderMethods(annotationMapKey).forEach {
                                 addStatement(it)
                             }
 
-                            addStatement("return super.executeStorage(request, returnType.getType())")
+                            addStatement("return super.executeData(request, returnType.getType())")
                         }.build()
                     } ?: ArrayList())
         }
@@ -69,16 +69,16 @@ class RepositoryStorageMethod {
         }
     }
 
-    private fun createStorageItemBuilderMethods(annotationKey: String): ArrayList<String> {
+    private fun createDataItemBuilderMethods(annotationKey: String): ArrayList<String> {
         return ArrayList<String>().apply {
-            RepositoryMapHolder.storageBodyAnnotationMap[annotationKey]?.forEach { varElement ->
-                add("request.setStorageItem(${varElement.simpleName})")
+            RepositoryMapHolder.dataBodyAnnotationMap[annotationKey]?.forEach { varElement ->
+                add("request.setDataObject(${varElement.simpleName})")
             }
         }
     }
 
-    private fun buildSql(annotationMapKey: String): String {
-        return (RepositoryMapHolder.sqlParameterAnnotationMap[annotationMapKey]?.map {
+    private fun buildStatement(annotationMapKey: String): String {
+        return (RepositoryMapHolder.statementParameterAnnotationMap[annotationMapKey]?.map {
             "statement = statement.replace(\":${it.simpleName}\", ${it.simpleName} + \"\");"
         } ?: ArrayList()).joinToString(separator = "\n", postfix = "\n\n")
     }

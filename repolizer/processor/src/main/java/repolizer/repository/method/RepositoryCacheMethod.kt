@@ -11,7 +11,6 @@ import javax.lang.model.element.Modifier
 class RepositoryCacheMethod {
 
     private val classPersistentRequest = ClassName.get("repolizer.repository.persistent", "PersistentFutureRequestBuilder")
-    private val classCacheItem = ClassName.get("repolizer.persistent", "CacheItem")
     private val classCacheOperation = ClassName.get("repolizer.annotation.repository.util", "CacheOperation")
 
     private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
@@ -58,11 +57,7 @@ class RepositoryCacheMethod {
     private fun createCacheItemBuilderMethods(annotationKey: String): ArrayList<String> {
         return ArrayList<String>().apply {
             RepositoryMapHolder.cacheBodyAnnotationMap[annotationKey]?.forEach { varElement ->
-                val varType = ClassName.get(varElement.asType())
-
-                if (varType == classCacheItem) {
-                    add("request.setCacheItem(${varElement.simpleName})")
-                }
+                add("request.setCacheObject(${varElement.simpleName})")
             }
         }
     }

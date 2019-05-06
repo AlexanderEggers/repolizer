@@ -91,11 +91,11 @@ class RepositoryProcessorUtil {
             }).joinToString(prefix = "url += \"?\";\n", separator = "\nurl += \"&\";\n")
         }
 
-        fun buildStatement(annotationMapKey: String, sqlParamName: String, baseSql: String): String {
+        fun buildStatement(annotationMapKey: String, statementParamName: String, baseSql: String): String {
             return ArrayList<String>().apply {
-                RepositoryMapHolder.sqlParameterAnnotationMap[annotationMapKey]?.forEach {
+                RepositoryMapHolder.statementParameterAnnotationMap[annotationMapKey]?.forEach {
                     if (baseSql.contains(":${it.simpleName}")) {
-                        add("$sqlParamName = $sqlParamName.replace(\":${it.simpleName}\", ${it.simpleName} + \"\");")
+                        add("$statementParamName = $statementParamName.replace(\":${it.simpleName}\", ${it.simpleName} + \"\");")
                     }
                 }
             }.joinToString(separator = "\n", postfix = "\n\n")

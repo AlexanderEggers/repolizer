@@ -22,7 +22,7 @@ constructor(repolizer: Repolizer,
     } else null
     protected val converterAdapter: ConverterAdapter? = AdapterUtil.getSafeAdapter(repolizer.converterAdapters,
             futureRequest.bodyType, futureRequest.repositoryClass, repolizer) as? ConverterAdapter
-    protected val storageAdapter: DataAdapter<Body>?
+    protected val dataAdapter: DataAdapter<Body>?
     protected val cacheAdapter: CacheAdapter?
 
     protected val loginManager: LoginManager? = repolizer.loginManager
@@ -34,13 +34,13 @@ constructor(repolizer: Repolizer,
 
     init {
         if (saveData) {
-            storageAdapter = AdapterUtil.getAdapter(repolizer.storageAdapters,
+            dataAdapter = AdapterUtil.getAdapter(repolizer.dataAdapters,
                     futureRequest.bodyType, futureRequest.repositoryClass, repolizer) as DataAdapter<Body>
 
             cacheAdapter = AdapterUtil.getSafeAdapter(repolizer.cacheAdapters,
                     futureRequest.bodyType, futureRequest.repositoryClass, repolizer) as? CacheAdapter?
         } else {
-            storageAdapter = null
+            dataAdapter = null
             cacheAdapter = null
         }
     }

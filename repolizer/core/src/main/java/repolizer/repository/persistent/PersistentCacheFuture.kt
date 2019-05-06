@@ -25,8 +25,9 @@ constructor(private val repolizer: Repolizer,
 
     override fun onExecute(executionType: ExecutionType): Boolean? {
         return when (futureRequest.cacheOperation) {
-            CacheOperation.INSERT -> cacheAdapter?.save(futureRequest, futureRequest.cacheItem)
-            CacheOperation.DELETE -> cacheAdapter?.delete(futureRequest, futureRequest.cacheItem)
+            CacheOperation.INSERT -> cacheAdapter?.save(futureRequest, futureRequest.cacheObject)
+            CacheOperation.DELETE -> cacheAdapter?.delete(futureRequest, futureRequest.cacheObject)
+            else -> false
         }
     }
 }

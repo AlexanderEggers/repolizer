@@ -39,7 +39,7 @@ constructor(private val repolizer: Repolizer,
         val response: NetworkResponse<String>? = networkAdapter?.execute(futureRequest, requestProvider)
 
         return if (response?.isSuccessful() == true && response.body != null) {
-            val saveSuccessful = storageAdapter?.insert(futureRequest, converterAdapter, response.body)
+            val saveSuccessful = dataAdapter?.insert(futureRequest, converterAdapter, response.body)
             if (saveSuccessful == true) {
                 val successfullyCached = cacheAdapter?.save(futureRequest, CacheItem(futureRequest.fullUrl))
                 if (successfullyCached == true) {

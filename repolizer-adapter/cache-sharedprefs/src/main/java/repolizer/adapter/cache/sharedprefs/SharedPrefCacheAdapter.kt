@@ -8,12 +8,14 @@ import repolizer.repository.future.FutureRequest
 
 class SharedPrefCacheAdapter(private val context: Context) : CacheAdapter() {
 
-    override fun save(request: FutureRequest, data: CacheItem): Boolean {
-        val prefs = context.getSharedPreferences(DEFAULT_CACHE_SHARED_PREFS_NAME, Context.MODE_PRIVATE)
-        val edit = prefs.edit()
-        edit.putLong(data.url, data.cacheTime)
-        edit.apply()
-        return true
+    override fun save(request: FutureRequest, cacheObject: Any?): Boolean {
+        return if (cacheObject != null && cacheObject is CacheItem) {
+            val prefs = context.getSharedPreferences(DEFAULT_CACHE_SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+            val edit = prefs.edit()
+            edit.putLong(cacheObject.key, cacheObject.cacheTime)
+            edit.apply()
+            true
+        } else false
     }
 
     override fun get(request: FutureRequest, key: String, freshCacheTime: Long, maxCacheTime: Long): CacheState {
@@ -31,10 +33,12 @@ class SharedPrefCacheAdapter(private val context: Context) : CacheAdapter() {
         }
     }
 
-    override fun delete(request: FutureRequest, data: CacheItem): Boolean {
-        val prefs = context.getSharedPreferences(DEFAULT_CACHE_SHARED_PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().remove(data.url).apply()
-        return true
+    override fun delete(request: FutureRequest, cacheObject: Any?): Boolean {
+        return if (cacheObject != null && cacheObject is CacheItem) {
+            val prefs = context.getSharedPreferences(DEFAULT_CACHE_SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+            prefs.edit().remove(cacheObject.key).apply()
+            true
+        } else false
     }
 
     companion object {

@@ -3,8 +3,8 @@ package repolizer.repository.network
 import repolizer.Repolizer
 import repolizer.adapter.WrapperAdapter
 import repolizer.adapter.util.AdapterUtil
-import repolizer.persistent.CacheItem
 import repolizer.persistent.CacheState
+import repolizer.persistent.CacheItem
 import repolizer.repository.response.NetworkResponse
 
 @Suppress("UNCHECKED_CAST")
@@ -17,11 +17,11 @@ constructor(private val repolizer: Repolizer,
     override fun <Wrapper> create(): Wrapper {
         val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters,
                 futureRequest.typeToken.type, futureRequest.repositoryClass, repolizer) as WrapperAdapter<Wrapper>
-        return if (wrapperAdapter.canHaveStorageConnection() && storageAdapter?.canHaveActiveConnections() == true) {
-            wrapperAdapter.establishStorageConnection(this, futureRequest, storageAdapter)
+        return if (wrapperAdapter.canHaveStorageConnection() && dataAdapter?.canHaveActiveConnections() == true) {
+            wrapperAdapter.establishStorageConnection(this, futureRequest, dataAdapter)
                     ?: throw IllegalStateException("If you want to use an active storage connection, " +
                             "you need to implement the method establishStorageConnection() of your " +
-                            "WrapperAdapter and establishConnection() function inside your StorageAdapter.")
+                            "WrapperAdapter and establishConnection() function inside your DataAdapter.")
         } else wrapperAdapter.execute(this, futureRequest)
                 ?: throw IllegalStateException("It seems like that your WrapperAdapter does not" +
                         "have the method execute() implemented.")
@@ -32,7 +32,7 @@ constructor(private val repolizer: Repolizer,
                 futureRequest.freshCacheTime, futureRequest.maxCacheTime)
                 ?: CacheState.NEEDS_NO_REFRESH
 
-        val cacheData = storageAdapter?.get(futureRequest, converterAdapter)
+        val cacheData = dataAdapter?.get(futureRequest, converterAdapter)
         val needsFetch = cacheState == CacheState.NEEDS_SOFT_REFRESH ||
                 cacheState == CacheState.NEEDS_HARD_REFRESH ||
                 cacheState == CacheState.NO_CACHE
@@ -40,7 +40,8 @@ constructor(private val repolizer: Repolizer,
         return if (futureRequest.url.isNotEmpty()
                 && (cacheData == null || needsFetch)
                 && futureRequest.allowFetch
-                && (futureRequest.allowMultipleRequestsAtSameTime || futureRequest.fetchSecurityLayer.allowFetch())) {
+                && (futureRequest.allowMultipleRequestsAtSameTime ||
+                        futureRequest.fetchSecurityLayer.allowFetch())) {
             ExecutionType.USE_NETWORK
         } else ExecutionType.USE_STORAGE
     }
@@ -79,18 +80,20 @@ constructor(private val repolizer: Repolizer,
     }
 
     private fun saveNetworkResponse(response: NetworkResponse<String>): Body? {
-        val saveSuccessful = storageAdapter?.insert(futureRequest, converterAdapter, response.body)
+        val saveSuccessful = dataAdapter?.insert(futureRequest, converterAdapter, response.body)
                 ?: false
         return if (saveSuccessful) {
-            val cacheSuccessful = cacheAdapter?.save(futureRequest, CacheItem(futureRequest.fullUrl))
-                    ?: true
+            val cacheSuccessful = if(cacheAdapter != null) {
+                val cacheKey = cacheAdapter.getCacheKeyForNetwork(futureRequest)
+                cacheAdapter.save(futureRequest, CacheItem(cacheKey))
+            } else true
 
             if (cacheSuccessful) {
                 repolizer.defaultMainThread.execute {
                     responseService?.handleSuccess(futureRequest)
                 }
 
-                storageAdapter?.get(futureRequest, converterAdapter)
+                dataAdapter?.get(futureRequest, converterAdapter)
             } else {
                 repolizer.defaultMainThread.execute {
                     responseService?.handleCacheError(futureRequest)
@@ -111,12 +114,16 @@ constructor(private val repolizer: Repolizer,
         }
 
         if (futureRequest.isDeletingCacheIfTooOld && cacheState == CacheState.NEEDS_HARD_REFRESH) {
-            storageAdapter?.delete(futureRequest)
-            cacheAdapter?.delete(futureRequest, CacheItem(futureRequest.fullUrl))
+            dataAdapter?.delete(futureRequest)
+
+            if(cacheAdapter != null) {
+                val cacheKey = cacheAdapter.getCacheKeyForNetwork(futureRequest)
+                cacheAdapter.delete(futureRequest, CacheItem(cacheKey))
+            }
         }
     }
 
     private fun fetchCacheData(): Body? {
-        return storageAdapter?.get(futureRequest, converterAdapter)
+        return dataAdapter?.get(futureRequest, converterAdapter)
     }
 }

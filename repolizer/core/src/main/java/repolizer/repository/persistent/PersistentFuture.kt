@@ -12,7 +12,7 @@ abstract class PersistentFuture<Body>
 constructor(repolizer: Repolizer,
             futureRequest: PersistentFutureRequest) : Future<Body>(repolizer) {
 
-    protected val storageAdapter: DataAdapter<Body>? = AdapterUtil.getSafeAdapter(repolizer.storageAdapters,
+    protected val dataAdapter: DataAdapter<Body>? = AdapterUtil.getSafeAdapter(repolizer.dataAdapters,
             futureRequest.bodyType, futureRequest.repositoryClass, repolizer) as? DataAdapter<Body>
     protected val cacheAdapter: CacheAdapter? = AdapterUtil.getSafeAdapter(repolizer.cacheAdapters,
             futureRequest.bodyType, futureRequest.repositoryClass, repolizer) as? CacheAdapter

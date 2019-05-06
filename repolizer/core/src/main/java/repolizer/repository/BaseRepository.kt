@@ -42,11 +42,11 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
         return futureRequest.buildCud(repolizer).create()
     }
 
-    protected fun <T> executeStorage(futureRequest: PersistentFutureRequestBuilder, returnType: Type): T {
+    protected fun <T> executeData(futureRequest: PersistentFutureRequestBuilder, returnType: Type): T {
         val bodyType = getBodyType(returnType)
         futureRequest.bodyType = bodyType
 
-        return futureRequest.buildStorage(repolizer).create()
+        return futureRequest.buildData(repolizer).create()
     }
 
     protected fun <T> executeCache(futureRequest: PersistentFutureRequestBuilder, returnType: Type): T {

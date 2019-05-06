@@ -11,8 +11,6 @@ class PersistentStorageFuture
 constructor(private val repolizer: Repolizer,
             private val futureRequest: PersistentFutureRequest) : PersistentFuture<Boolean>(repolizer, futureRequest) {
 
-    private val databaseItem: Any? = futureRequest.storageItem
-
     override fun <Wrapper> create(): Wrapper {
         val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, futureRequest.typeToken.type,
                 futureRequest.repositoryClass, repolizer) as WrapperAdapter<Wrapper>
@@ -21,17 +19,16 @@ constructor(private val repolizer: Repolizer,
                         "have the method execute() implemented.")
     }
 
+    override fun onStart() {
+        if (dataAdapter == null) throw IllegalStateException("Storage adapter is null.")
+    }
+
     override fun onExecute(executionType: ExecutionType): Boolean? {
-        if (storageAdapter == null) throw IllegalStateException("Storage adapter is null.")
-        else return when (futureRequest.storageOperation) {
-            DataOperation.INSERT -> {
-                if (databaseItem == null) throw IllegalStateException("Database item is null.")
-                storageAdapter.insert(futureRequest, null, databaseItem)
-            }
-            DataOperation.UPDATE -> {
-                storageAdapter.update(futureRequest, databaseItem)
-            }
-            DataOperation.DELETE -> storageAdapter.delete(futureRequest)
+        return when (futureRequest.dataOperation) {
+            DataOperation.INSERT -> dataAdapter?.insert(futureRequest, null, futureRequest.dataObject)
+            DataOperation.UPDATE -> dataAdapter?.update(futureRequest, futureRequest.dataObject)
+            DataOperation.DELETE -> dataAdapter?.delete(futureRequest)
+            else -> false
         }
     }
 }

@@ -76,7 +76,7 @@ class RepositoryMainProcessor {
             addAll(RepositoryRefreshMethod().build(repositoryClassElement))
             addAll(RepositoryGetMethod().build(repositoryClassElement))
             addAll(RepositoryCudMethod().build(repositoryClassElement))
-            addAll(RepositoryStorageMethod().build(repositoryClassElement))
+            addAll(RepositoryDataMethod().build(repositoryClassElement))
             addAll(RepositoryCacheMethod().build(repositoryClassElement))
         }
     }
@@ -102,11 +102,11 @@ class RepositoryMainProcessor {
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
                 RequestBody::class.java, true, RepositoryMapHolder.requestBodyAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
-                DataBody::class.java, true, RepositoryMapHolder.storageBodyAnnotationMap)
+                DataBody::class.java, true, RepositoryMapHolder.dataBodyAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
                 CacheBody::class.java, true, RepositoryMapHolder.cacheBodyAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
-                SqlParameter::class.java, false, RepositoryMapHolder.sqlParameterAnnotationMap)
+                StatementParameter::class.java, false, RepositoryMapHolder.statementParameterAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
                 UrlParameter::class.java, false, RepositoryMapHolder.urlParameterAnnotationMap)
         RepositoryProcessorUtil.initParamAnnotations(mainProcessor, roundEnv,
