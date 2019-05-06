@@ -2,13 +2,12 @@ package repolizer.adapter.wrapper.livedata
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import repolizer.adapter.StorageAdapter
+import repolizer.adapter.DataAdapter
 import repolizer.adapter.WrapperAdapter
 import repolizer.repository.future.Future
 import repolizer.repository.future.FutureCallback
 import repolizer.repository.future.FutureRequest
 import repolizer.repository.network.NetworkFutureRequest
-import repolizer.repository.network.NetworkGetFuture
 import java.util.concurrent.atomic.AtomicBoolean
 
 class LiveDataWrapper: WrapperAdapter<LiveData<*>>() {
@@ -31,7 +30,7 @@ class LiveDataWrapper: WrapperAdapter<LiveData<*>>() {
         }
     }
 
-    override fun <B> establishStorageConnection(future: Future<B>, request: NetworkFutureRequest, storageAdapter: StorageAdapter<B>): LiveData<B>? {
+    override fun <B> establishStorageConnection(future: Future<B>, request: NetworkFutureRequest, storageAdapter: DataAdapter<B>): LiveData<B>? {
         if(!request.connectionOnly) future.executeAsync()
         return storageAdapter.establishConnection(request)
     }

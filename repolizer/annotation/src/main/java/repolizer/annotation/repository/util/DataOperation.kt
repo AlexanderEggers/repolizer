@@ -1,6 +1,6 @@
 package repolizer.annotation.repository.util
 
-enum class StorageOperation {
+enum class DataOperation {
     INSERT,
     UPDATE,
     DELETE

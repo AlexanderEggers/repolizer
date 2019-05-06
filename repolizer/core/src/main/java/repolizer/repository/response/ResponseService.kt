@@ -1,7 +1,6 @@
 package repolizer.repository.response
 
 import repolizer.repository.network.NetworkFutureRequest
-import repolizer.repository.request.RequestType
 
 abstract class ResponseService {
 

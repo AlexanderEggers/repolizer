@@ -3,8 +3,8 @@ package repolizer.repository.network
 import repolizer.Repolizer
 import repolizer.adapter.CacheAdapter
 import repolizer.adapter.ConverterAdapter
+import repolizer.adapter.DataAdapter
 import repolizer.adapter.NetworkAdapter
-import repolizer.adapter.StorageAdapter
 import repolizer.adapter.util.AdapterUtil
 import repolizer.repository.future.Future
 import repolizer.repository.login.LoginManager
@@ -22,7 +22,7 @@ constructor(repolizer: Repolizer,
     } else null
     protected val converterAdapter: ConverterAdapter? = AdapterUtil.getSafeAdapter(repolizer.converterAdapters,
             futureRequest.bodyType, futureRequest.repositoryClass, repolizer) as? ConverterAdapter
-    protected val storageAdapter: StorageAdapter<Body>?
+    protected val storageAdapter: DataAdapter<Body>?
     protected val cacheAdapter: CacheAdapter?
 
     protected val loginManager: LoginManager? = repolizer.loginManager
@@ -35,7 +35,7 @@ constructor(repolizer: Repolizer,
     init {
         if (saveData) {
             storageAdapter = AdapterUtil.getAdapter(repolizer.storageAdapters,
-                    futureRequest.bodyType, futureRequest.repositoryClass, repolizer) as StorageAdapter<Body>
+                    futureRequest.bodyType, futureRequest.repositoryClass, repolizer) as DataAdapter<Body>
 
             cacheAdapter = AdapterUtil.getSafeAdapter(repolizer.cacheAdapters,
                     futureRequest.bodyType, futureRequest.repositoryClass, repolizer) as? CacheAdapter?

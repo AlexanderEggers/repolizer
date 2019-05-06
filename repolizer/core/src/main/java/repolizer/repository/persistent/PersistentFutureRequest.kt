@@ -1,7 +1,7 @@
 package repolizer.repository.persistent
 
 import repolizer.annotation.repository.util.CacheOperation
-import repolizer.annotation.repository.util.StorageOperation
+import repolizer.annotation.repository.util.DataOperation
 import repolizer.persistent.CacheItem
 import repolizer.repository.future.FutureRequest
 
@@ -9,7 +9,7 @@ open class PersistentFutureRequest(builder: PersistentFutureRequestBuilder) : Fu
 
     var cacheOperation: CacheOperation = builder.cacheOperation
             ?: throw IllegalStateException("CacheOperation is null.")
-    var storageOperation: StorageOperation = builder.storageOperation
+    var storageOperation: DataOperation = builder.storageOperation
             ?: throw IllegalStateException("StorageOperation is null.")
 
     var cacheItem: CacheItem = builder.cacheItem

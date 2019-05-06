@@ -2,11 +2,11 @@ package org.demo.weatherapp.storage
 
 import org.demo.weatherapp.model.WeatherModel
 import repolizer.adapter.ConverterAdapter
-import repolizer.adapter.StorageAdapter
+import repolizer.adapter.DataAdapter
 import repolizer.repository.future.FutureRequest
 
 class AppDatabaseAdapter
-constructor(private val weatherModelDao: WeatherModelDao): StorageAdapter<WeatherModel>() {
+constructor(private val weatherModelDao: WeatherModelDao): DataAdapter<WeatherModel>() {
 
     override fun insert(request: FutureRequest, converter: ConverterAdapter?, data: Any?): Boolean {
         return if(data is String) {

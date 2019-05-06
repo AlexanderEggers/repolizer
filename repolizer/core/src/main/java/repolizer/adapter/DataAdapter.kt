@@ -2,7 +2,7 @@ package repolizer.adapter
 
 import repolizer.repository.future.FutureRequest
 
-abstract class StorageAdapter<T> {
+abstract class DataAdapter<T> {
 
     abstract fun insert(request: FutureRequest, converter: ConverterAdapter?, data: Any?): Boolean
 

@@ -9,8 +9,8 @@ abstract class FutureRequestBuilder {
     var bodyType: Type? = null
 
     var url: String = ""
-    var insertSql: String = ""
-    var querySql: String = ""
-    var updateSql: String = ""
-    var deleteSql: String = ""
+    var insertStatement: String = ""
+    var queryStatement: String = ""
+    var updateStatement: String = ""
+    var deleteStatement: String = ""
 }

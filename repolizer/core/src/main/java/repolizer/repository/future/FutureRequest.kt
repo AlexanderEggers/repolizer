@@ -12,8 +12,8 @@ abstract class FutureRequest(builder: FutureRequestBuilder) {
             ?: throw IllegalStateException("Body type is null.")
 
     val url: String = builder.url
-    val insertSql: String = builder.insertSql
-    val querySql: String = builder.querySql
-    val updateSql: String = builder.updateSql
-    val deleteSql: String = builder.deleteSql
+    val insertStatement: String = builder.insertStatement
+    val queryStatement: String = builder.queryStatement
+    val updateStatement: String = builder.updateStatement
+    val deleteStatement: String = builder.deleteStatement
 }

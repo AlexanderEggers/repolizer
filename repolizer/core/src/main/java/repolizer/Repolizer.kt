@@ -25,7 +25,7 @@ class Repolizer private constructor(builder: Builder) {
 
     val wrapperAdapters: ArrayList<AdapterFactory<out WrapperAdapter<*>>> = builder.wrapperAdapters
     val networkAdapters: ArrayList<AdapterFactory<out NetworkAdapter>> = builder.networkAdapters
-    val storageAdapters: ArrayList<AdapterFactory<out StorageAdapter<*>>> = builder.storageAdapters
+    val storageAdapters: ArrayList<AdapterFactory<out DataAdapter<*>>> = builder.storageAdapters
     val cacheAdapters: ArrayList<AdapterFactory<out CacheAdapter>> = builder.cacheAdapters
     val converterAdapters: ArrayList<AdapterFactory<out ConverterAdapter>> = builder.converterAdapters
 
@@ -47,7 +47,7 @@ class Repolizer private constructor(builder: Builder) {
     class Builder {
         val wrapperAdapters: ArrayList<AdapterFactory<out WrapperAdapter<*>>> = ArrayList()
         val networkAdapters: ArrayList<AdapterFactory<out NetworkAdapter>> = ArrayList()
-        val storageAdapters: ArrayList<AdapterFactory<out StorageAdapter<*>>> = ArrayList()
+        val storageAdapters: ArrayList<AdapterFactory<out DataAdapter<*>>> = ArrayList()
         val cacheAdapters: ArrayList<AdapterFactory<out CacheAdapter>> = ArrayList()
         val converterAdapters: ArrayList<AdapterFactory<out ConverterAdapter>> = ArrayList()
 
@@ -82,7 +82,7 @@ class Repolizer private constructor(builder: Builder) {
             return this@Builder
         }
 
-        fun addStorageAdapter(storageAdapter: AdapterFactory<out StorageAdapter<*>>): Builder {
+        fun addStorageAdapter(storageAdapter: AdapterFactory<out DataAdapter<*>>): Builder {
             storageAdapters.add(storageAdapter)
             return this@Builder
         }

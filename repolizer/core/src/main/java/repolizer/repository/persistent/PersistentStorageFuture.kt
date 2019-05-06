@@ -3,13 +3,13 @@ package repolizer.repository.persistent
 import repolizer.Repolizer
 import repolizer.adapter.WrapperAdapter
 import repolizer.adapter.util.AdapterUtil
-import repolizer.annotation.repository.util.StorageOperation
+import repolizer.annotation.repository.util.DataOperation
 import repolizer.repository.network.ExecutionType
 
 @Suppress("UNCHECKED_CAST")
 class PersistentStorageFuture
 constructor(private val repolizer: Repolizer,
-            private  val futureRequest: PersistentFutureRequest) : PersistentFuture<Boolean>(repolizer, futureRequest) {
+            private val futureRequest: PersistentFutureRequest) : PersistentFuture<Boolean>(repolizer, futureRequest) {
 
     private val databaseItem: Any? = futureRequest.storageItem
 
@@ -24,14 +24,14 @@ constructor(private val repolizer: Repolizer,
     override fun onExecute(executionType: ExecutionType): Boolean? {
         if (storageAdapter == null) throw IllegalStateException("Storage adapter is null.")
         else return when (futureRequest.storageOperation) {
-            StorageOperation.INSERT -> {
+            DataOperation.INSERT -> {
                 if (databaseItem == null) throw IllegalStateException("Database item is null.")
                 storageAdapter.insert(futureRequest, null, databaseItem)
             }
-            StorageOperation.UPDATE -> {
+            DataOperation.UPDATE -> {
                 storageAdapter.update(futureRequest, databaseItem)
             }
-            StorageOperation.DELETE -> storageAdapter.delete(futureRequest)
+            DataOperation.DELETE -> storageAdapter.delete(futureRequest)
         }
     }
 }

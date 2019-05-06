@@ -20,7 +20,7 @@ constructor(private val repolizer: Repolizer,
     }
 
     override fun onStart() {
-        if (cacheAdapter == null) { throw IllegalStateException("Cache adapter is null.") }
+        if (cacheAdapter == null) throw IllegalStateException("Cache adapter is null.")
     }
 
     override fun onExecute(executionType: ExecutionType): Boolean? {

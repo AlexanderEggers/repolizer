@@ -1,7 +1,6 @@
 package repolizer.repository.future.worker
 
 import repolizer.repository.util.RepositoryExecutor
-import java.lang.IllegalStateException
 import java.util.concurrent.Executor
 
 open class FutureTask
@@ -38,7 +37,7 @@ constructor(private var workerThread: Executor,
     }
 
     override fun execute() {
-        if(workerBlockMap.isNotEmpty()) {
+        if (workerBlockMap.isNotEmpty()) {
             executeWorkerTask(0)
         } else {
             throw IllegalStateException("FutureTask requires at least one worker task.")
@@ -50,7 +49,7 @@ constructor(private var workerThread: Executor,
         executor.execute {
             workerBlockMap["worker$position"]?.invoke()
 
-            if(workerBlockMap.size > position + 1) {
+            if (workerBlockMap.size > position + 1) {
                 executeWorkerTask(position + 1)
             } else {
                 executeAfterExecuteTask()

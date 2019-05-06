@@ -2,14 +2,14 @@ package repolizer.repository.persistent
 
 import repolizer.Repolizer
 import repolizer.annotation.repository.util.CacheOperation
-import repolizer.annotation.repository.util.StorageOperation
+import repolizer.annotation.repository.util.DataOperation
 import repolizer.persistent.CacheItem
 import repolizer.repository.future.FutureRequestBuilder
 
 open class PersistentFutureRequestBuilder : FutureRequestBuilder() {
 
     var cacheOperation: CacheOperation? = null
-    var storageOperation: StorageOperation? = null
+    var storageOperation: DataOperation? = null
 
     var cacheItem: CacheItem? = null
         set(value) {

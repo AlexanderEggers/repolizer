@@ -6,7 +6,7 @@ import repolizer.persistent.CacheItem
 import repolizer.persistent.CacheState
 import repolizer.repository.future.FutureRequest
 
-class SharedPrefCacheAdapter(private val context: Context): CacheAdapter() {
+class SharedPrefCacheAdapter(private val context: Context) : CacheAdapter() {
 
     override fun save(request: FutureRequest, data: CacheItem): Boolean {
         val prefs = context.getSharedPreferences(DEFAULT_CACHE_SHARED_PREFS_NAME, Context.MODE_PRIVATE)
@@ -20,7 +20,7 @@ class SharedPrefCacheAdapter(private val context: Context): CacheAdapter() {
         val prefs = context.getSharedPreferences(DEFAULT_CACHE_SHARED_PREFS_NAME, Context.MODE_PRIVATE)
 
         val lastUpdated = prefs.getLong(key, 0L)
-        if(lastUpdated == 0L) return CacheState.NO_CACHE
+        if (lastUpdated == 0L) return CacheState.NO_CACHE
 
         val diff = System.currentTimeMillis() - lastUpdated
 

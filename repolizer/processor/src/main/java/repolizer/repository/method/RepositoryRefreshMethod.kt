@@ -8,7 +8,7 @@ import repolizer.annotation.repository.REFRESH
 import repolizer.annotation.repository.parameter.Header
 import repolizer.annotation.repository.parameter.UrlQuery
 import repolizer.repository.RepositoryMapHolder
-import repolizer.repository.RepositoryProcessorUtil.Companion.buildSql
+import repolizer.repository.RepositoryProcessorUtil.Companion.buildStatement
 import repolizer.repository.RepositoryProcessorUtil.Companion.buildUrl
 import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
@@ -44,10 +44,10 @@ class RepositoryRefreshMethod {
                     addStatement("String url = \"$url\"")
                     addCode(buildUrl(annotationMapKey))
 
-                    val sql = methodElement.getAnnotation(REFRESH::class.java).insertSql
-                    addStatement("String insertSql = \"$sql\"")
-                    if (sql.isNotEmpty()) addCode(buildSql(annotationMapKey,
-                            "insertSql", sql))
+                    val statement = methodElement.getAnnotation(REFRESH::class.java).insertStatement
+                    addStatement("String insertStatement = \"$statement\"")
+                    if (statement.isNotEmpty()) addCode(buildStatement(annotationMapKey,
+                            "insertStatement", statement))
 
                     //Uses the return type of the related GET method. This is needed for any
                     //storage related actions.
@@ -96,7 +96,7 @@ class RepositoryRefreshMethod {
             add("request.setRepositoryClass(${ClassName.get(classElement.asType())}.class);")
             add("request.setUrl(url);")
             add("request.setRequiresLogin(${annotation.requiresLogin});")
-            add("request.setInsertSql(insertSql);")
+            add("request.setInsertStatement(insertStatement);")
             add("request.setSaveData(true);")
 
             RepositoryMapHolder.headerAnnotationMap[annotationMapKey]?.forEach {

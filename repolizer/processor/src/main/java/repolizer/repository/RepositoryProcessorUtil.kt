@@ -91,7 +91,7 @@ class RepositoryProcessorUtil {
             }).joinToString(prefix = "url += \"?\";\n", separator = "\nurl += \"&\";\n")
         }
 
-        fun buildSql(annotationMapKey: String, sqlParamName: String, baseSql: String): String {
+        fun buildStatement(annotationMapKey: String, sqlParamName: String, baseSql: String): String {
             return ArrayList<String>().apply {
                 RepositoryMapHolder.sqlParameterAnnotationMap[annotationMapKey]?.forEach {
                     if (baseSql.contains(":${it.simpleName}")) {

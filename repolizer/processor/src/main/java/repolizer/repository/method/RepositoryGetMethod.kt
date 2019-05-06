@@ -10,7 +10,7 @@ import repolizer.annotation.repository.parameter.RepositoryParameter
 import repolizer.annotation.repository.parameter.UrlQuery
 import repolizer.annotation.repository.util.ParameterType
 import repolizer.repository.RepositoryMapHolder
-import repolizer.repository.RepositoryProcessorUtil.Companion.buildSql
+import repolizer.repository.RepositoryProcessorUtil.Companion.buildStatement
 import repolizer.repository.RepositoryProcessorUtil.Companion.buildUrl
 import javax.lang.model.element.Element
 import javax.lang.model.element.ExecutableElement
@@ -46,20 +46,20 @@ class RepositoryGetMethod {
                     addStatement("String url = \"$url\"")
                     addCode(buildUrl(annotationMapKey))
 
-                    val insertSql = methodElement.getAnnotation(GET::class.java).insertSql
-                    addStatement("String insertSql = \"$insertSql\"")
-                    if (insertSql.isNotEmpty()) addCode(buildSql(annotationMapKey,
-                            "insertSql", insertSql))
+                    val insertStatement = methodElement.getAnnotation(GET::class.java).insertStatement
+                    addStatement("String insertStatement = \"$insertStatement\"")
+                    if (insertStatement.isNotEmpty()) addCode(buildStatement(annotationMapKey,
+                            "insertStatement", insertStatement))
 
-                    val querySql = methodElement.getAnnotation(GET::class.java).querySql
-                    addStatement("String querySql = \"$querySql\"")
-                    if (querySql.isNotEmpty()) addCode(buildSql(annotationMapKey,
-                            "querySql", querySql))
+                    val queryStatement = methodElement.getAnnotation(GET::class.java).queryStatement
+                    addStatement("String queryStatement = \"$queryStatement\"")
+                    if (queryStatement.isNotEmpty()) addCode(buildStatement(annotationMapKey,
+                            "queryStatement", queryStatement))
 
-                    val deleteSql = methodElement.getAnnotation(GET::class.java).deleteSql
-                    addStatement("String deleteSql = \"$deleteSql\"")
-                    if (deleteSql.isNotEmpty()) addCode(buildSql(annotationMapKey,
-                            "deleteSql", deleteSql))
+                    val deleteStatement = methodElement.getAnnotation(GET::class.java).deleteStatement
+                    addStatement("String deleteStatement = \"$deleteStatement\"")
+                    if (deleteStatement.isNotEmpty()) addCode(buildStatement(annotationMapKey,
+                            "deleteStatement", deleteStatement))
 
                     val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
                             ClassName.get(methodElement.returnType))
@@ -99,9 +99,9 @@ class RepositoryGetMethod {
             add("request.setSaveData(${annotation.saveData});")
             add("request.setConnectionOnly(${annotation.connectionOnly});")
 
-            add("request.setInsertSql(insertSql);")
-            add("request.setQuerySql(querySql);")
-            add("request.setDeleteSql(deleteSql);")
+            add("request.setInsertStatement(insertStatement);")
+            add("request.setQueryStatement(queryStatement);")
+            add("request.setDeleteStatement(deleteStatement);")
 
             add("request.setFreshCacheTime(${annotation.maxFreshTime}L);")
             add("request.setMaxCacheTime(${annotation.maxCacheTime}L);")
