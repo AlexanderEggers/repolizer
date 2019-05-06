@@ -6,11 +6,14 @@ import repolizer.adapter.StorageAdapter
 import repolizer.adapter.WrapperAdapter
 import repolizer.repository.future.Future
 import repolizer.repository.future.FutureCallback
+import repolizer.repository.future.FutureRequest
+import repolizer.repository.network.NetworkFutureRequest
+import repolizer.repository.network.NetworkGetFuture
 import java.util.concurrent.atomic.AtomicBoolean
 
 class LiveDataWrapper: WrapperAdapter<LiveData<*>>() {
 
-    override fun <B> execute(future: Future<B>): LiveData<B> {
+    override fun <B> execute(future: Future<B>, request: FutureRequest): LiveData<B> {
         return object : MediatorLiveData<B>() {
             var started = AtomicBoolean(false)
 
@@ -28,10 +31,9 @@ class LiveDataWrapper: WrapperAdapter<LiveData<*>>() {
         }
     }
 
-    override fun <B> execute(future: Future<B>, storageAdapter: StorageAdapter<B>,
-                             repositoryClass: Class<*>, url: String, sql: String): LiveData<B>? {
-        future.executeAsync()
-        return storageAdapter.establishConnection(repositoryClass, url, sql)
+    override fun <B> establishStorageConnection(future: Future<B>, request: NetworkFutureRequest, storageAdapter: StorageAdapter<B>): LiveData<B>? {
+        if(!request.connectionOnly) future.executeAsync()
+        return storageAdapter.establishConnection(request)
     }
 
     override fun canHaveStorageConnection(): Boolean {

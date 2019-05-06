@@ -11,7 +11,7 @@ import javax.lang.model.element.Modifier
 
 class RepositoryStorageMethod {
 
-    private val classDatabaseRequest = ClassName.get("repolizer.repository.persistent", "NetworkFutureRequest")
+    private val classDatabaseRequest = ClassName.get("repolizer.repository.persistent", "PersistentFutureRequestBuilder")
     private val classStorageOperation = ClassName.get("repolizer.annotation.repository.util", "StorageOperation")
 
     private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")

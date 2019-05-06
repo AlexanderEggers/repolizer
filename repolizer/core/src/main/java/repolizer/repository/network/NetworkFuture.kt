@@ -1,6 +1,5 @@
 package repolizer.repository.network
 
-import com.google.gson.reflect.TypeToken
 import repolizer.Repolizer
 import repolizer.adapter.CacheAdapter
 import repolizer.adapter.ConverterAdapter
@@ -10,43 +9,19 @@ import repolizer.adapter.util.AdapterUtil
 import repolizer.repository.future.Future
 import repolizer.repository.login.LoginManager
 import repolizer.repository.request.RequestProvider
-import repolizer.repository.request.RequestType
 import repolizer.repository.response.ResponseService
-import repolizer.repository.util.QueryHashMap
-import java.lang.reflect.Type
 
 @Suppress("UNCHECKED_CAST")
 abstract class NetworkFuture<Body>
-constructor(protected val repolizer: Repolizer,
-            protected val futureRequest: NetworkFutureRequest) : Future<Body>(repolizer) {
+constructor(repolizer: Repolizer,
+            futureRequest: NetworkFutureRequest) : Future<Body>(repolizer) {
 
-    val requestType: RequestType = futureRequest.requestType
-            ?: throw IllegalStateException("Request type is null.")
-
-    val headerMap: Map<String, String> = futureRequest.headerMap
-    val queryMap: QueryHashMap = futureRequest.queryMap
-    val rawObjects: List<Any?> = futureRequest.rawObjects
-    val partObjects: List<Any?> = futureRequest.partObjects
-
-    val fullUrl: String by lazy {
-        repolizer.baseUrl?.let { baseUrl ->
-            "$baseUrl${futureRequest.url}"
-        } ?: futureRequest.url
-    }
-
-    protected val requestUrl: String = futureRequest.url
-
-    protected val repositoryClass: Class<*> = futureRequest.repositoryClass
-            ?: throw IllegalStateException("Repository class type is null.")
-
-    protected val wrapperType: TypeToken<*> = futureRequest.typeToken
-            ?: throw IllegalStateException("Wrapper type is null.")
-    protected val bodyType: Type = futureRequest.bodyType
-            ?: throw IllegalStateException("Body type is null.")
-
-    protected val networkAdapter: NetworkAdapter?
+    protected val networkAdapter: NetworkAdapter? = if (futureRequest.url.isNotEmpty()) {
+        AdapterUtil.getAdapter(repolizer.networkAdapters, futureRequest.bodyType,
+                futureRequest.repositoryClass, repolizer) as? NetworkAdapter?
+    } else null
     protected val converterAdapter: ConverterAdapter? = AdapterUtil.getSafeAdapter(repolizer.converterAdapters,
-            bodyType, repositoryClass, repolizer) as? ConverterAdapter
+            futureRequest.bodyType, futureRequest.repositoryClass, repolizer) as? ConverterAdapter
     protected val storageAdapter: StorageAdapter<Body>?
     protected val cacheAdapter: CacheAdapter?
 
@@ -58,17 +33,12 @@ constructor(protected val repolizer: Repolizer,
     protected val saveData: Boolean = futureRequest.saveData
 
     init {
-        networkAdapter = if (requestUrl.isNotEmpty()) {
-            AdapterUtil.getAdapter(repolizer.networkAdapters,
-                    bodyType, repositoryClass, repolizer) as? NetworkAdapter?
-        } else null
-
         if (saveData) {
             storageAdapter = AdapterUtil.getAdapter(repolizer.storageAdapters,
-                    bodyType, repositoryClass, repolizer) as StorageAdapter<Body>
+                    futureRequest.bodyType, futureRequest.repositoryClass, repolizer) as StorageAdapter<Body>
 
             cacheAdapter = AdapterUtil.getSafeAdapter(repolizer.cacheAdapters,
-                    bodyType, repositoryClass, repolizer) as? CacheAdapter?
+                    futureRequest.bodyType, futureRequest.repositoryClass, repolizer) as? CacheAdapter?
         } else {
             storageAdapter = null
             cacheAdapter = null
@@ -78,8 +48,7 @@ constructor(protected val repolizer: Repolizer,
     override fun execute(): Body? {
         onStart()
 
-        val executionType = onDetermineExecutionType()
-        val newBody = when (executionType) {
+        val newBody = when (val executionType = onDetermineExecutionType()) {
             ExecutionType.USE_NETWORK -> {
                 if (requiresLogin) {
                     val checkSuccessful = checkLogin()

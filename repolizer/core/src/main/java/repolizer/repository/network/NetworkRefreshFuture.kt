@@ -8,18 +8,18 @@ import repolizer.repository.response.NetworkResponse
 
 @Suppress("UNCHECKED_CAST")
 class NetworkRefreshFuture
-constructor(repolizer: Repolizer,
-            futureRequest: NetworkFutureRequest) : NetworkFuture<Boolean>(repolizer, futureRequest) {
+constructor(private val repolizer: Repolizer,
+            private val futureRequest: NetworkFutureRequest) : NetworkFuture<Boolean>(repolizer, futureRequest) {
 
     private val fetchSecurityLayer: FetchSecurityLayer = futureRequest.fetchSecurityLayer
     private val allowMultipleRequestsAtSameTime: Boolean = futureRequest.allowMultipleRequestsAtSameTime
 
-    private val insertSql: String = futureRequest.insertSql
-
     override fun <Wrapper> create(): Wrapper {
-        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, wrapperType.type,
-                repositoryClass, repolizer) as WrapperAdapter<Wrapper>
-        return wrapperAdapter.execute(this)
+        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, futureRequest.typeToken.type,
+                futureRequest.repositoryClass, repolizer) as WrapperAdapter<Wrapper>
+        return wrapperAdapter.execute(this, futureRequest)
+                ?: throw IllegalStateException("It seems like that your WrapperAdapter does not" +
+                        "have the method execute() implemented.")
     }
 
     override fun onDetermineExecutionType(): ExecutionType {
@@ -36,33 +36,32 @@ constructor(repolizer: Repolizer,
     }
 
     private fun fetchFromNetwork(): Boolean? {
-        val response: NetworkResponse<String>? = networkAdapter?.execute(this, requestProvider)
+        val response: NetworkResponse<String>? = networkAdapter?.execute(futureRequest, requestProvider)
 
         return if (response?.isSuccessful() == true && response.body != null) {
-            val saveSuccessful = storageAdapter?.insert(repositoryClass, converterAdapter, fullUrl,
-                    insertSql, response.body, bodyType)
+            val saveSuccessful = storageAdapter?.insert(futureRequest, converterAdapter, response.body)
             if (saveSuccessful == true) {
-                val successfullyCached = cacheAdapter?.save(repositoryClass, CacheItem(fullUrl, System.currentTimeMillis()))
+                val successfullyCached = cacheAdapter?.save(futureRequest, CacheItem(futureRequest.fullUrl))
                 if (successfullyCached == true) {
                     repolizer.defaultMainThread.execute {
-                        responseService?.handleSuccess(requestType, futureRequest)
+                        responseService?.handleSuccess(futureRequest)
                     }
                     true
                 } else {
                     repolizer.defaultMainThread.execute {
-                        responseService?.handleCacheError(requestType, futureRequest)
+                        responseService?.handleCacheError(futureRequest)
                     }
                     false
                 }
             } else {
                 repolizer.defaultMainThread.execute {
-                    responseService?.handleStorageError(requestType, futureRequest)
+                    responseService?.handleStorageError(futureRequest)
                 }
                 false
             }
         } else {
             repolizer.defaultMainThread.execute {
-                responseService?.handleRequestError(requestType, futureRequest, response)
+                responseService?.handleRequestError(futureRequest, response)
             }
             false
         }

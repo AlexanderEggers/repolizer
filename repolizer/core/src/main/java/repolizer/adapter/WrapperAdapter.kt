@@ -1,13 +1,16 @@
 package repolizer.adapter
 
 import repolizer.repository.future.Future
+import repolizer.repository.future.FutureRequest
+import repolizer.repository.network.NetworkFutureRequest
 
 abstract class WrapperAdapter<W> {
 
-    abstract fun <B> execute(future: Future<B>): W
+    open fun <B> execute(future: Future<B>, request: FutureRequest): W? {
+        return null
+    }
 
-    open fun <B> execute(future: Future<B>, storageAdapter: StorageAdapter<B>,
-                         repositoryClass: Class<*>, url: String, sql: String): W? {
+    open fun <B> establishStorageConnection(future: Future<B>, request: NetworkFutureRequest, storageAdapter: StorageAdapter<B>): W? {
         return null
     }
 

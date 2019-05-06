@@ -5,8 +5,8 @@ import repolizer.adapter.util.AdapterUtil.Companion.getBodyType
 import repolizer.adapter.util.AdapterUtil.Companion.getLowestBodyClass
 import repolizer.adapter.util.AdapterUtil.Companion.hasListType
 import repolizer.repository.network.FetchSecurityLayer
-import repolizer.repository.network.NetworkFutureRequest
-import repolizer.repository.persistent.PersistentFutureRequest
+import repolizer.repository.network.NetworkFutureRequestBuilder
+import repolizer.repository.persistent.PersistentFutureRequestBuilder
 import java.lang.reflect.Type
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -14,14 +14,14 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
 
     private val fetchingData = AtomicBoolean(false)
 
-    protected fun <T> executeRefresh(futureRequest: NetworkFutureRequest, returnType: Type): T {
+    protected fun <T> executeRefresh(futureRequest: NetworkFutureRequestBuilder, returnType: Type): T {
         val bodyType = getBodyType(returnType)
         futureRequest.bodyType = bodyType
 
         return futureRequest.buildRefresh(repolizer).create()
     }
 
-    protected fun <T> executeGet(futureRequest: NetworkFutureRequest, returnType: Type): T {
+    protected fun <T> executeGet(futureRequest: NetworkFutureRequestBuilder, returnType: Type): T {
         val lowestBodyClass = getLowestBodyClass(returnType)
         val hasList = hasListType(returnType)
 
@@ -35,21 +35,21 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
         }
     }
 
-    protected fun <T> executeCud(futureRequest: NetworkFutureRequest, returnType: Type): T {
+    protected fun <T> executeCud(futureRequest: NetworkFutureRequestBuilder, returnType: Type): T {
         val bodyType = getBodyType(returnType)
         futureRequest.bodyType = bodyType
 
         return futureRequest.buildCud(repolizer).create()
     }
 
-    protected fun <T> executeStorage(futureRequest: PersistentFutureRequest, returnType: Type): T {
+    protected fun <T> executeStorage(futureRequest: PersistentFutureRequestBuilder, returnType: Type): T {
         val bodyType = getBodyType(returnType)
         futureRequest.bodyType = bodyType
 
         return futureRequest.buildStorage(repolizer).create()
     }
 
-    protected fun <T> executeCache(futureRequest: PersistentFutureRequest, returnType: Type): T {
+    protected fun <T> executeCache(futureRequest: PersistentFutureRequestBuilder, returnType: Type): T {
         val bodyType = getBodyType(returnType)
         futureRequest.bodyType = bodyType
 

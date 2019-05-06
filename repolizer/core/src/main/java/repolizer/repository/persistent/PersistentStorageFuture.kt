@@ -8,34 +8,30 @@ import repolizer.repository.network.ExecutionType
 
 @Suppress("UNCHECKED_CAST")
 class PersistentStorageFuture
-constructor(repolizer: Repolizer, futureRequest: PersistentFutureRequest) : PersistentFuture<Boolean>(repolizer, futureRequest) {
-
-    private val storageOperation: StorageOperation = futureRequest.storageOperation
-            ?: throw IllegalStateException("StorageOperation is null.")
-
-    private val insertSql = futureRequest.insertSql
-    private val updateSql = futureRequest.updateSql
-    private val deleteSql = futureRequest.deleteSql
+constructor(private val repolizer: Repolizer,
+            private  val futureRequest: PersistentFutureRequest) : PersistentFuture<Boolean>(repolizer, futureRequest) {
 
     private val databaseItem: Any? = futureRequest.storageItem
 
     override fun <Wrapper> create(): Wrapper {
-        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, wrapperType.type,
-                repositoryClass, repolizer) as WrapperAdapter<Wrapper>
-        return wrapperAdapter.execute(this)
+        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, futureRequest.typeToken.type,
+                futureRequest.repositoryClass, repolizer) as WrapperAdapter<Wrapper>
+        return wrapperAdapter.execute(this, futureRequest)
+                ?: throw IllegalStateException("It seems like that your WrapperAdapter does not" +
+                        "have the method execute() implemented.")
     }
 
     override fun onExecute(executionType: ExecutionType): Boolean? {
         if (storageAdapter == null) throw IllegalStateException("Storage adapter is null.")
-        else return when (storageOperation) {
+        else return when (futureRequest.storageOperation) {
             StorageOperation.INSERT -> {
                 if (databaseItem == null) throw IllegalStateException("Database item is null.")
-                storageAdapter.insert(repositoryClass, null, "", insertSql, databaseItem, bodyType)
+                storageAdapter.insert(futureRequest, null, databaseItem)
             }
             StorageOperation.UPDATE -> {
-                storageAdapter.update(repositoryClass, updateSql, databaseItem)
+                storageAdapter.update(futureRequest, databaseItem)
             }
-            StorageOperation.DELETE -> storageAdapter.delete(repositoryClass, "", deleteSql)
+            StorageOperation.DELETE -> storageAdapter.delete(futureRequest)
         }
     }
 }

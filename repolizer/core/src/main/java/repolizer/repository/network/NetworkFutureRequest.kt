@@ -5,58 +5,32 @@ import repolizer.repository.future.FutureRequest
 import repolizer.repository.request.RequestType
 import repolizer.repository.util.QueryHashMap
 
-open class NetworkFutureRequest(val fetchSecurityLayer: FetchSecurityLayer) : FutureRequest() {
+open class NetworkFutureRequest(repolizer: Repolizer, builder: NetworkFutureRequestBuilder) : FutureRequest(builder) {
 
-    var requestType: RequestType? = null
+    val fetchSecurityLayer: FetchSecurityLayer = builder.fetchSecurityLayer
+    val requestType: RequestType = builder.requestType
+            ?: throw IllegalStateException("Request type is null.")
 
-    val rawObjects = ArrayList<Any?>()
-    val partObjects = ArrayList<Any?>()
-
-    var freshCacheTime: Long = Long.MAX_VALUE
-    var maxCacheTime: Long = Long.MAX_VALUE
-
-    var requiresLogin: Boolean = false
-    var saveData: Boolean = true
-
-    var allowFetch: Boolean = false
-    var isDeletingCacheIfTooOld: Boolean = false
-    var allowMultipleRequestsAtSameTime: Boolean = false
-
-    val headerMap: HashMap<String, String> = HashMap()
-    val queryMap: QueryHashMap = QueryHashMap()
-
-    open fun addHeader(key: String, value: String) {
-        headerMap[key] = value
+    val fullUrl: String by lazy {
+        repolizer.baseUrl?.let { baseUrl ->
+            "$baseUrl${builder.url}"
+        } ?: builder.url
     }
 
-    @Suppress("unchecked_cast")
-    open fun addQuery(key: String, value: String) {
-        val list = queryMap[key] as? ArrayList<String> ?: ArrayList()
-        list.add(value)
-        queryMap[key] = list
-    }
+    val rawObjects = builder.rawObjects
+    val partObjects = builder.partObjects
 
-    open fun addRaw(raw: Any?) {
-        rawObjects.add(raw)
-    }
+    val freshCacheTime: Long = builder.freshCacheTime
+    val maxCacheTime: Long = builder.maxCacheTime
 
-    open fun addMultipartBody(body: Any?) {
-        partObjects.add(body)
-    }
+    val requiresLogin: Boolean = builder.requiresLogin
+    val saveData: Boolean = builder.saveData
+    val connectionOnly: Boolean = builder.connectionOnly
 
-    open fun <Body> buildGet(repolizer: Repolizer, returnType: Class<Body>): NetworkGetFuture<Body> {
-        return NetworkGetFuture(repolizer, this)
-    }
+    val allowFetch: Boolean = builder.allowFetch
+    val isDeletingCacheIfTooOld: Boolean = builder.isDeletingCacheIfTooOld
+    val allowMultipleRequestsAtSameTime: Boolean = builder.allowMultipleRequestsAtSameTime
 
-    open fun <Body> buildGetWithList(repolizer: Repolizer, returnType: Class<Body>): NetworkGetFuture<List<Body>> {
-        return NetworkGetFuture(repolizer, this)
-    }
-
-    open fun buildRefresh(repolizer: Repolizer): NetworkRefreshFuture {
-        return NetworkRefreshFuture(repolizer, this)
-    }
-
-    open fun buildCud(repolizer: Repolizer): NetworkCudFuture {
-        return NetworkCudFuture(repolizer, this)
-    }
+    val headerMap: HashMap<String, String> = builder.headerMap
+    val queryMap: QueryHashMap = builder.queryMap
 }

@@ -1,33 +1,33 @@
 package repolizer.repository.response
 
-import repolizer.repository.future.FutureRequest
+import repolizer.repository.network.NetworkFutureRequest
 import repolizer.repository.request.RequestType
 
 abstract class ResponseService {
 
     private val callbacks: ArrayList<Callback> = ArrayList()
 
-    open fun handleSuccess(requestType: RequestType, request: FutureRequest) {
+    open fun handleSuccess(request: NetworkFutureRequest) {
         callbacks.forEach {
-            it.onSuccess(requestType, request)
+            it.onSuccess(request)
         }
     }
 
-    open fun handleStorageError(requestType: RequestType, request: FutureRequest) {
+    open fun handleStorageError(request: NetworkFutureRequest) {
         callbacks.forEach {
-            it.onStorageError(requestType, request)
+            it.onStorageError(request)
         }
     }
 
-    open fun handleCacheError(requestType: RequestType, request: FutureRequest) {
+    open fun handleCacheError(request: NetworkFutureRequest) {
         callbacks.forEach {
-            it.onCacheError(requestType, request)
+            it.onCacheError(request)
         }
     }
 
-    open fun handleRequestError(requestType: RequestType, request: FutureRequest, response: NetworkResponse<String>?) {
+    open fun handleRequestError(request: NetworkFutureRequest, response: NetworkResponse<String>?) {
         callbacks.forEach {
-            it.onRequestError(requestType, request, response)
+            it.onRequestError(request, response)
         }
     }
 
@@ -49,19 +49,19 @@ abstract class ResponseService {
     }
 
     abstract class Callback {
-        open fun onSuccess(requestType: RequestType, request: FutureRequest) {
+        open fun onSuccess(request: NetworkFutureRequest) {
             //do nothing by default
         }
 
-        open fun onStorageError(requestType: RequestType, request: FutureRequest) {
+        open fun onStorageError(request: NetworkFutureRequest) {
             //do nothing by default
         }
 
-        open fun onCacheError(requestType: RequestType, request: FutureRequest) {
+        open fun onCacheError(request: NetworkFutureRequest) {
             //do nothing by default
         }
 
-        open fun onRequestError(requestType: RequestType, request: FutureRequest, response: NetworkResponse<String>?) {
+        open fun onRequestError(request: NetworkFutureRequest, response: NetworkResponse<String>?) {
             //do nothing by default
         }
     }

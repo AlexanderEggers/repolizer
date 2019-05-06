@@ -10,4 +10,5 @@ annotation class GET(val url: String = "",
                      val maxCacheTime: Long = Long.MAX_VALUE,
                      val maxFreshTime: Long = Long.MAX_VALUE,
                      val requiresLogin: Boolean = false,
-                     val saveData: Boolean = true)
+                     val saveData: Boolean = true,
+                     val connectionOnly: Boolean = false)

@@ -3,15 +3,15 @@ package org.demo.weatherapp.storage
 import org.demo.weatherapp.model.WeatherModel
 import repolizer.adapter.ConverterAdapter
 import repolizer.adapter.StorageAdapter
-import java.lang.reflect.Type
+import repolizer.repository.future.FutureRequest
 
 class AppDatabaseAdapter
 constructor(private val weatherModelDao: WeatherModelDao): StorageAdapter<WeatherModel>() {
 
-    override fun insert(repositoryClass: Class<*>, converter: ConverterAdapter?, url: String,
-                         sql: String, data: Any, bodyType: Type): Boolean {
+    override fun insert(request: FutureRequest, converter: ConverterAdapter?, data: Any?): Boolean {
         return if(data is String) {
-            val model: WeatherModel? = converter?.convertStringToData(repositoryClass, data, bodyType)
+            val model: WeatherModel? = converter?.convertStringToData(request.repositoryClass, data,
+                    request.bodyType)
             model?.let {
                 weatherModelDao.insertWeatherModel(model)
                 true
@@ -19,17 +19,16 @@ constructor(private val weatherModelDao: WeatherModelDao): StorageAdapter<Weathe
         } else false
     }
 
-    override fun update(repositoryClass: Class<*>, sql: String, data: Any?): Boolean {
+    override fun update(request: FutureRequest, data: Any?): Boolean {
         //do nothing
         return false
     }
 
-    override fun get(repositoryClass: Class<*>, converter: ConverterAdapter?, url: String,
-                     sql: String, bodyType: Type): WeatherModel? {
+    override fun get(request: FutureRequest, converter: ConverterAdapter?): WeatherModel? {
         return weatherModelDao.getWeather()
     }
 
-    override fun delete(repositoryClass: Class<*>, url: String, sql: String): Boolean {
+    override fun delete(request: FutureRequest): Boolean {
         //do nothing
         return false
     }
@@ -39,7 +38,7 @@ constructor(private val weatherModelDao: WeatherModelDao): StorageAdapter<Weathe
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <Wrapper> establishConnection(repositoryClass: Class<*>, url: String, sql: String): Wrapper? {
+    override fun <Wrapper> establishConnection(request: FutureRequest): Wrapper? {
         return weatherModelDao.getWeatherAsLiveData() as? Wrapper
     }
 }

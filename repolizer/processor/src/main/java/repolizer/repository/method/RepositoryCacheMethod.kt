@@ -10,7 +10,7 @@ import javax.lang.model.element.Modifier
 
 class RepositoryCacheMethod {
 
-    private val classPersistentRequest = ClassName.get("repolizer.repository.persistent", "PersistentFutureRequest")
+    private val classPersistentRequest = ClassName.get("repolizer.repository.persistent", "PersistentFutureRequestBuilder")
     private val classCacheItem = ClassName.get("repolizer.persistent", "CacheItem")
     private val classCacheOperation = ClassName.get("repolizer.annotation.repository.util", "CacheOperation")
 

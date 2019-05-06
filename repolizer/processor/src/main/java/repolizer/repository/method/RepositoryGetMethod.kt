@@ -18,7 +18,7 @@ import javax.lang.model.element.Modifier
 
 class RepositoryGetMethod {
 
-    private val classNetworkRequest = ClassName.get("repolizer.repository.network", "NetworkFutureRequest")
+    private val classNetworkRequest = ClassName.get("repolizer.repository.network", "NetworkFutureRequestBuilder")
     private val classRequestType = ClassName.get("repolizer.repository.request", "RequestType")
 
     private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
@@ -93,9 +93,11 @@ class RepositoryGetMethod {
             add("request.setRequestType($classRequestType.GET);")
             add("request.setTypeToken(returnType);")
             add("request.setUrl(url);")
+            add("request.setRepositoryClass(${ClassName.get(classElement.asType())}.class);")
+
             add("request.setRequiresLogin(${annotation.requiresLogin});")
             add("request.setSaveData(${annotation.saveData});")
-            add("request.setRepositoryClass(${ClassName.get(classElement.asType())}.class);")
+            add("request.setConnectionOnly(${annotation.connectionOnly});")
 
             add("request.setInsertSql(insertSql);")
             add("request.setQuerySql(querySql);")

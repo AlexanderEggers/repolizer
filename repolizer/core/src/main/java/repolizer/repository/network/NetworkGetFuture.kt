@@ -9,56 +9,40 @@ import repolizer.repository.response.NetworkResponse
 
 @Suppress("UNCHECKED_CAST")
 class NetworkGetFuture<Body>
-constructor(repolizer: Repolizer,
-            futureRequest: NetworkFutureRequest) : NetworkFuture<Body>(repolizer, futureRequest) {
+constructor(private val repolizer: Repolizer,
+            private val futureRequest: NetworkFutureRequest) : NetworkFuture<Body>(repolizer, futureRequest) {
 
-    private val deleteIfCacheIsTooOld: Boolean = futureRequest.isDeletingCacheIfTooOld
-    private var allowFetch: Boolean = futureRequest.allowFetch
-    private val allowMultipleRequestsAtSameTime: Boolean = futureRequest.allowMultipleRequestsAtSameTime
-
-    private val freshCacheTime = futureRequest.freshCacheTime
-    private val maxCacheTime = futureRequest.maxCacheTime
-
-    private val insertSql: String = futureRequest.insertSql
-    private val querySql: String = futureRequest.querySql
-    private val deleteSql: String = futureRequest.deleteSql
-
-    private var fetchSecurityLayer: FetchSecurityLayer = futureRequest.fetchSecurityLayer
-
-    private var wrapperCanHaveActiveConnection: Boolean = false
     private lateinit var cacheState: CacheState
 
     override fun <Wrapper> create(): Wrapper {
-        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, wrapperType.type,
-                repositoryClass, repolizer) as WrapperAdapter<Wrapper>
-        wrapperCanHaveActiveConnection = wrapperAdapter.canHaveStorageConnection()
-
-        return if (wrapperAdapter.canHaveStorageConnection()
-                && storageAdapter?.canHaveActiveConnections() == true) {
-            wrapperAdapter.execute(this, storageAdapter, repositoryClass, fullUrl, querySql)
+        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters,
+                futureRequest.typeToken.type, futureRequest.repositoryClass, repolizer) as WrapperAdapter<Wrapper>
+        return if (wrapperAdapter.canHaveStorageConnection() && storageAdapter?.canHaveActiveConnections() == true) {
+            wrapperAdapter.establishStorageConnection(this, futureRequest, storageAdapter)
                     ?: throw IllegalStateException("If you want to use an active storage connection, " +
-                            "you need to implement the non-default execute() of your WrapperAdapter " +
-                            "and establishConnection() function inside your StorageAdapter.")
-        } else wrapperAdapter.execute(this)
+                            "you need to implement the method establishStorageConnection() of your " +
+                            "WrapperAdapter and establishConnection() function inside your StorageAdapter.")
+        } else wrapperAdapter.execute(this, futureRequest)
+                ?: throw IllegalStateException("It seems like that your WrapperAdapter does not" +
+                        "have the method execute() implemented.")
     }
 
     override fun onDetermineExecutionType(): ExecutionType {
-        this.cacheState = cacheAdapter?.get(repositoryClass, fullUrl, freshCacheTime, maxCacheTime)
+        this.cacheState = cacheAdapter?.get(futureRequest, futureRequest.fullUrl,
+                futureRequest.freshCacheTime, futureRequest.maxCacheTime)
                 ?: CacheState.NEEDS_NO_REFRESH
 
-        val cacheData = storageAdapter?.get(repositoryClass, converterAdapter, fullUrl, querySql, bodyType)
+        val cacheData = storageAdapter?.get(futureRequest, converterAdapter)
         val needsFetch = cacheState == CacheState.NEEDS_SOFT_REFRESH ||
-                cacheState == CacheState.NEEDS_HARD_REFRESH || cacheState == CacheState.NO_CACHE
+                cacheState == CacheState.NEEDS_HARD_REFRESH ||
+                cacheState == CacheState.NO_CACHE
 
-        return if (requestUrl.isNotEmpty() && (cacheData == null || needsFetch) && allowFetch) {
-            if (allowMultipleRequestsAtSameTime || fetchSecurityLayer.allowFetch()) {
-                ExecutionType.USE_NETWORK
-            } else {
-                ExecutionType.USE_STORAGE
-            }
-        } else {
-            ExecutionType.USE_STORAGE
-        }
+        return if (futureRequest.url.isNotEmpty()
+                && (cacheData == null || needsFetch)
+                && futureRequest.allowFetch
+                && (futureRequest.allowMultipleRequestsAtSameTime || futureRequest.fetchSecurityLayer.allowFetch())) {
+            ExecutionType.USE_NETWORK
+        } else ExecutionType.USE_STORAGE
     }
 
     override fun onExecute(executionType: ExecutionType): Body? {
@@ -71,20 +55,20 @@ constructor(repolizer: Repolizer,
 
     override fun onFinished(result: Body?) {
         super.onFinished(result)
-        fetchSecurityLayer.onFetchFinished()
+        futureRequest.fetchSecurityLayer.onFetchFinished()
     }
 
     private fun fetchFromNetwork(): Body? {
-        val response: NetworkResponse<String>? = networkAdapter?.execute(this, requestProvider)
+        val response: NetworkResponse<String>? = networkAdapter?.execute(futureRequest, requestProvider)
 
         return if (response?.isSuccessful() == true && response.body != null) {
             if (saveData) saveNetworkResponse(response)
             else {
-                if (bodyType == String::class.java) {
-                    response.body as? Body?
-                } else {
-                    val data: Body? = converterAdapter?.convertStringToData(repositoryClass, response.body, bodyType)
-                    if(data == null) responseService?.handleStorageError(requestType, futureRequest)
+                if (futureRequest.bodyType == String::class.java) response.body as? Body?
+                else {
+                    val data: Body? = converterAdapter?.convertStringToData(
+                            futureRequest.repositoryClass, response.body, futureRequest.bodyType)
+                    if (data == null) responseService?.handleStorageError(futureRequest)
                     data
                 }
             }
@@ -95,29 +79,27 @@ constructor(repolizer: Repolizer,
     }
 
     private fun saveNetworkResponse(response: NetworkResponse<String>): Body? {
-        val saveSuccessful = storageAdapter?.insert(repositoryClass, converterAdapter, fullUrl, insertSql,
-                response.body!!, bodyType) ?: false
+        val saveSuccessful = storageAdapter?.insert(futureRequest, converterAdapter, response.body)
+                ?: false
         return if (saveSuccessful) {
-            val cacheSuccessful = cacheAdapter?.save(repositoryClass, CacheItem(fullUrl)) ?: true
+            val cacheSuccessful = cacheAdapter?.save(futureRequest, CacheItem(futureRequest.fullUrl))
+                    ?: true
 
-            //If no cacheAdapter given, ignore check
             if (cacheSuccessful) {
                 repolizer.defaultMainThread.execute {
-                    responseService?.handleSuccess(requestType, futureRequest)
+                    responseService?.handleSuccess(futureRequest)
                 }
 
-                if (!wrapperCanHaveActiveConnection || storageAdapter?.canHaveActiveConnections() == false) {
-                    storageAdapter?.get(repositoryClass, converterAdapter, fullUrl, querySql, bodyType)
-                } else null
+                storageAdapter?.get(futureRequest, converterAdapter)
             } else {
                 repolizer.defaultMainThread.execute {
-                    responseService?.handleCacheError(requestType, futureRequest)
+                    responseService?.handleCacheError(futureRequest)
                 }
                 null
             }
         } else {
             repolizer.defaultMainThread.execute {
-                responseService?.handleStorageError(requestType, futureRequest)
+                responseService?.handleStorageError(futureRequest)
             }
             null
         }
@@ -125,16 +107,16 @@ constructor(repolizer: Repolizer,
 
     private fun handleRequestError(response: NetworkResponse<String>?) {
         repolizer.defaultMainThread.execute {
-            responseService?.handleRequestError(requestType, futureRequest, response)
+            responseService?.handleRequestError(futureRequest, response)
         }
 
-        if (deleteIfCacheIsTooOld && cacheState == CacheState.NEEDS_HARD_REFRESH) {
-            storageAdapter?.delete(repositoryClass, fullUrl, deleteSql)
-            cacheAdapter?.delete(repositoryClass, CacheItem(fullUrl))
+        if (futureRequest.isDeletingCacheIfTooOld && cacheState == CacheState.NEEDS_HARD_REFRESH) {
+            storageAdapter?.delete(futureRequest)
+            cacheAdapter?.delete(futureRequest, CacheItem(futureRequest.fullUrl))
         }
     }
 
     private fun fetchCacheData(): Body? {
-        return storageAdapter?.get(repositoryClass, converterAdapter, fullUrl, querySql, bodyType)
+        return storageAdapter?.get(futureRequest, converterAdapter)
     }
 }

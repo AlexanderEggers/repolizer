@@ -13,7 +13,7 @@ import javax.lang.model.element.Modifier
 
 class RepositoryCudMethod {
 
-    private val classNetworkRequest = ClassName.get("repolizer.repository.network", "NetworkFutureRequest")
+    private val classNetworkRequest = ClassName.get("repolizer.repository.network", "NetworkFutureRequestBuilder")
     private val classRequestType = ClassName.get("repolizer.repository.request", "RequestType")
 
     private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")

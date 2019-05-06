@@ -7,13 +7,15 @@ import repolizer.repository.response.NetworkResponse
 
 @Suppress("UNCHECKED_CAST")
 class NetworkCudFuture
-constructor(repolizer: Repolizer,
-            futureRequest: NetworkFutureRequest) : NetworkFuture<String>(repolizer, futureRequest) {
+constructor(private val repolizer: Repolizer,
+            private val futureRequest: NetworkFutureRequest) : NetworkFuture<String>(repolizer, futureRequest) {
 
     override fun <Wrapper> create(): Wrapper {
-        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, wrapperType.type,
-                repositoryClass, repolizer) as WrapperAdapter<Wrapper>
-        return wrapperAdapter.execute(this)
+        val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, futureRequest.typeToken.type,
+                futureRequest.repositoryClass, repolizer) as WrapperAdapter<Wrapper>
+        return wrapperAdapter.execute(this, futureRequest)
+                ?: throw IllegalStateException("It seems like that your WrapperAdapter does not" +
+                        "have the method execute() implemented.")
     }
 
     override fun onDetermineExecutionType(): ExecutionType {
@@ -21,16 +23,16 @@ constructor(repolizer: Repolizer,
     }
 
     override fun onExecute(executionType: ExecutionType): String? {
-        val response: NetworkResponse<String>? = networkAdapter?.execute(this, requestProvider)
+        val response: NetworkResponse<String>? = networkAdapter?.execute(futureRequest, requestProvider)
 
         return if (response?.isSuccessful() == true) {
             repolizer.defaultMainThread.execute {
-                responseService?.handleSuccess(requestType, futureRequest)
+                responseService?.handleSuccess(futureRequest)
             }
             response.body
         } else {
             repolizer.defaultMainThread.execute {
-                responseService?.handleRequestError(requestType, futureRequest, response)
+                responseService?.handleRequestError(futureRequest, response)
             }
             null
         }

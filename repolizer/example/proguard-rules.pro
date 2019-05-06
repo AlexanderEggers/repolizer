@@ -20,8 +20,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class org.demo.weatherapp.app.** { *; }
-
 ## Retrofit2 specific rules ##
 -keepattributes Signature, InnerClasses, EnclosingMethod
 -keepclassmembers,allowshrinking,allowobfuscation interface * {
@@ -41,5 +39,4 @@
 ## Repolizer specific rules ##
 -keep public class * extends repolizer.adapter.network.retrofit.api.NetworkController { *; }
 -keep public class * extends repolizer.repository.BaseRepository { *; }
--keep class android.support.v4.app.CoreComponentFactory { *; }
--keep class org.demo.weatherapp.api.** { *; }
+-keep @repolizer.annotation.repository.Repository public class * { *; }

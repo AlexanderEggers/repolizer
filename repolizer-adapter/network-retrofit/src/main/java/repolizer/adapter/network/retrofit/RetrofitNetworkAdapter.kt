@@ -2,7 +2,7 @@ package repolizer.adapter.network.retrofit
 
 import repolizer.adapter.NetworkAdapter
 import repolizer.adapter.network.retrofit.api.NetworkController
-import repolizer.repository.network.NetworkFuture
+import repolizer.repository.network.NetworkFutureRequest
 import repolizer.repository.request.RequestProvider
 import repolizer.repository.request.RequestType
 import repolizer.repository.response.NetworkResponse
@@ -16,12 +16,11 @@ import java.util.logging.Logger
 
 class RetrofitNetworkAdapter(private val networkController: NetworkController) : NetworkAdapter() {
 
-    override fun execute(networkFuture: NetworkFuture<*>, requestProvider: RequestProvider<*>?): NetworkResponse<String> {
-        val url = prepareUrl(networkFuture.fullUrl)
-        val raw = if (networkFuture.rawObjects.isNotEmpty()) networkFuture.rawObjects[0] else null
+    override fun execute(request: NetworkFutureRequest, requestProvider: RequestProvider<*>?): NetworkResponse<String> {
+        val url = prepareUrl(request.fullUrl)
+        val raw = if (request.rawObjects.isNotEmpty()) request.rawObjects[0] else null
 
-        //TODO show message when requestbodyparts are set
-        if (networkFuture.rawObjects.size > 1 || networkFuture.partObjects.isNotEmpty())
+        if (request.rawObjects.size > 1 || request.partObjects.isNotEmpty())
             Logger.getLogger("repolizer").log(Level.SEVERE, "This retrofit adapter implementation " +
                     "only supports one raw body for put/post/delete requests. If you want to want " +
                     "to use multipartbody (therefore to upload more than one object), consider " +
@@ -29,14 +28,14 @@ class RetrofitNetworkAdapter(private val networkController: NetworkController) :
                     "requests. Use @MultipartBody(partName) inside your repositories " +
                     "to provide relevant parameters to your own network implementation.")
 
-        val call = when (networkFuture.requestType) {
-            RequestType.REFRESH -> networkController.get(networkFuture.headerMap, url, networkFuture.queryMap)
-            RequestType.GET -> networkController.get(networkFuture.headerMap, url, networkFuture.queryMap)
-            RequestType.POST -> networkController.post(networkFuture.headerMap, url, networkFuture.queryMap,
-                    networkFuture.rawObjects[0])
-            RequestType.PUT -> networkController.put(networkFuture.headerMap, url, networkFuture.queryMap,
+        val call = when (request.requestType) {
+            RequestType.REFRESH -> networkController.get(request.headerMap, url, request.queryMap)
+            RequestType.GET -> networkController.get(request.headerMap, url, request.queryMap)
+            RequestType.POST -> networkController.post(request.headerMap, url, request.queryMap,
+                    request.rawObjects[0])
+            RequestType.PUT -> networkController.put(request.headerMap, url, request.queryMap,
                     raw)
-            RequestType.DELETE -> networkController.delete(networkFuture.headerMap, url, networkFuture.queryMap,
+            RequestType.DELETE -> networkController.delete(request.headerMap, url, request.queryMap,
                     raw)
         }
 
