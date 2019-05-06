@@ -31,10 +31,10 @@ ext {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation "com.squareup.retrofit2:retrofit:$retrofit2_version"
     implementation "com.squareup.retrofit2:converter-scalars:$retrofit2_version"
     implementation "com.google.code.gson:gson:$gson_version"
+    api "com.squareup.okhttp3:okhttp:$okhttp_version"
 
     implementation project(":repolizer-core")
     //implementation "org.repolizer:repolizer-core:$repolizer_library_version"

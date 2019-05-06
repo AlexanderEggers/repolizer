@@ -18,7 +18,7 @@ buildscript {
         archknife_version = "0.11.0"
         archtree_version = "0.21.1"
 
-        okhttp_version = '3.14.1'
+        okhttp_version = '3.12.2'
         retrofit2_version = "2.5.0"
 
         room_version = '2.0.0'
