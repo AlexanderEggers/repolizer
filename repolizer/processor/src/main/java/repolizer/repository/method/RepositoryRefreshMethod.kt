@@ -89,13 +89,14 @@ class RepositoryRefreshMethod {
             val annotation = methodElement.getAnnotation(REFRESH::class.java)
 
             add("$classNetworkRequest request = new $classNetworkRequest(this);")
-
             add("request.setTypeToken(refreshMethodReturnType);")
+            add("request.setRepositoryClass(${ClassName.get(classElement.asType())}.class);")
 
             add("request.setRequestType($classRequestType.GET);")
-            add("request.setRepositoryClass(${ClassName.get(classElement.asType())}.class);")
             add("request.setUrl(url);")
             add("request.setRequiresLogin(${annotation.requiresLogin});")
+
+            add("request.setCacheKey(${annotation.cacheKey});")
             add("request.setInsertStatement(insertStatement);")
             add("request.setSaveData(true);")
 

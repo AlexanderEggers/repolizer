@@ -24,6 +24,8 @@ open class NetworkFutureRequestBuilder(val fetchSecurityLayer: FetchSecurityLaye
     var isDeletingCacheIfTooOld: Boolean = false
     var allowMultipleRequestsAtSameTime: Boolean = false
 
+    var cacheKey: String = ""
+
     val headerMap: HashMap<String, String> = HashMap()
     val queryMap: QueryHashMap = QueryHashMap()
 

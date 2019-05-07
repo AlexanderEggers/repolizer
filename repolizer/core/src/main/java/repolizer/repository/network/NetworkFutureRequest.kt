@@ -32,6 +32,8 @@ open class NetworkFutureRequest(repolizer: Repolizer, builder: NetworkFutureRequ
     val isDeletingCacheIfTooOld: Boolean = builder.isDeletingCacheIfTooOld
     val allowMultipleRequestsAtSameTime: Boolean = builder.allowMultipleRequestsAtSameTime
 
+    var cacheKey: String = builder.cacheKey
+
     val headerMap: HashMap<String, String> = builder.headerMap
     val queryMap: QueryHashMap = builder.queryMap
 }

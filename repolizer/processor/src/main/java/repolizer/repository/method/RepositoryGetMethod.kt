@@ -104,6 +104,8 @@ class RepositoryGetMethod {
             add("request.setQueryStatement(queryStatement);")
             add("request.setDeleteStatement(deleteStatement);")
 
+            add("request.setCacheKey(${annotation.cacheKey});")
+
             add("request.setFreshCacheTime(${annotation.maxFreshTime}L);")
             add("request.setMaxCacheTime(${annotation.maxCacheTime}L);")
 

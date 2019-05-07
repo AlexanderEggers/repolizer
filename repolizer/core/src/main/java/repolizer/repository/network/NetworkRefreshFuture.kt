@@ -40,9 +40,10 @@ constructor(private val repolizer: Repolizer,
 
         return if (response?.isSuccessful() == true && response.body != null) {
             val saveSuccessful = dataAdapter?.insert(futureRequest, converterAdapter, response.body)
-            if (saveSuccessful == true) {
-                val successfullyCached = cacheAdapter?.save(futureRequest, CacheItem(futureRequest.fullUrl))
-                if (successfullyCached == true) {
+            if (saveSuccessful == true && cacheAdapter != null) {
+                val cacheKey = cacheAdapter.getCacheKeyForNetwork(futureRequest, response)
+                val successfullyCached = cacheAdapter.save(futureRequest, cacheKey)
+                if (successfullyCached) {
                     repolizer.defaultMainThread.execute {
                         responseService?.handleSuccess(futureRequest)
                     }

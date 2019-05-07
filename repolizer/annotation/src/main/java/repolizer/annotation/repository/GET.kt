@@ -5,6 +5,7 @@ package repolizer.annotation.repository
 @Target(AnnotationTarget.FUNCTION)
 annotation class GET(val url: String = "",
                      val ignoreEmptyUrl: Boolean = false,
+                     val cacheKey: String = "",
                      val insertStatement: String = "",
                      val queryStatement: String = "",
                      val deleteStatement: String = "",
