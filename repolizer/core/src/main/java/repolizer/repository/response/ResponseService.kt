@@ -12,7 +12,7 @@ abstract class ResponseService {
         }
     }
 
-    open fun handleStorageError(request: NetworkFutureRequest) {
+    open fun handleDataError(request: NetworkFutureRequest) {
         callbacks.forEach {
             it.onStorageError(request)
         }

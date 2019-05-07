@@ -50,7 +50,7 @@ class RepositoryRefreshMethod {
                             "insertStatement", statement))
 
                     //Uses the return type of the related GET method. This is needed for any
-                    //storage related actions.
+                    //data related actions.
                     val relatedGetMethod = getGETExecutableElement(element, methodElement, url)
                     val returnTypeWithTypeToken = ParameterizedTypeName.get(classTypeToken,
                             ClassName.get(relatedGetMethod.returnType))

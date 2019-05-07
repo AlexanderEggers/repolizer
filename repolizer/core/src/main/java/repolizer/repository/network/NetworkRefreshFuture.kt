@@ -3,7 +3,6 @@ package repolizer.repository.network
 import repolizer.Repolizer
 import repolizer.adapter.WrapperAdapter
 import repolizer.adapter.util.AdapterUtil
-import repolizer.persistent.CacheItem
 import repolizer.repository.response.NetworkResponse
 
 @Suppress("UNCHECKED_CAST")
@@ -56,7 +55,7 @@ constructor(private val repolizer: Repolizer,
                 }
             } else {
                 repolizer.defaultMainThread.execute {
-                    responseService?.handleStorageError(futureRequest)
+                    responseService?.handleDataError(futureRequest)
                 }
                 false
             }

@@ -7,7 +7,7 @@ import repolizer.annotation.repository.util.DataOperation
 import repolizer.repository.network.ExecutionType
 
 @Suppress("UNCHECKED_CAST")
-class PersistentStorageFuture
+class PersistentDataFuture
 constructor(private val repolizer: Repolizer,
             private val futureRequest: PersistentFutureRequest) : PersistentFuture<Boolean>(repolizer, futureRequest) {
 
@@ -20,7 +20,7 @@ constructor(private val repolizer: Repolizer,
     }
 
     override fun onStart() {
-        if (dataAdapter == null) throw IllegalStateException("Storage adapter is null.")
+        if (dataAdapter == null) throw IllegalStateException("Data adapter is null.")
     }
 
     override fun onExecute(executionType: ExecutionType): Boolean? {

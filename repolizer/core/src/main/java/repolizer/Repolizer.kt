@@ -67,28 +67,28 @@ class Repolizer private constructor(builder: Builder) {
         var workerThread: Executor? = null
             private set
 
-        fun addWrapperAdapter(wrapperAdapter: AdapterFactory<out WrapperAdapter<*>>): Builder {
-            wrapperAdapters.add(wrapperAdapter)
+        fun addWrapperAdapterFactory(factory: AdapterFactory<out WrapperAdapter<*>>): Builder {
+            wrapperAdapters.add(factory)
             return this@Builder
         }
 
-        fun addNetworkAdapter(networkAdapter: AdapterFactory<out NetworkAdapter>): Builder {
-            networkAdapters.add(networkAdapter)
+        fun addNetworkAdapterFactory(factory: AdapterFactory<out NetworkAdapter>): Builder {
+            networkAdapters.add(factory)
             return this@Builder
         }
 
-        fun addCacheAdapter(cacheAdapter: AdapterFactory<out CacheAdapter>): Builder {
-            cacheAdapters.add(cacheAdapter)
+        fun addCacheAdapterFactory(factory: AdapterFactory<out CacheAdapter>): Builder {
+            cacheAdapters.add(factory)
             return this@Builder
         }
 
-        fun addDataAdapter(storageAdapter: AdapterFactory<out DataAdapter<*>>): Builder {
-            dataAdapters.add(storageAdapter)
+        fun addDataAdapterFactory(factory: AdapterFactory<out DataAdapter<*>>): Builder {
+            dataAdapters.add(factory)
             return this@Builder
         }
 
-        fun addConverterAdapter(converterAdapter: AdapterFactory<out ConverterAdapter>): Builder {
-            converterAdapters.add(converterAdapter)
+        fun addConverterAdapterFactory(factory: AdapterFactory<out ConverterAdapter>): Builder {
+            converterAdapters.add(factory)
             return this@Builder
         }
 

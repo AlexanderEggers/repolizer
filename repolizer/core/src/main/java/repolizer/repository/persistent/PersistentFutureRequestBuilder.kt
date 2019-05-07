@@ -17,7 +17,7 @@ open class PersistentFutureRequestBuilder : FutureRequestBuilder() {
         return PersistentCacheFuture(repolizer, PersistentFutureRequest(this))
     }
 
-    open fun buildData(repolizer: Repolizer): PersistentStorageFuture {
-        return PersistentStorageFuture(repolizer, PersistentFutureRequest(this))
+    open fun buildData(repolizer: Repolizer): PersistentDataFuture {
+        return PersistentDataFuture(repolizer, PersistentFutureRequest(this))
     }
 }

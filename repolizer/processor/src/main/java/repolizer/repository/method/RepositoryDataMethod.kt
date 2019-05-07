@@ -12,7 +12,7 @@ import javax.lang.model.element.Modifier
 class RepositoryDataMethod {
 
     private val classDatabaseRequest = ClassName.get("repolizer.repository.persistent", "PersistentFutureRequestBuilder")
-    private val classStorageOperation = ClassName.get("repolizer.annotation.repository.util", "StorageOperation")
+    private val classDataOperation = ClassName.get("repolizer.annotation.repository.util", "DataOperation")
 
     private val classTypeToken = ClassName.get("com.google.gson.reflect", "TypeToken")
 
@@ -48,7 +48,7 @@ class RepositoryDataMethod {
                             addStatement("request.setTypeToken(returnType)")
 
                             val operation = methodElement.getAnnotation(DATA::class.java).operation
-                            addStatement("request.setStorageOperation($classStorageOperation.$operation)")
+                            addStatement("request.setDataOperation($classDataOperation.$operation)")
                             addStatement(getStorageSql(operation))
 
                             createDataItemBuilderMethods(annotationMapKey).forEach {

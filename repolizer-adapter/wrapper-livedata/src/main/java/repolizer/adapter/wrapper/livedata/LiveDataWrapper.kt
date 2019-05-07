@@ -30,12 +30,12 @@ class LiveDataWrapper : WrapperAdapter<LiveData<*>>() {
         }
     }
 
-    override fun <B> establishStorageConnection(future: Future<B>, request: NetworkFutureRequest, storageAdapter: DataAdapter<B>): LiveData<B>? {
+    override fun <B> establishDataConnection(future: Future<B>, request: NetworkFutureRequest, dataAdapter: DataAdapter<B>): LiveData<B>? {
         if (!request.connectionOnly) future.executeAsync()
-        return storageAdapter.establishConnection(request)
+        return dataAdapter.establishConnection(request)
     }
 
-    override fun canHaveStorageConnection(): Boolean {
+    override fun canHaveDataConnection(): Boolean {
         return true
     }
 }

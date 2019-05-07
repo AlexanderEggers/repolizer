@@ -10,11 +10,11 @@ abstract class WrapperAdapter<W> {
         return null
     }
 
-    open fun <B> establishStorageConnection(future: Future<B>, request: NetworkFutureRequest, storageAdapter: DataAdapter<B>): W? {
+    open fun <B> establishDataConnection(future: Future<B>, request: NetworkFutureRequest, dataAdapter: DataAdapter<B>): W? {
         return null
     }
 
-    open fun canHaveStorageConnection(): Boolean {
+    open fun canHaveDataConnection(): Boolean {
         return false
     }
 }

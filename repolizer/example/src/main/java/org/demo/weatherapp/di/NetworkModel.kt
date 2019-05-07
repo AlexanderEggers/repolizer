@@ -26,12 +26,12 @@ class NetworkModel {
     fun provideWeatherRepository(context: Context, appExecutor: AppExecutor, httpClient: OkHttpClient): WeatherRepository {
         return Repolizer.newBuilder()
                 .setBaseUrl(context.getString(R.string.server_base_url))
-                .addNetworkAdapter(RetrofitNetworkAdapterFactory(context.getString(R.string.server_base_url),
+                .addNetworkAdapterFactory(RetrofitNetworkAdapterFactory(context.getString(R.string.server_base_url),
                         httpClient = httpClient))
-                .addWrapperAdapter(LiveDataWrapperFactory())
-                .addDataAdapter(AppDatabaseAdapterFactory(context))
-                .addCacheAdapter(SharedPrefCacheAdapterFactory(context))
-                .addConverterAdapter(GsonConverterAdapterFactory())
+                .addWrapperAdapterFactory(LiveDataWrapperFactory())
+                .addDataAdapterFactory(AppDatabaseAdapterFactory(context))
+                .addCacheAdapterFactory(SharedPrefCacheAdapterFactory(context))
+                .addConverterAdapterFactory(GsonConverterAdapterFactory())
                 .setDefaultMainThread(appExecutor.mainThread)
                 .build()
                 .getRepository(WeatherRepository::class.java)

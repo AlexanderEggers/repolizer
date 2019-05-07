@@ -17,10 +17,10 @@ constructor(private val repolizer: Repolizer,
     override fun <Wrapper> create(): Wrapper {
         val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters,
                 futureRequest.typeToken.type, futureRequest.repositoryClass, repolizer) as WrapperAdapter<Wrapper>
-        return if (wrapperAdapter.canHaveStorageConnection() && dataAdapter?.canHaveActiveConnections() == true) {
-            wrapperAdapter.establishStorageConnection(this, futureRequest, dataAdapter)
-                    ?: throw IllegalStateException("If you want to use an active storage connection, " +
-                            "you need to implement the method establishStorageConnection() of your " +
+        return if (wrapperAdapter.canHaveDataConnection() && dataAdapter?.canHaveActiveConnections() == true) {
+            wrapperAdapter.establishDataConnection(this, futureRequest, dataAdapter)
+                    ?: throw IllegalStateException("If you want to use an active data connection, " +
+                            "you need to implement the method establishDataConnection() of your " +
                             "WrapperAdapter and establishConnection() function inside your DataAdapter.")
         } else wrapperAdapter.execute(this, futureRequest)
                 ?: throw IllegalStateException("It seems like that your WrapperAdapter does not" +
@@ -68,7 +68,7 @@ constructor(private val repolizer: Repolizer,
                 else {
                     val data: Body? = converterAdapter?.convertStringToData(
                             futureRequest.repositoryClass, response.body, futureRequest.bodyType)
-                    if (data == null) responseService?.handleStorageError(futureRequest)
+                    if (data == null) responseService?.handleDataError(futureRequest)
                     data
                 }
             }
@@ -100,7 +100,7 @@ constructor(private val repolizer: Repolizer,
             }
         } else {
             repolizer.defaultMainThread.execute {
-                responseService?.handleStorageError(futureRequest)
+                responseService?.handleDataError(futureRequest)
             }
             null
         }
