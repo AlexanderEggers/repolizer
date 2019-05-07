@@ -6,7 +6,7 @@ import repolizer.adapter.factory.AdapterFactory
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
-class LiveDataWrapperFactory: AdapterFactory<LiveDataWrapper> {
+class LiveDataWrapperFactory : AdapterFactory<LiveDataWrapper> {
 
     override fun get(type: Type, repositoryClass: Class<*>, repolizer: Repolizer): LiveDataWrapper? {
         return when {

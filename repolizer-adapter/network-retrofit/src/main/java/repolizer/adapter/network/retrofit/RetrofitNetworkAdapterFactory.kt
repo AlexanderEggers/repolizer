@@ -32,7 +32,7 @@ class RetrofitNetworkAdapterFactory
                 .let { networkControllerClass.getConstructor(NetworkInterface::class.java, Gson::class.java) }
                 ?.newInstance(networkInterface, gson)
                 ?: throw IllegalStateException("NetworkController is null. Usage of reflection to " +
-                "create an instance of your NetworkController ($networkControllerClass.class) has failed.")
+                        "create an instance of your NetworkController ($networkControllerClass.class) has failed.")
     }
 
     override fun get(type: Type, repositoryClass: Class<*>, repolizer: Repolizer): RetrofitNetworkAdapter? {

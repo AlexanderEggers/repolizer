@@ -10,7 +10,7 @@ import repolizer.repository.future.FutureRequest
 import repolizer.repository.network.NetworkFutureRequest
 import java.util.concurrent.atomic.AtomicBoolean
 
-class LiveDataWrapper: WrapperAdapter<LiveData<*>>() {
+class LiveDataWrapper : WrapperAdapter<LiveData<*>>() {
 
     override fun <B> execute(future: Future<B>, request: FutureRequest): LiveData<B> {
         return object : MediatorLiveData<B>() {
@@ -19,7 +19,7 @@ class LiveDataWrapper: WrapperAdapter<LiveData<*>>() {
             override fun onActive() {
                 super.onActive()
                 if (started.compareAndSet(false, true)) {
-                    future.executeAsync(object: FutureCallback<B> {
+                    future.executeAsync(object : FutureCallback<B> {
 
                         override fun onFinished(body: B?) {
                             postValue(body)
@@ -31,7 +31,7 @@ class LiveDataWrapper: WrapperAdapter<LiveData<*>>() {
     }
 
     override fun <B> establishStorageConnection(future: Future<B>, request: NetworkFutureRequest, storageAdapter: DataAdapter<B>): LiveData<B>? {
-        if(!request.connectionOnly) future.executeAsync()
+        if (!request.connectionOnly) future.executeAsync()
         return storageAdapter.establishConnection(request)
     }
 

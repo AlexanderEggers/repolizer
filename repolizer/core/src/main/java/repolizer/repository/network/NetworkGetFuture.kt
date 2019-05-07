@@ -3,8 +3,8 @@ package repolizer.repository.network
 import repolizer.Repolizer
 import repolizer.adapter.WrapperAdapter
 import repolizer.adapter.util.AdapterUtil
-import repolizer.persistent.CacheState
 import repolizer.persistent.CacheItem
+import repolizer.persistent.CacheState
 import repolizer.repository.response.NetworkResponse
 
 @Suppress("UNCHECKED_CAST")
@@ -82,7 +82,7 @@ constructor(private val repolizer: Repolizer,
         val saveSuccessful = dataAdapter?.insert(futureRequest, converterAdapter, response.body)
                 ?: false
         return if (saveSuccessful) {
-            val cacheSuccessful = if(cacheAdapter != null) {
+            val cacheSuccessful = if (cacheAdapter != null) {
                 val cacheKey = cacheAdapter.getCacheKeyForNetwork(futureRequest, response)
                 cacheAdapter.save(futureRequest, CacheItem(cacheKey))
             } else true
@@ -91,7 +91,6 @@ constructor(private val repolizer: Repolizer,
                 repolizer.defaultMainThread.execute {
                     responseService?.handleSuccess(futureRequest)
                 }
-
                 dataAdapter?.get(futureRequest, converterAdapter)
             } else {
                 repolizer.defaultMainThread.execute {
@@ -115,7 +114,7 @@ constructor(private val repolizer: Repolizer,
         if (futureRequest.isDeletingCacheIfTooOld && cacheState == CacheState.NEEDS_HARD_REFRESH) {
             dataAdapter?.delete(futureRequest)
 
-            if(cacheAdapter != null) {
+            if (cacheAdapter != null) {
                 val cacheKey = cacheAdapter.getCacheKeyForNetwork(futureRequest, response)
                 cacheAdapter.delete(futureRequest, CacheItem(cacheKey))
             }
