@@ -37,11 +37,10 @@ constructor(private val repolizer: Repolizer,
                 cacheState == CacheState.NEEDS_HARD_REFRESH ||
                 cacheState == CacheState.NO_CACHE
 
-        return if (futureRequest.url.isNotEmpty()
+        return if ((futureRequest.url.isNotEmpty() || futureRequest.ignoreEmptyUrl)
                 && (cacheData == null || needsFetch)
                 && futureRequest.allowFetch
-                && (futureRequest.allowMultipleRequestsAtSameTime ||
-                        futureRequest.fetchSecurityLayer.allowFetch())) {
+                && (futureRequest.allowMultipleRequestsAtSameTime || futureRequest.fetchSecurityLayer.allowFetch())) {
             ExecutionType.USE_NETWORK
         } else ExecutionType.USE_STORAGE
     }
@@ -84,7 +83,7 @@ constructor(private val repolizer: Repolizer,
                 ?: false
         return if (saveSuccessful) {
             val cacheSuccessful = if(cacheAdapter != null) {
-                val cacheKey = cacheAdapter.getCacheKeyForNetwork(futureRequest)
+                val cacheKey = cacheAdapter.getCacheKeyForNetwork(futureRequest, response)
                 cacheAdapter.save(futureRequest, CacheItem(cacheKey))
             } else true
 
@@ -117,7 +116,7 @@ constructor(private val repolizer: Repolizer,
             dataAdapter?.delete(futureRequest)
 
             if(cacheAdapter != null) {
-                val cacheKey = cacheAdapter.getCacheKeyForNetwork(futureRequest)
+                val cacheKey = cacheAdapter.getCacheKeyForNetwork(futureRequest, response)
                 cacheAdapter.delete(futureRequest, CacheItem(cacheKey))
             }
         }

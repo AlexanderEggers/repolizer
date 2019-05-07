@@ -18,6 +18,7 @@ open class NetworkFutureRequestBuilder(val fetchSecurityLayer: FetchSecurityLaye
     var requiresLogin: Boolean = false
     var saveData: Boolean = true
     var connectionOnly: Boolean = false
+    var ignoreEmptyUrl: Boolean = false
 
     var allowFetch: Boolean = false
     var isDeletingCacheIfTooOld: Boolean = false

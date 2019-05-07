@@ -98,6 +98,7 @@ class RepositoryGetMethod {
             add("request.setRequiresLogin(${annotation.requiresLogin});")
             add("request.setSaveData(${annotation.saveData});")
             add("request.setConnectionOnly(${annotation.connectionOnly});")
+            add("request.setIgnoreEmptyUrl(${annotation.ignoreEmptyUrl});")
 
             add("request.setInsertStatement(insertStatement);")
             add("request.setQueryStatement(queryStatement);")

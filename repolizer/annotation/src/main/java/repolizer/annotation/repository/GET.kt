@@ -4,6 +4,7 @@ package repolizer.annotation.repository
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class GET(val url: String = "",
+                     val ignoreEmptyUrl: Boolean = false,
                      val insertStatement: String = "",
                      val queryStatement: String = "",
                      val deleteStatement: String = "",

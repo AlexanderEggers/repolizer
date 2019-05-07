@@ -3,6 +3,7 @@ package repolizer.adapter
 import repolizer.persistent.CacheState
 import repolizer.repository.future.FutureRequest
 import repolizer.repository.network.NetworkFutureRequest
+import repolizer.repository.response.NetworkResponse
 
 abstract class CacheAdapter {
 
@@ -12,7 +13,7 @@ abstract class CacheAdapter {
 
     abstract fun delete(request: FutureRequest, cacheObject: Any?): Boolean
 
-    open fun getCacheKeyForNetwork(request: NetworkFutureRequest): String {
+    open fun getCacheKeyForNetwork(request: NetworkFutureRequest, response: NetworkResponse<String>?): String {
         return request.fullUrl
     }
 }

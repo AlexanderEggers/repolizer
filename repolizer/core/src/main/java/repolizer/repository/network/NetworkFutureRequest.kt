@@ -26,6 +26,7 @@ open class NetworkFutureRequest(repolizer: Repolizer, builder: NetworkFutureRequ
     val requiresLogin: Boolean = builder.requiresLogin
     val saveData: Boolean = builder.saveData
     val connectionOnly: Boolean = builder.connectionOnly
+    var ignoreEmptyUrl: Boolean = builder.ignoreEmptyUrl
 
     val allowFetch: Boolean = builder.allowFetch
     val isDeletingCacheIfTooOld: Boolean = builder.isDeletingCacheIfTooOld
