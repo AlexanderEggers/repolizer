@@ -96,7 +96,7 @@ class RepositoryRefreshMethod {
             add("request.setUrl(url);")
             add("request.setRequiresLogin(${annotation.requiresLogin});")
 
-            add("request.setCacheKey(${annotation.cacheKey});")
+            add("request.setCacheKey(\"${annotation.cacheKey}\");")
             add("request.setInsertStatement(insertStatement);")
             add("request.setSaveData(true);")
 
