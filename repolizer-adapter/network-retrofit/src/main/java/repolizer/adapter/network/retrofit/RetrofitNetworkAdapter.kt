@@ -16,7 +16,7 @@ import java.util.logging.Logger
 
 class RetrofitNetworkAdapter(private val networkController: NetworkController) : NetworkAdapter() {
 
-    override fun execute(request: NetworkFutureRequest, requestProvider: RequestProvider<*>?): NetworkResponse<String> {
+    override fun execute(request: NetworkFutureRequest, requestProvider: RequestProvider<*>?): NetworkResponse<String>? {
         val url = prepareUrl(request.fullUrl)
         val raw = if (request.rawObjects.isNotEmpty()) request.rawObjects[0] else null
 
@@ -31,12 +31,10 @@ class RetrofitNetworkAdapter(private val networkController: NetworkController) :
         val call = when (request.requestType) {
             RequestType.REFRESH -> networkController.get(request.headerMap, url, request.queryMap)
             RequestType.GET -> networkController.get(request.headerMap, url, request.queryMap)
-            RequestType.POST -> networkController.post(request.headerMap, url, request.queryMap,
-                    request.rawObjects[0])
-            RequestType.PUT -> networkController.put(request.headerMap, url, request.queryMap,
-                    raw)
-            RequestType.DELETE -> networkController.delete(request.headerMap, url, request.queryMap,
-                    raw)
+            RequestType.POST -> networkController.post(request.headerMap, url, request.queryMap, raw)
+            RequestType.PUT -> networkController.put(request.headerMap, url, request.queryMap, raw)
+            RequestType.PATCH -> networkController.patch(request.headerMap, url, request.queryMap, raw)
+            RequestType.DELETE -> networkController.delete(request.headerMap, url, request.queryMap, raw)
         }
 
         val requestProviderCast: RequestProvider<Call<String>>? = try {

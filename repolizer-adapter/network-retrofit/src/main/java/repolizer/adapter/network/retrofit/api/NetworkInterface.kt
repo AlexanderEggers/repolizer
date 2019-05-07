@@ -30,6 +30,14 @@ interface NetworkInterface {
             @Body raw: RequestBody?
     ): Call<String>
 
+    @PATCH("{url}")
+    fun patch(
+            @HeaderMap headerMap: Map<String, String>,
+            @Path(value = "url", encoded = true) url: String,
+            @QueryMap map: QueryHashMap,
+            @Body raw: RequestBody?
+    ): Call<String>
+
     @DELETE("{url}")
     fun delete(
             @HeaderMap headerMap: Map<String, String>,

@@ -34,6 +34,16 @@ constructor(networkInterface: NetworkInterface, gson: Gson) : NetworkController(
         }
     }
 
+    override fun patch(headerMap: Map<String, String>, url: String, queryMap: QueryHashMap, rawObject: Any?): Call<String> {
+        return if (rawObject != null) {
+            val json = super.gson.toJson(rawObject)
+            val requestBody = RequestBody.create(MediaType.parse(DEFAULT_MEDIA_TYPE), json)
+            return super.networkInterface.patch(headerMap, RetrofitAdapterUtils.prepareUrl(url), queryMap, requestBody)
+        } else {
+            super.networkInterface.patch(headerMap, RetrofitAdapterUtils.prepareUrl(url), queryMap, null)
+        }
+    }
+
     override fun delete(headerMap: Map<String, String>, url: String, queryMap: QueryHashMap, rawObject: Any?): Call<String> {
         return if (rawObject != null) {
             val json = super.gson.toJson(rawObject)

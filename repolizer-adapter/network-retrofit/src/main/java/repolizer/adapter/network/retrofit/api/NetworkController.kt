@@ -13,5 +13,7 @@ constructor(protected val networkInterface: NetworkInterface, protected val gson
 
     abstract fun put(headerMap: Map<String, String>, url: String, queryMap: QueryHashMap, rawObject: Any?): Call<String>
 
+    abstract fun patch(headerMap: Map<String, String>, url: String, queryMap: QueryHashMap, rawObject: Any?): Call<String>
+
     abstract fun delete(headerMap: Map<String, String>, url: String, queryMap: QueryHashMap, rawObject: Any?): Call<String>
 }
