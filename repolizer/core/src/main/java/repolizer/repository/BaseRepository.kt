@@ -28,11 +28,9 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
         val bodyType = getBodyType(returnType)
         futureRequest.bodyType = bodyType
 
-        return if (hasList) {
-            futureRequest.buildGet(repolizer, lowestBodyClass).create()
-        } else {
-            futureRequest.buildGetWithList(repolizer, lowestBodyClass).create()
-        }
+        val future = if (hasList) futureRequest.buildGet(repolizer, lowestBodyClass)
+        else futureRequest.buildGetWithList(repolizer, lowestBodyClass)
+        return future.create()
     }
 
     protected fun <T> executeCud(futureRequest: NetworkFutureRequestBuilder, returnType: Type): T {
