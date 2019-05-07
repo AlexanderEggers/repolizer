@@ -46,9 +46,12 @@ apiKey= MY_API_KEY
 ProGuard
 ------
 ```
--keep public class * extends repolizer.adapter.network.retrofit.api.NetworkController { *; }
+# For the core artifact:
 -keep public class * extends repolizer.repository.BaseRepository { *; }
 -keep @repolizer.annotation.repository.Repository public class * { *; }
+
+# For the Retrofit adapter artifact:
+-keep public class * extends repolizer.adapter.network.retrofit.api.NetworkController { *; }
 ```
 
 Status
