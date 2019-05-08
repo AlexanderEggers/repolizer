@@ -1,4 +1,4 @@
-package repolizer.persistent
+package repolizer.repository.util
 
 enum class CacheState {
     NEEDS_SOFT_REFRESH,

@@ -3,8 +3,7 @@ package repolizer.repository.network
 import repolizer.Repolizer
 import repolizer.adapter.WrapperAdapter
 import repolizer.adapter.util.AdapterUtil
-import repolizer.persistent.CacheItem
-import repolizer.persistent.CacheState
+import repolizer.repository.util.CacheState
 import repolizer.repository.response.NetworkResponse
 
 @Suppress("UNCHECKED_CAST")
@@ -32,7 +31,7 @@ constructor(private val repolizer: Repolizer,
                 futureRequest.freshCacheTime, futureRequest.maxCacheTime)
                 ?: CacheState.NEEDS_NO_REFRESH
 
-        val cacheData = dataAdapter?.get(futureRequest, converterAdapter)
+        val cacheData = dataAdapter?.get(futureRequest)
         val needsFetch = cacheState == CacheState.NEEDS_SOFT_REFRESH ||
                 cacheState == CacheState.NEEDS_HARD_REFRESH ||
                 cacheState == CacheState.NO_CACHE
@@ -62,39 +61,31 @@ constructor(private val repolizer: Repolizer,
         val response: NetworkResponse? = networkAdapter?.execute(futureRequest, requestProvider)
 
         return if (response?.isSuccessful() == true && response.body != null) {
-            if (saveData) saveNetworkResponse(response)
-            else {
-                when {
-                    futureRequest.bodyType == String::class.java -> response.body as? Body?
-                    response.body is String -> {
-                        val data: Body? = converterAdapter?.convertStringToData(
-                                futureRequest.repositoryClass, response.body, futureRequest.bodyType)
-                        if (data == null) responseService?.handleDataError(futureRequest)
-                        data
-                    }
-                    else -> response.body as? Body?
-                }
-            }
+            val convertedBody = if(response.body is String && futureRequest.bodyType != String::class.java)
+                convertResponseData(response.body) else response.body as Body?
+
+            if (convertedBody != null && saveData) saveNetworkResponse(response, convertedBody)
+            else response.body as Body?
         } else {
             handleRequestError(response)
             null
         }
     }
 
-    private fun saveNetworkResponse(response: NetworkResponse): Body? {
-        val saveSuccessful = dataAdapter?.insert(futureRequest, converterAdapter, response.body)
-                ?: false
+    private fun saveNetworkResponse(response: NetworkResponse, data: Body): Body? {
+        val saveSuccessful = dataAdapter?.insert(futureRequest, data) ?: false
+
         return if (saveSuccessful) {
             val cacheSuccessful = if (cacheAdapter != null) {
                 val cacheKey = cacheAdapter.getCacheKeyForNetwork(futureRequest, response)
-                cacheAdapter.save(futureRequest, CacheItem(cacheKey))
+                cacheAdapter.save(futureRequest, cacheKey)
             } else true
 
             if (cacheSuccessful) {
                 repolizer.defaultMainThread.execute {
                     responseService?.handleSuccess(futureRequest)
                 }
-                dataAdapter?.get(futureRequest, converterAdapter)
+                dataAdapter?.get(futureRequest)
             } else {
                 repolizer.defaultMainThread.execute {
                     responseService?.handleCacheError(futureRequest)
@@ -119,12 +110,19 @@ constructor(private val repolizer: Repolizer,
 
             if (cacheAdapter != null) {
                 val cacheKey = cacheAdapter.getCacheKeyForNetwork(futureRequest, response)
-                cacheAdapter.delete(futureRequest, CacheItem(cacheKey))
+                cacheAdapter.delete(futureRequest, cacheKey)
             }
         }
     }
 
     private fun fetchCacheData(): Body? {
-        return dataAdapter?.get(futureRequest, converterAdapter)
+        return dataAdapter?.get(futureRequest)
+    }
+
+    private fun convertResponseData(bodyData: String): Body? {
+        val data: Body? = converterAdapter?.convertStringToData(
+                futureRequest.repositoryClass, bodyData, futureRequest.bodyType)
+        if (data == null) responseService?.handleDataError(futureRequest)
+        return data
     }
 }

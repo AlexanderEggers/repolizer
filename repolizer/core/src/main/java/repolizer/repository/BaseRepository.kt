@@ -15,10 +15,15 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
     private val fetchingData = AtomicBoolean(false)
 
     protected fun <T> executeRefresh(futureRequest: NetworkFutureRequestBuilder, returnType: Type): T {
+        val lowestBodyClass = getLowestBodyClass(returnType)
+        val hasList = hasListType(returnType)
+
         val bodyType = getBodyType(returnType)
         futureRequest.bodyType = bodyType
 
-        return futureRequest.buildRefresh(repolizer).create()
+        val future = if (hasList) futureRequest.buildRefreshWithList(repolizer, lowestBodyClass)
+        else futureRequest.buildRefresh(repolizer, lowestBodyClass)
+        return future.create()
     }
 
     protected fun <T> executeGet(futureRequest: NetworkFutureRequestBuilder, returnType: Type): T {
@@ -28,23 +33,33 @@ abstract class BaseRepository constructor(private val repolizer: Repolizer) : Fe
         val bodyType = getBodyType(returnType)
         futureRequest.bodyType = bodyType
 
-        val future = if (hasList) futureRequest.buildGet(repolizer, lowestBodyClass)
-        else futureRequest.buildGetWithList(repolizer, lowestBodyClass)
+        val future = if (hasList) futureRequest.buildGetWithList(repolizer, lowestBodyClass)
+        else futureRequest.buildGet(repolizer, lowestBodyClass)
         return future.create()
     }
 
     protected fun <T> executeCud(futureRequest: NetworkFutureRequestBuilder, returnType: Type): T {
+        val lowestBodyClass = getLowestBodyClass(returnType)
+        val hasList = hasListType(returnType)
+
         val bodyType = getBodyType(returnType)
         futureRequest.bodyType = bodyType
 
-        return futureRequest.buildCud(repolizer).create()
+        val future = if (hasList) futureRequest.buildCudWithList(repolizer, lowestBodyClass)
+        else futureRequest.buildCud(repolizer, lowestBodyClass)
+        return future.create()
     }
 
     protected fun <T> executeData(futureRequest: PersistentFutureRequestBuilder, returnType: Type): T {
+        val lowestBodyClass = getLowestBodyClass(returnType)
+        val hasList = hasListType(returnType)
+
         val bodyType = getBodyType(returnType)
         futureRequest.bodyType = bodyType
 
-        return futureRequest.buildData(repolizer).create()
+        val future = if (hasList) futureRequest.buildDataWithList(repolizer, lowestBodyClass)
+        else futureRequest.buildData(repolizer, lowestBodyClass)
+        return future.create()
     }
 
     protected fun <T> executeCache(futureRequest: PersistentFutureRequestBuilder, returnType: Type): T {

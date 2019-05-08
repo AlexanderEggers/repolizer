@@ -7,9 +7,9 @@ import repolizer.annotation.repository.util.DataOperation
 import repolizer.repository.network.ExecutionType
 
 @Suppress("UNCHECKED_CAST")
-class PersistentDataFuture
+class PersistentDataFuture<Body>
 constructor(private val repolizer: Repolizer,
-            private val futureRequest: PersistentFutureRequest) : PersistentFuture<Boolean>(repolizer, futureRequest) {
+            private val futureRequest: PersistentFutureRequest) : PersistentFuture<Body>(repolizer, futureRequest) {
 
     override fun <Wrapper> create(): Wrapper {
         val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, futureRequest.typeToken.type,
@@ -23,12 +23,31 @@ constructor(private val repolizer: Repolizer,
         if (dataAdapter == null) throw IllegalStateException("Data adapter is null.")
     }
 
-    override fun onExecute(executionType: ExecutionType): Boolean? {
+    override fun onExecute(executionType: ExecutionType): Body? {
         return when (futureRequest.dataOperation) {
-            DataOperation.INSERT -> dataAdapter?.insert(futureRequest, null, futureRequest.dataObject)
-            DataOperation.UPDATE -> dataAdapter?.update(futureRequest, futureRequest.dataObject)
-            DataOperation.DELETE -> dataAdapter?.delete(futureRequest)
-            else -> false
+            DataOperation.INSERT -> {
+                val successful = dataAdapter?.insert(futureRequest, futureRequest.dataObject as Body?)
+                handleDataOperation(successful)
+            }
+            DataOperation.UPDATE -> {
+                val successful = dataAdapter?.update(futureRequest, futureRequest.dataObject as Body?)
+                handleDataOperation(successful)
+            }
+            DataOperation.DELETE -> {
+                val successful = dataAdapter?.delete(futureRequest)
+                handleDataOperation(successful)
+            }
+            else -> null
+        }
+    }
+
+    private fun handleDataOperation(successful: Boolean?): Body? {
+        return if(successful == true) dataAdapter?.get(futureRequest)
+        else {
+            repolizer.defaultMainThread.execute {
+                responseService?.handleDataError(futureRequest)
+            }
+            null
         }
     }
 }

@@ -1,24 +1,25 @@
 package repolizer.repository.response
 
+import repolizer.repository.future.FutureRequest
 import repolizer.repository.network.NetworkFutureRequest
 
 abstract class ResponseService {
 
     private val callbacks: ArrayList<Callback> = ArrayList()
 
-    open fun handleSuccess(request: NetworkFutureRequest) {
+    open fun handleSuccess(request: FutureRequest) {
         callbacks.forEach {
             it.onSuccess(request)
         }
     }
 
-    open fun handleDataError(request: NetworkFutureRequest) {
+    open fun handleDataError(request: FutureRequest) {
         callbacks.forEach {
             it.onStorageError(request)
         }
     }
 
-    open fun handleCacheError(request: NetworkFutureRequest) {
+    open fun handleCacheError(request: FutureRequest) {
         callbacks.forEach {
             it.onCacheError(request)
         }
@@ -48,15 +49,15 @@ abstract class ResponseService {
     }
 
     abstract class Callback {
-        open fun onSuccess(request: NetworkFutureRequest) {
+        open fun onSuccess(request: FutureRequest) {
             //do nothing by default
         }
 
-        open fun onStorageError(request: NetworkFutureRequest) {
+        open fun onStorageError(request: FutureRequest) {
             //do nothing by default
         }
 
-        open fun onCacheError(request: NetworkFutureRequest) {
+        open fun onCacheError(request: FutureRequest) {
             //do nothing by default
         }
 

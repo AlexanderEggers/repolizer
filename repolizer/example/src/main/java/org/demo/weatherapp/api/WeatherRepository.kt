@@ -12,7 +12,6 @@ import repolizer.annotation.repository.parameter.UrlParameter
 import repolizer.annotation.repository.parameter.UrlQuery
 import repolizer.annotation.repository.util.CacheOperation
 import repolizer.annotation.repository.util.CudType
-import repolizer.persistent.CacheItem
 import repolizer.repository.future.Future
 
 @Repository
@@ -25,8 +24,8 @@ interface WeatherRepository {
                        @UrlQuery("units") metric: String = "metric"): LiveData<WeatherModel>
 
     @CUD(url = ":weather", cudType = CudType.POST)
-    fun sendTest(): Future<Boolean>
+    fun sendTest(): Future<String>
 
     @CACHE(operation = CacheOperation.INSERT)
-    fun insertCache(@CacheBody cacheItem: CacheItem): Future<Boolean>
+    fun insertCache(@CacheBody newCacheKey: String): Future<Boolean>
 }

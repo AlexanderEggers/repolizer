@@ -6,9 +6,9 @@ import repolizer.adapter.util.AdapterUtil
 import repolizer.repository.response.NetworkResponse
 
 @Suppress("UNCHECKED_CAST")
-class NetworkCudFuture
+class NetworkCudFuture<Body>
 constructor(private val repolizer: Repolizer,
-            private val futureRequest: NetworkFutureRequest) : NetworkFuture<Boolean>(repolizer, futureRequest) {
+            private val futureRequest: NetworkFutureRequest) : NetworkFuture<Body>(repolizer, futureRequest) {
 
     override fun <Wrapper> create(): Wrapper {
         val wrapperAdapter = AdapterUtil.getAdapter(repolizer.wrapperAdapters, futureRequest.typeToken.type,
@@ -22,19 +22,19 @@ constructor(private val repolizer: Repolizer,
         return ExecutionType.USE_NETWORK
     }
 
-    override fun onExecute(executionType: ExecutionType): Boolean? {
+    override fun onExecute(executionType: ExecutionType): Body? {
         val response: NetworkResponse? = networkAdapter?.execute(futureRequest, requestProvider)
 
-        return if (response?.isSuccessful() == true) {
+        return if (response?.isSuccessful() == true && response.body?.javaClass == futureRequest.bodyType.javaClass) {
             repolizer.defaultMainThread.execute {
                 responseService?.handleSuccess(futureRequest)
             }
-            true
+            response.body as Body?
         } else {
             repolizer.defaultMainThread.execute {
                 responseService?.handleRequestError(futureRequest, response)
             }
-            false
+            null
         }
     }
 }

@@ -6,9 +6,9 @@ import repolizer.adapter.util.AdapterUtil
 import repolizer.repository.response.NetworkResponse
 
 @Suppress("UNCHECKED_CAST")
-class NetworkRefreshFuture
+class NetworkRefreshFuture<Body>
 constructor(private val repolizer: Repolizer,
-            private val futureRequest: NetworkFutureRequest) : NetworkFuture<Boolean>(repolizer, futureRequest) {
+            private val futureRequest: NetworkFutureRequest) : NetworkFuture<Body>(repolizer, futureRequest) {
 
     private val fetchSecurityLayer: FetchSecurityLayer = futureRequest.fetchSecurityLayer
     private val allowMultipleRequestsAtSameTime: Boolean = futureRequest.allowMultipleRequestsAtSameTime
@@ -27,18 +27,21 @@ constructor(private val repolizer: Repolizer,
         } else ExecutionType.DO_NOTHING
     }
 
-    override fun onExecute(executionType: ExecutionType): Boolean? {
+    override fun onExecute(executionType: ExecutionType): Body? {
         return when (executionType) {
             ExecutionType.USE_NETWORK -> fetchFromNetwork()
             else -> null
         }
     }
 
-    private fun fetchFromNetwork(): Boolean? {
+    private fun fetchFromNetwork(): Body? {
         val response: NetworkResponse? = networkAdapter?.execute(futureRequest, requestProvider)
 
         return if (response?.isSuccessful() == true && response.body != null) {
-            val saveSuccessful = dataAdapter?.insert(futureRequest, converterAdapter, response.body)
+            val convertedBody = if(response.body is String && futureRequest.bodyType != String::class.java)
+                convertResponseData(response.body) else response.body as Body?
+
+            val saveSuccessful = dataAdapter?.insert(futureRequest, convertedBody)
             if (saveSuccessful == true && cacheAdapter != null) {
                 val cacheKey = cacheAdapter.getCacheKeyForNetwork(futureRequest, response)
                 val successfullyCached = cacheAdapter.save(futureRequest, cacheKey)
@@ -46,29 +49,36 @@ constructor(private val repolizer: Repolizer,
                     repolizer.defaultMainThread.execute {
                         responseService?.handleSuccess(futureRequest)
                     }
-                    true
+                    convertedBody
                 } else {
                     repolizer.defaultMainThread.execute {
                         responseService?.handleCacheError(futureRequest)
                     }
-                    false
+                    null
                 }
             } else {
                 repolizer.defaultMainThread.execute {
                     responseService?.handleDataError(futureRequest)
                 }
-                false
+                null
             }
         } else {
             repolizer.defaultMainThread.execute {
                 responseService?.handleRequestError(futureRequest, response)
             }
-            false
+            null
         }
     }
 
-    override fun onFinished(result: Boolean?) {
+    override fun onFinished(result: Body?) {
         super.onFinished(result)
         fetchSecurityLayer.onFetchFinished()
+    }
+
+    private fun convertResponseData(bodyData: String): Body? {
+        val data: Body? = converterAdapter?.convertStringToData(
+                futureRequest.repositoryClass, bodyData, futureRequest.bodyType)
+        if (data == null) responseService?.handleDataError(futureRequest)
+        return data
     }
 }

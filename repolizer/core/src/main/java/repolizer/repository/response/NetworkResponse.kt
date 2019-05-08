@@ -9,8 +9,4 @@ constructor(val body: Any?,
     fun isSuccessful(): Boolean {
         return status == NetworkResponseStatus.SUCCESS
     }
-
-    fun withBody(body: Any): NetworkResponse {
-        return NetworkResponse(body, url, statusCode, status)
-    }
 }

@@ -1,5 +1,6 @@
 package repolizer.repository.network
 
+import com.sun.xml.internal.ws.wsdl.writer.document.soap.Body
 import repolizer.Repolizer
 import repolizer.repository.future.FutureRequestBuilder
 import repolizer.repository.request.RequestType
@@ -56,11 +57,19 @@ open class NetworkFutureRequestBuilder(val fetchSecurityLayer: FetchSecurityLaye
         return NetworkGetFuture(repolizer, NetworkFutureRequest(repolizer, this))
     }
 
-    open fun buildRefresh(repolizer: Repolizer): NetworkRefreshFuture {
+    open fun <Body> buildRefresh(repolizer: Repolizer, returnType: Class<Body>): NetworkRefreshFuture<Body> {
         return NetworkRefreshFuture(repolizer, NetworkFutureRequest(repolizer, this))
     }
 
-    open fun buildCud(repolizer: Repolizer): NetworkCudFuture {
+    open fun <Body> buildRefreshWithList(repolizer: Repolizer, returnType: Class<Body>): NetworkRefreshFuture<List<Body>> {
+        return NetworkRefreshFuture(repolizer, NetworkFutureRequest(repolizer, this))
+    }
+
+    open fun <Body> buildCud(repolizer: Repolizer, returnType: Class<Body>): NetworkCudFuture<Body> {
+        return NetworkCudFuture(repolizer, NetworkFutureRequest(repolizer, this))
+    }
+
+    open fun <Body> buildCudWithList(repolizer: Repolizer, returnType: Class<Body>): NetworkCudFuture<List<Body>> {
         return NetworkCudFuture(repolizer, NetworkFutureRequest(repolizer, this))
     }
 }
