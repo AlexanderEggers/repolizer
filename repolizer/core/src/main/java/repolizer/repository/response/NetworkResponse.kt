@@ -1,7 +1,7 @@
 package repolizer.repository.response
 
-class NetworkResponse<T>
-constructor(val body: T?,
+class NetworkResponse
+constructor(val body: Any?,
             val url: String,
             val statusCode: Int,
             val status: NetworkResponseStatus) {
@@ -10,7 +10,7 @@ constructor(val body: T?,
         return status == NetworkResponseStatus.SUCCESS
     }
 
-    fun <R> withBody(body: R): NetworkResponse<R> {
+    fun withBody(body: Any): NetworkResponse {
         return NetworkResponse(body, url, statusCode, status)
     }
 }

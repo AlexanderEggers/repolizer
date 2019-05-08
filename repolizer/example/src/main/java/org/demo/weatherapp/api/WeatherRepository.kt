@@ -25,7 +25,7 @@ interface WeatherRepository {
                        @UrlQuery("units") metric: String = "metric"): LiveData<WeatherModel>
 
     @CUD(url = ":weather", cudType = CudType.POST)
-    fun sendTest(): Future<String>
+    fun sendTest(): Future<Boolean>
 
     @CACHE(operation = CacheOperation.INSERT)
     fun insertCache(@CacheBody cacheItem: CacheItem): Future<Boolean>

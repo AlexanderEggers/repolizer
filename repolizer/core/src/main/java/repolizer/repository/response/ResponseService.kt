@@ -24,7 +24,7 @@ abstract class ResponseService {
         }
     }
 
-    open fun handleRequestError(request: NetworkFutureRequest, response: NetworkResponse<String>?) {
+    open fun handleRequestError(request: NetworkFutureRequest, response: NetworkResponse?) {
         callbacks.forEach {
             it.onRequestError(request, response)
         }
@@ -60,7 +60,7 @@ abstract class ResponseService {
             //do nothing by default
         }
 
-        open fun onRequestError(request: NetworkFutureRequest, response: NetworkResponse<String>?) {
+        open fun onRequestError(request: NetworkFutureRequest, response: NetworkResponse?) {
             //do nothing by default
         }
     }

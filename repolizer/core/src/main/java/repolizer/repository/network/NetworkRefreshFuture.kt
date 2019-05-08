@@ -35,7 +35,7 @@ constructor(private val repolizer: Repolizer,
     }
 
     private fun fetchFromNetwork(): Boolean? {
-        val response: NetworkResponse<String>? = networkAdapter?.execute(futureRequest, requestProvider)
+        val response: NetworkResponse? = networkAdapter?.execute(futureRequest, requestProvider)
 
         return if (response?.isSuccessful() == true && response.body != null) {
             val saveSuccessful = dataAdapter?.insert(futureRequest, converterAdapter, response.body)

@@ -59,17 +59,20 @@ constructor(private val repolizer: Repolizer,
     }
 
     private fun fetchFromNetwork(): Body? {
-        val response: NetworkResponse<String>? = networkAdapter?.execute(futureRequest, requestProvider)
+        val response: NetworkResponse? = networkAdapter?.execute(futureRequest, requestProvider)
 
         return if (response?.isSuccessful() == true && response.body != null) {
             if (saveData) saveNetworkResponse(response)
             else {
-                if (futureRequest.bodyType == String::class.java) response.body as? Body?
-                else {
-                    val data: Body? = converterAdapter?.convertStringToData(
-                            futureRequest.repositoryClass, response.body, futureRequest.bodyType)
-                    if (data == null) responseService?.handleDataError(futureRequest)
-                    data
+                when {
+                    futureRequest.bodyType == String::class.java -> response.body as? Body?
+                    response.body is String -> {
+                        val data: Body? = converterAdapter?.convertStringToData(
+                                futureRequest.repositoryClass, response.body, futureRequest.bodyType)
+                        if (data == null) responseService?.handleDataError(futureRequest)
+                        data
+                    }
+                    else -> response.body as? Body?
                 }
             }
         } else {
@@ -78,7 +81,7 @@ constructor(private val repolizer: Repolizer,
         }
     }
 
-    private fun saveNetworkResponse(response: NetworkResponse<String>): Body? {
+    private fun saveNetworkResponse(response: NetworkResponse): Body? {
         val saveSuccessful = dataAdapter?.insert(futureRequest, converterAdapter, response.body)
                 ?: false
         return if (saveSuccessful) {
@@ -106,7 +109,7 @@ constructor(private val repolizer: Repolizer,
         }
     }
 
-    private fun handleRequestError(response: NetworkResponse<String>?) {
+    private fun handleRequestError(response: NetworkResponse?) {
         repolizer.defaultMainThread.execute {
             responseService?.handleRequestError(futureRequest, response)
         }

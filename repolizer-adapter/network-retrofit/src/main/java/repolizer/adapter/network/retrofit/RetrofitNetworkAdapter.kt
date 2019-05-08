@@ -10,13 +10,12 @@ import repolizer.repository.response.NetworkResponseStatus
 import retrofit2.Call
 import retrofit2.Response
 import java.io.IOException
-import java.lang.reflect.ParameterizedType
 import java.util.logging.Level
 import java.util.logging.Logger
 
 class RetrofitNetworkAdapter(private val networkController: NetworkController) : NetworkAdapter() {
 
-    override fun execute(request: NetworkFutureRequest, requestProvider: RequestProvider<*>?): NetworkResponse<String>? {
+    override fun execute(request: NetworkFutureRequest, requestProvider: RequestProvider<*>?): NetworkResponse? {
         val url = prepareUrl(request.fullUrl)
         val raw = if (request.rawObjects.isNotEmpty()) request.rawObjects[0] else null
 
@@ -37,15 +36,11 @@ class RetrofitNetworkAdapter(private val networkController: NetworkController) :
             RequestType.DELETE -> networkController.delete(request.headerMap, url, request.queryMap, raw)
         }
 
-        val requestProviderCast: RequestProvider<Call<String>>? = try {
+        @Suppress("UNCHECKED_CAST")
+        val requestProviderCast: RequestProvider<Call<*>>? = try {
             val requestType = requestProvider?.getRequestType()
             if (requestType == Call::class.java) {
-
-                @Suppress("UNCHECKED_CAST")
-                if (requestType is ParameterizedType
-                        && requestType.actualTypeArguments[0] == String::class.java) {
-                    requestProvider as? RequestProvider<Call<String>>
-                }
+                requestProvider as? RequestProvider<Call<*>>
             }
             null
         } catch (e: ClassCastException) {
