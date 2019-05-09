@@ -10,6 +10,9 @@ open class PersistentFutureRequestBuilder : FutureRequestBuilder() {
     var cacheOperation: CacheOperation? = null
     var dataOperation: DataOperation? = null
 
+    var returnStatement: String? = null
+    var overrideEmptyReturnStatement: Boolean = false
+
     var cacheObject: String? = null
     var dataObject: Any? = null
 

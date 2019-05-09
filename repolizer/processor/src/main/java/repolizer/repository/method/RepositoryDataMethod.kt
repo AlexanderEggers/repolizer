@@ -32,10 +32,17 @@ class RepositoryDataMethod {
                             }
 
                             val annotationMapKey = "${element.simpleName}.${methodElement.simpleName}"
+                            val annotation = methodElement.getAnnotation(DATA::class.java)
 
-                            val sql = methodElement.getAnnotation(DATA::class.java).statement
-                            addStatement("String statement = \"$sql\"")
-                            if (sql.isNotEmpty()) addCode(buildStatement(annotationMapKey))
+                            val operationStatement = annotation.operationStatement
+                            addStatement("String operationStatement = \"$operationStatement\"")
+                            if (operationStatement.isNotEmpty()) addCode(buildStatement(
+                                    "operationStatement", annotationMapKey))
+
+                            val returnStatement = annotation.operationStatement
+                            addStatement("String returnStatement = \"$returnStatement\"")
+                            if (returnStatement.isNotEmpty()) addCode(buildStatement(
+                                    "returnStatement", annotationMapKey))
 
                             val classWithTypeToken = ParameterizedTypeName.get(classTypeToken,
                                     ClassName.get(methodElement.returnType))
@@ -49,7 +56,9 @@ class RepositoryDataMethod {
 
                             val operation = methodElement.getAnnotation(DATA::class.java).operation
                             addStatement("request.setDataOperation($classDataOperation.$operation)")
-                            addStatement(getStorageSql(operation))
+                            addStatement(getOperationBuilderMethod(operation))
+                            addStatement("request.setReturnStatement(returnStatement)")
+                            addStatement("request.setOverrideEmptyReturnStatement(${annotation.overrideEmptyReturnStatement})")
 
                             createDataItemBuilderMethods(annotationMapKey).forEach {
                                 addStatement(it)
@@ -61,11 +70,11 @@ class RepositoryDataMethod {
         }
     }
 
-    private fun getStorageSql(operation: DataOperation): String {
+    private fun getOperationBuilderMethod(operation: DataOperation): String {
         return when (operation) {
-            DataOperation.INSERT -> "request.setInsertStatement(statement)"
-            DataOperation.UPDATE -> "request.setUpdateStatement(statement)"
-            DataOperation.DELETE -> "request.setDeleteStatement(statement)"
+            DataOperation.INSERT -> "request.setInsertStatement(operationStatement)"
+            DataOperation.UPDATE -> "request.setUpdateStatement(operationStatement)"
+            DataOperation.DELETE -> "request.setDeleteStatement(operationStatement)"
         }
     }
 
@@ -77,9 +86,9 @@ class RepositoryDataMethod {
         }
     }
 
-    private fun buildStatement(annotationMapKey: String): String {
+    private fun buildStatement(parameter: String, annotationMapKey: String): String {
         return (RepositoryMapHolder.statementParameterAnnotationMap[annotationMapKey]?.map {
-            "statement = statement.replace(\":${it.simpleName}\", ${it.simpleName} + \"\");"
+            "$parameter = $parameter.replace(\":${it.simpleName}\", ${it.simpleName} + \"\");"
         } ?: ArrayList()).joinToString(separator = "\n", postfix = "\n\n")
     }
 }

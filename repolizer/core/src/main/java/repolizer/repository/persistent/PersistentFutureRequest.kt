@@ -9,6 +9,9 @@ open class PersistentFutureRequest(builder: PersistentFutureRequestBuilder) : Fu
     var cacheOperation: CacheOperation? = builder.cacheOperation
     var dataOperation: DataOperation? = builder.dataOperation
 
+    var returnStatement: String? = builder.returnStatement
+    var overrideEmptyReturnStatement: Boolean = builder.overrideEmptyReturnStatement
+
     var cacheObject = builder.cacheObject
     var dataObject = builder.dataObject
 }
