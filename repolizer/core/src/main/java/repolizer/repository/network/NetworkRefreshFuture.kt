@@ -38,7 +38,7 @@ constructor(private val repolizer: Repolizer,
         val response: NetworkResponse? = networkAdapter?.execute(futureRequest, requestProvider)
 
         return if (response?.isSuccessful() == true && response.body != null) {
-            val convertedBody = if(response.body is String && futureRequest.bodyType != String::class.java)
+            val convertedBody = if (response.body is String && futureRequest.bodyType != String::class.java)
                 convertResponseData(response.body) else response.body as Body?
 
             val saveSuccessful = dataAdapter?.insert(futureRequest, convertedBody)

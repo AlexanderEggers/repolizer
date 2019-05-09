@@ -1,6 +1,5 @@
 package repolizer.repository.network
 
-import com.sun.xml.internal.ws.wsdl.writer.document.soap.Body
 import repolizer.Repolizer
 import repolizer.repository.future.FutureRequestBuilder
 import repolizer.repository.request.RequestType

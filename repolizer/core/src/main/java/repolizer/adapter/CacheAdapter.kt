@@ -1,9 +1,9 @@
 package repolizer.adapter
 
-import repolizer.repository.util.CacheState
 import repolizer.repository.future.FutureRequest
 import repolizer.repository.network.NetworkFutureRequest
 import repolizer.repository.response.NetworkResponse
+import repolizer.repository.util.CacheState
 
 abstract class CacheAdapter {
 
@@ -14,6 +14,6 @@ abstract class CacheAdapter {
     abstract fun delete(request: FutureRequest, key: String?): Boolean
 
     open fun getCacheKeyForNetwork(request: NetworkFutureRequest, response: NetworkResponse?): String {
-        return if(request.cacheKey.isNotBlank()) request.cacheKey else request.fullUrl
+        return if (request.cacheKey.isNotBlank()) request.cacheKey else request.fullUrl
     }
 }

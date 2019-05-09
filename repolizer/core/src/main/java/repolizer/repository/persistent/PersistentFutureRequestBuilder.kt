@@ -1,6 +1,5 @@
 package repolizer.repository.persistent
 
-import com.sun.xml.internal.ws.wsdl.writer.document.soap.Body
 import repolizer.Repolizer
 import repolizer.annotation.repository.util.CacheOperation
 import repolizer.annotation.repository.util.DataOperation

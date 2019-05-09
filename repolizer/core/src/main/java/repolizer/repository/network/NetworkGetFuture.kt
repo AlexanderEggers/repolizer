@@ -3,8 +3,8 @@ package repolizer.repository.network
 import repolizer.Repolizer
 import repolizer.adapter.WrapperAdapter
 import repolizer.adapter.util.AdapterUtil
-import repolizer.repository.util.CacheState
 import repolizer.repository.response.NetworkResponse
+import repolizer.repository.util.CacheState
 
 @Suppress("UNCHECKED_CAST")
 class NetworkGetFuture<Body>
@@ -61,7 +61,7 @@ constructor(private val repolizer: Repolizer,
         val response: NetworkResponse? = networkAdapter?.execute(futureRequest, requestProvider)
 
         return if (response?.isSuccessful() == true && response.body != null) {
-            val convertedBody = if(response.body is String && futureRequest.bodyType != String::class.java)
+            val convertedBody = if (response.body is String && futureRequest.bodyType != String::class.java)
                 convertResponseData(response.body) else response.body as Body?
 
             if (convertedBody != null && saveData) saveNetworkResponse(response, convertedBody)
