@@ -25,7 +25,7 @@ constructor(private val repolizer: Repolizer,
     override fun onExecute(executionType: ExecutionType): Body? {
         val response: NetworkResponse? = networkAdapter?.execute(futureRequest, requestProvider)
 
-        return if (response?.isSuccessful() == true && response.body?.javaClass == futureRequest.bodyType.javaClass) {
+        return if (response?.isSuccessful() == true) {
             repolizer.defaultMainThread.execute {
                 responseService?.handleSuccess(futureRequest)
             }
