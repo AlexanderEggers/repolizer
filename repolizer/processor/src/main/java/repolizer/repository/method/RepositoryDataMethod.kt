@@ -39,7 +39,7 @@ class RepositoryDataMethod {
                             if (operationStatement.isNotEmpty()) addCode(buildStatement(
                                     "operationStatement", annotationMapKey))
 
-                            val returnStatement = annotation.operationStatement
+                            val returnStatement = annotation.returnStatement
                             addStatement("String returnStatement = \"$returnStatement\"")
                             if (returnStatement.isNotEmpty()) addCode(buildStatement(
                                     "returnStatement", annotationMapKey))
