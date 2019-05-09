@@ -42,11 +42,10 @@ constructor(private val repolizer: Repolizer,
     }
 
     private fun handleDataOperation(successful: Boolean?): Body? {
-        return if (successful == true && (!futureRequest.returnStatement.isNullOrBlank()
+        return if (successful == true && (futureRequest.returnStatement?.isNotBlank() == true
                         || futureRequest.overrideEmptyReturnStatement)) {
             dataAdapter?.get(futureRequest)
-        }
-        else {
+        } else {
             if(successful != true) {
                 repolizer.defaultMainThread.execute { responseService?.handleDataError(futureRequest) }
             }
