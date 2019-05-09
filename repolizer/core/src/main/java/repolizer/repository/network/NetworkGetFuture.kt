@@ -65,7 +65,7 @@ constructor(private val repolizer: Repolizer,
                 convertResponseData(response.body) else response.body as Body?
 
             if (convertedBody != null && saveData) saveNetworkResponse(response, convertedBody)
-            else response.body as Body?
+            else convertedBody
         } else {
             handleRequestError(response)
             null
