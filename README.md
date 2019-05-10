@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-  def repolizer_version = "0.9.3"
+  def repolizer_version = "0.9.9"
 
   //main dependency which is required for the app
   implementation "org.repolizer:repolizer-core:$repolizer_version"
