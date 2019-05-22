@@ -14,7 +14,7 @@ import repolizer.repository.response.ResponseService
 @Suppress("UNCHECKED_CAST")
 abstract class NetworkFuture<Body>
 constructor(repolizer: Repolizer,
-            futureRequest: NetworkFutureRequest) : Future<Body>(repolizer) {
+            private val futureRequest: NetworkFutureRequest) : Future<Body>(repolizer) {
 
     protected val networkAdapter: NetworkAdapter? = if (futureRequest.url.isNotEmpty()) {
         AdapterUtil.getAdapter(repolizer.networkAdapters, futureRequest.bodyType,
@@ -68,10 +68,9 @@ constructor(repolizer: Repolizer,
 
     private fun checkLogin(): Boolean {
         loginManager?.let {
-            val isLoginValid = it.isCurrentLoginValid()
-            return if (isLoginValid) {
-                true
-            } else {
+            val isLoginValid = it.isCurrentLoginValid(futureRequest)
+            return if (isLoginValid) true
+            else {
                 it.onLoginInvalid()
                 false
             }
