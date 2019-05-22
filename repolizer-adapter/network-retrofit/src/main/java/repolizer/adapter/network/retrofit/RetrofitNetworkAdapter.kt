@@ -56,12 +56,15 @@ class RetrofitNetworkAdapter(private val networkController: NetworkController) :
 
             NetworkResponse(
                     if (response.isSuccessful) response.body() else getErrorBody(response),
+                    if (response.isSuccessful) NetworkResponseStatus.SUCCESS else NetworkResponseStatus.FAILED,
                     url,
-                    response.code(),
-                    if (response.isSuccessful) NetworkResponseStatus.SUCCESS else NetworkResponseStatus.FAILED)
+                    response.code())
         } catch (e: IOException) {
             requestProviderCast?.removeRequest(url, call)
-            NetworkResponse(null, url, 0, NetworkResponseStatus.NETWORK_ERROR)
+            NetworkResponse(null,
+                    NetworkResponseStatus.NETWORK_ERROR,
+                    url,
+                    0)
         }
     }
 
