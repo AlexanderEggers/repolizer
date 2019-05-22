@@ -92,7 +92,7 @@ class RepositoryRefreshMethod {
             add("request.setTypeToken(refreshMethodReturnType);")
             add("request.setRepositoryClass(${ClassName.get(classElement.asType())}.class);")
 
-            add("request.setRequestType($classRequestType.GET);")
+            add("request.setRequestType($classRequestType.REFRESH);")
             add("request.setUrl(url);")
             add("request.setRequiresLogin(${annotation.requiresLogin});")
 
