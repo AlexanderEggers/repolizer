@@ -2,6 +2,8 @@ Repolizer
 =====
 [![Download](https://api.bintray.com/packages/mordag/android/repolizer-core/images/download.svg) ](https://bintray.com/mordag/android/repolizer-core/_latestVersion)
 
+**Important: This library is deprecated and won't be supported with new feature (major bugs are still going to be fixed). Please open an issue in case of any blocking issues.**
+
 Repolizer is generating the backend related classes for your Android/Java project. Backends are usually complex, containing a lot of potential errors and consuming most of the development time.
 
 Repolizer provides you with a solution using a handful of annotations and adapters. The library is designed to give you access to a full stack of implementations (downloading, caching, converting, persisting). You can use the default implementations or write your own adapters (like if you want to use your own http client).
@@ -56,9 +58,7 @@ ProGuard
 
 Status
 ------
-Version 1.0.0 is currently under development in the master branch.
-
-Comments/bugs/questions/pull requests are always welcome!
+This library is deprecated and won't be supported with new feature (major bugs are still going to be fixed). Please open an issue in case of any blocking issues.
 
 Compatibility
 -------------
