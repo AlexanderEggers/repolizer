@@ -4,13 +4,12 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion "28.0.3"
+    compileSdkVersion 29
 
     defaultConfig {
         applicationId "org.demo.weatherapp"
         minSdkVersion 16
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
 
@@ -60,13 +59,18 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "androidx.appcompat:appcompat:$support_lib_appcompat_version"
-    implementation "com.google.android.material:material:$support_lib_version"
+    implementation "com.google.android.material:material:$material_version"
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
 
     implementation "org.archknife:archknife-core:$archknife_version"
     kapt "org.archknife:archknife-processor:$archknife_version"
 
-    implementation "org.archtree:archtree-core:$archtree_version"
+    implementation "org.archtree:archtree-builder:$archtree_version"
+    implementation "org.archtree:archtree-viewmodel:$archtree_version"
+    implementation "org.archtree:archtree-action:$archtree_version"
+    implementation "org.archtree:archtree-helper-core:$archtree_version"
+    implementation "org.archtree:archtree-helper-dagger:$archtree_version"
+    implementation "org.archtree:archtree-list:$archtree_version"
 
     api "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"

@@ -4,6 +4,8 @@ import com.google.auto.service.AutoService
 import repolizer.annotation.repository.*
 import repolizer.annotation.repository.parameter.*
 import repolizer.repository.RepositoryMainProcessor
+import net.ltgt.gradle.incap.IncrementalAnnotationProcessor
+import net.ltgt.gradle.incap.IncrementalAnnotationProcessorType
 import java.io.IOException
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
@@ -11,6 +13,7 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.util.Elements
 
 @AutoService(Processor::class)
+@IncrementalAnnotationProcessor(IncrementalAnnotationProcessorType.AGGREGATING)
 class MainProcessor : AbstractProcessor() {
 
     lateinit var filer: Filer
@@ -30,7 +33,10 @@ class MainProcessor : AbstractProcessor() {
 
     override fun process(set: MutableSet<out TypeElement>, roundEnv: RoundEnvironment): Boolean {
         try {
-            RepositoryMainProcessor().process(this, roundEnv)
+            //only in the first round has elements that can be processed
+            if (set.isNotEmpty()) {
+                RepositoryMainProcessor().process(this, roundEnv)
+            }
         } catch (e: IOException) {
             e.printStackTrace()
         }

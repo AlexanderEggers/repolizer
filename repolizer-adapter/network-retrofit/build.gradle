@@ -8,7 +8,7 @@ ext {
     publishedGroupId = 'org.repolizer'
     libraryName = 'Repolizer Retrofit Network Adapter Artifact'
     artifact = 'network-retrofit'
-    libraryYear = '2019'
+    libraryYear = '2020'
 
     libraryDescription = 'The Repolizer Retrofit Network Adapter Artifact is a adapter ' +
             'implementation to use Retrofit for the Repolizer network implementation.'

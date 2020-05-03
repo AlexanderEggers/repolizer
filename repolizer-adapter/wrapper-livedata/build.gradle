@@ -8,7 +8,7 @@ ext {
     publishedGroupId = 'org.repolizer'
     libraryName = 'Repolizer LiveData Wrapper Adapter Artifact'
     artifact = 'wrapper-livedata'
-    libraryYear = '2019'
+    libraryYear = '2020'
 
     libraryDescription = 'The Repolizer LiveData Wrapper Adapter Artifact is a adapter ' +
             'implementation to use LiveData for the Repolizer wrapper implementation (stands ' +
@@ -30,8 +30,7 @@ ext {
 }
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion "28.0.3"
+    compileSdkVersion 29
 
     defaultConfig {
         minSdkVersion 16
@@ -40,8 +39,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 

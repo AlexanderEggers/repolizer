@@ -9,7 +9,7 @@ ext {
     publishedGroupId = 'org.repolizer'
     libraryName = 'Repolizer Processor Artifact'
     artifact = 'repolizer-processor'
-    libraryYear = '2019'
+    libraryYear = '2020'
 
     libraryDescription = 'The Repolizer Processor Artifact generates classes related to ' +
             'the Repolizer library.'
@@ -31,14 +31,18 @@ ext {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "com.squareup:javapoet:$javapoet_version"
 
     implementation project(":repolizer-annotation")
     //implementation "org.repolizer:repolizer-annotation:$repolizer_library_version"
 
-    implementation "com.google.auto.service:auto-service:$autoservice_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "com.squareup:javapoet:$javapoet_version"
+
+    implementation "com.google.auto.service:auto-service-annotations:$autoservice_version"
     kapt "com.google.auto.service:auto-service:$autoservice_version"
+
+    implementation "net.ltgt.gradle.incap:incap:$incap_version"
+    kapt "net.ltgt.gradle.incap:incap-processor:$incap_version"
 }
 
 if (project.rootProject.file('local.properties').exists()) {

@@ -8,7 +8,7 @@ ext {
     publishedGroupId = 'org.repolizer'
     libraryName = 'Repolizer SharedPrefs Cache Adapter Artifact'
     artifact = 'cache-sharedprefs'
-    libraryYear = '2019'
+    libraryYear = '2020'
 
     libraryDescription = 'The Repolizer SharedPrefs Cache Adapter Artifact is a adapter ' +
             'implementation to use SharedPrefs for the Repolizer cache implementation (reference ' +
@@ -30,8 +30,7 @@ ext {
 }
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion "28.0.3"
+    compileSdkVersion 29
 
     defaultConfig {
         minSdkVersion 16
@@ -40,8 +39,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
