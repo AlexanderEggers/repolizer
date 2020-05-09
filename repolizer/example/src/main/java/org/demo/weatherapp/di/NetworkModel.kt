@@ -2,7 +2,6 @@ package org.demo.weatherapp.di
 
 import android.content.Context
 import archknife.annotation.ProvideModule
-import archtree.helper.AppExecutor
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -10,11 +9,12 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.demo.weatherapp.R
 import org.demo.weatherapp.api.WeatherRepository
 import org.demo.weatherapp.storage.AppDatabaseAdapterFactory
+import org.demo.weatherapp.util.AppExecutor
 import repolizer.Repolizer
 import repolizer.adapter.cache.sharedprefs.SharedPrefCacheAdapterFactory
 import repolizer.adapter.converter.gson.GsonConverterAdapterFactory
-import repolizer.adapter.wrapper.livedata.LiveDataWrapperFactory
 import repolizer.adapter.network.retrofit.RetrofitNetworkAdapterFactory
+import repolizer.adapter.wrapper.livedata.LiveDataWrapperFactory
 import javax.inject.Singleton
 
 @ProvideModule

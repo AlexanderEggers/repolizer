@@ -1,10 +1,11 @@
 package org.demo.weatherapp
 
+import android.os.Bundle
+import androidx.databinding.ObservableField
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
-import androidx.databinding.ObservableField
 import archknife.annotation.ProvideViewModel
+import archtree.viewmodel.BaseViewModel
 import org.demo.weatherapp.api.WeatherRepository
 import org.demo.weatherapp.model.WeatherModel
 import org.demo.weatherapp.util.WeatherIconUtil
@@ -13,7 +14,8 @@ import java.util.*
 import javax.inject.Inject
 
 @ProvideViewModel
-class MainActivityViewModel @Inject constructor(weatherRepository: WeatherRepository) : ViewModel() {
+class MainActivityViewModel
+@Inject constructor(private val weatherRepository: WeatherRepository) : BaseViewModel() {
 
     private val weatherRawData: LiveData<WeatherModel> = weatherRepository.getWeatherData("weather", BuildConfig.apiKey)
     private val observer: Observer<WeatherModel> = Observer {
@@ -43,7 +45,8 @@ class MainActivityViewModel @Inject constructor(weatherRepository: WeatherReposi
     val humidity: ObservableField<String> = ObservableField()
     val pressure: ObservableField<String> = ObservableField()
 
-    init {
+    override fun onInit(resourceBundle: Bundle?, customBundle: Bundle?, savedInstanceBundle: Bundle?) {
+        super.onInit(resourceBundle, customBundle, savedInstanceBundle)
         weatherRawData.observeForever(observer)
         weatherRepository.insertCache("test").execute()
     }

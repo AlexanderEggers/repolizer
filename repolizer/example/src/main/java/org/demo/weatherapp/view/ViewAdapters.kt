@@ -1,19 +1,13 @@
 package org.demo.weatherapp.view
 
-import androidx.databinding.BindingAdapter
 import android.text.Html
 import android.widget.TextView
+import androidx.databinding.BindingAdapter
 
-class ViewAdapters {
-
-    companion object {
-
-        @JvmStatic
-        @BindingAdapter("setWeatherIcon")
-        fun setWeatherIcon(textView: TextView, value: String?) {
-            if (value != null && !value.isEmpty()) {
-                textView.text = Html.fromHtml(value)
-            }
-        }
+@Suppress("DEPRECATION")
+@BindingAdapter("setWeatherIconView")
+fun setWeatherIconView(textView: TextView, value: String?) {
+    if (value != null && value.isNotEmpty()) {
+        textView.text = Html.fromHtml(value)
     }
 }

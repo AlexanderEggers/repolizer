@@ -9,7 +9,7 @@ object WeatherIconUtil {
         var icon = ""
         if (actualId == 800) {
             val currentTime = Date().time
-            icon = if (currentTime in sunrise..(sunset - 1)) {
+            icon = if (currentTime in sunrise until sunset) {
                 "&#xf00d;"
             } else {
                 "&#xf02e;"

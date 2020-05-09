@@ -65,7 +65,7 @@
                 android:textColor="@color/defaultTextColor"
                 android:textSize="90sp"
                 android:typeface="@{BindingAdapter.setWeatherFont(context)}"
-                app:setWeatherIcon="@{viewModel.weatherIcon}" />
+                app:setWeatherIconView="@{viewModel.weatherIcon}" />
 
             <TextView
                 android:id="@+id/current_temperature_field"
